@@ -1,0 +1,29 @@
+{
+  "_comment": "Old CoinGecko id → new id for coins that migrated to a new token. Only migrations confirmed by CoinGecko data; each entry notes its evidence and date.",
+  "migrations": {
+    "matic-network": {
+      "to": "polygon-ecosystem-token",
+      "note": "MATIC → POL; CoinGecko name \"MATIC (migrated to POL)\", confirmed 2026-10-15"
+    },
+    "fantom": {
+      "to": "sonic-3",
+      "note": "FTM → S (Sonic), confirmed 2026-10-15"
+    },
+    "maker": {
+      "to": "sky",
+      "note": "MKR → SKY, confirmed 2026-10-15"
+    },
+    "eos": {
+      "to": "vaulta",
+      "note": "EOS → A (Vaulta), confirmed 2026-10-15"
+    },
+    "klaytn": {
+      "to": "kaia",
+      "note": "KLAY → KAIA; old id removed from CoinGecko, confirmed 2026-10-15"
+    },
+    "gate-token": {
+      "to": "gatechain-token",
+      "note": "Same coin GT under a new id; old id removed, confirmed 2026-10-15"
+    }
+  }
+}

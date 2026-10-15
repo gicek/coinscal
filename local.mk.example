@@ -1,0 +1,17 @@
+# Copy to local.mk (not committed). Holds machine-private config only; keep key files outside the repo.
+
+# Apple signing Team ID (sign the Mac app with a real certificate so TCC permissions survive rebuilds)
+# DEVELOPMENT_TEAM := ABCDE12345
+# App Store Connect API key (keep the .p8 outside the repo)
+# ASC_KEY_ID :=
+# ASC_ISSUER_ID :=
+# ASC_KEY_PATH := $(HOME)/.keys/AuthKey_XXXX.p8
+
+# Notarization credentials (make mac-release-notarized), pick one:
+# 1) Keychain profile (recommended): run once
+#    xcrun notarytool store-credentials coinscal-notary --apple-id <Apple ID> --team-id <Team ID>
+#    (enter an app-specific password when prompted), then set:
+# NOTARY_PROFILE := coinscal-notary
+# 2) Or use ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH above (the API key needs the "Developer" role or higher)
+# The signing identity defaults to "Developer ID Application". If the keychain has several, use the full name:
+# DEVELOPER_ID := Developer ID Application: Your Name (ABCDE12345)

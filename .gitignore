@@ -1,0 +1,47 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Unified build directory
+/Build/
+Build/
+
+# Local developer config and keys
+local.mk
+.env
+.env.*
+!.env.example
+.dev.vars
+*.p8
+*.p12
+*.cer
+*.mobileprovision
+*.jks
+*.keystore
+
+# Swift / Xcode
+.build/
+.swiftpm/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.xcarchive
+*.ipa
+*.dSYM
+*.dSYM.zip
+
+# Rust (artifacts go to Build/Core/target; this is a fallback)
+Core/target/
+# Core/bindings/   # UniFFI output: either commit or ignore; record the decision in AGENTS "Deviations from the standard"
+
+# Editors
+*.swp
+*~
+
+# Python
+__pycache__/
+
+# Local files from editors / AI tools
+.claude/settings.local.json
+.claude/*.lock

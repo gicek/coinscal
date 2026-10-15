@@ -1,0 +1,104 @@
+name: Coinscal
+# Single source of the Xcode project: `make project` generates Coinscal.xcodeproj (committed for convenience; never edit project.pbxproj).
+options:
+  developmentLanguage: en
+  bundleIdPrefix: com.gicek
+  createIntermediateGroups: true
+  deploymentTarget:
+    macOS: "14.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    # UI strings are read from the String Catalog through loc("semantic.key"), not extracted by the compiler.
+    SWIFT_EMIT_LOC_STRINGS: NO
+    # Single source of the version number.
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+    # Injected from DEVELOPMENT_TEAM in local.mk on the command line; empty means local ad-hoc signing.
+    DEVELOPMENT_TEAM: ""
+    # Required for notarization; on in every configuration so Debug runs under the same restrictions as releases.
+    ENABLE_HARDENED_RUNTIME: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+  configs:
+    Release:
+      # Strip on build as well; Debug keeps symbols for lldb.
+      DEPLOYMENT_POSTPROCESSING: YES
+
+targets:
+  CoinscalMac:
+    type: application
+    platform: macOS
+    # Product is always Coinscal.app: settings' PRODUCT_NAME decides the product,
+    # the top-level productName decides the scheme's BuildableName (with only one of them, tests cannot find the host).
+    productName: Coinscal
+    sources:
+      - path: Mac
+        excludes: ["Tests/**", "docs/**", "scripts/**", "release-notes/**", "Info.plist", "Coinscal.entitlements"]
+    settings:
+      base:
+        PRODUCT_NAME: Coinscal
+        PRODUCT_BUNDLE_IDENTIFIER: com.gicek.coinscal
+        ARCHS: arm64
+        INFOPLIST_FILE: Mac/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Mac/Coinscal.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        COMBINE_HIDPI_IMAGES: YES
+        ENABLE_PREVIEWS: YES
+    dependencies:
+      # Embedded in Coinscal.app/Contents/PlugIns.
+      - target: CoinscalWidget
+  # Desktop / Notification Center widgets (docs/WIDGET.md). Shares the listed app sources instead of a framework.
+  CoinscalWidget:
+    type: app-extension
+    platform: macOS
+    productName: CoinscalWidget
+    sources:
+      - path: MacWidget
+        excludes: ["Info.plist", "CoinscalWidget.entitlements"]
+      - Mac/Shared
+      - Mac/App/Constants.swift
+      - Mac/Models/AppSettings.swift
+      - Mac/Models/Coin.swift
+      - Mac/Services/CoinCatalog.swift
+      - Mac/Services/HTTPClient.swift
+      - Mac/Services/PriceService.swift
+      - Mac/Services/ExchangeRateService.swift
+      - Mac/Utilities/PriceFormatter.swift
+      - Mac/Utilities/LocalizationManager.swift
+      - Mac/Utilities/Color+Hex.swift
+      - Mac/Resources/Assets.xcassets
+      - Mac/Resources/Localizable.xcstrings
+      - Mac/Resources/coins.json
+    settings:
+      base:
+        PRODUCT_NAME: CoinscalWidget
+        PRODUCT_BUNDLE_IDENTIFIER: com.gicek.coinscal.widget
+        ARCHS: arm64
+        INFOPLIST_FILE: MacWidget/Info.plist
+        CODE_SIGN_ENTITLEMENTS: MacWidget/CoinscalWidget.entitlements
+        SKIP_INSTALL: YES
+        ENABLE_PREVIEWS: YES
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks"
+  CoinscalMacTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [Mac/Tests]
+    dependencies:
+      - target: CoinscalMac
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.gicek.coinscal.tests
+        ARCHS: arm64
+
+schemes:
+  CoinscalMac:
+    build:
+      targets:
+        CoinscalMac: all
+    test:
+      targets: [CoinscalMacTests]

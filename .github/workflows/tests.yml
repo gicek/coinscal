@@ -1,0 +1,37 @@
+name: tests
+
+# Covers components that don't depend on a machine-specific toolchain. App target tests, which depend on a pinned Xcode version, run locally with `make test`.
+# Uninitialized components (no gradlew / package.json) are detected and skipped by each job's first step,
+# so CI isn't red on a freshly scaffolded repo; components start running once initialized.
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hygiene:
+    name: Repository hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No build artifacts or secrets in the source tree
+        run: |
+          found="$(git ls-files | grep -E '(^|/)(\.build|DerivedData|\.gradle|\.kotlin|node_modules|\.next|\.open-next|Build)/' || true)"
+          if [ -n "$found" ]; then echo "These build artifacts are committed:"; echo "$found"; exit 1; fi
+          secrets="$(git ls-files | grep -E '(^|/)(local\.mk|\.env(\.[^/]*)?|\.dev\.vars)$|\.(p8|p12|cer|mobileprovision|jks|keystore)$' | grep -v '\.example$' || true)"
+          if [ -n "$secrets" ]; then echo "These possible secrets / local config files are committed:"; echo "$secrets"; exit 1; fi
+
+  i18n:
+    name: Localization guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Three Mac string guards
+        # Same as the i18n step in make test-mac; app unit tests depend on the local Xcode 26 SDK and run locally with make test
+        run: python3 scripts/i18n-guard.py --langs "en,zh-Hans,zh-Hant" --min-files 20 --platform apple --root Apple/Mac --extra Apple/MacWidget

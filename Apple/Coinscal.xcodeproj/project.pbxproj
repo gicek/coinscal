@@ -1,0 +1,890 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0022A0C58288ECA3AFAA2982 /* TickerProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87E697D51629B2F2E8CCB6B0 /* TickerProviderTests.swift */; };
+		039583B12AE0375F6CB68614 /* CoinCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE97BF404E305507A4E7BA14 /* CoinCatalog.swift */; };
+		0E7749CEC9A076D15E4E7834 /* MenuBarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7238E223855713E2112736C /* MenuBarViewModel.swift */; };
+		0E7F2C24D3620756FDFF1952 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61F5B4492437D3D3F1DE211 /* SettingsStore.swift */; };
+		0F539C7910C12182EA6E37C0 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFCF80F14161BC664DC3BE6 /* HTTPClient.swift */; };
+		18624C865D26B7474E175193 /* WidgetProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D19B6E36DAFD4A5CD97C17C /* WidgetProviders.swift */; };
+		18F0FC2AB250245A8432B1E6 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C461C59F6F2188556297293E /* SettingsViewModel.swift */; };
+		1BA517D26003D66B1D26F3DF /* DesktopOverlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC7B73DD2E7BE30579A8B1E /* DesktopOverlayController.swift */; };
+		1D6E7451E6387D30F908140F /* coins.json in Resources */ = {isa = PBXBuildFile; fileRef = C3723C032BE1902D0A5F193C /* coins.json */; };
+		2C6C5EA02B67435939DEB1D2 /* Coin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 997205431AAAC5F18BC0A1D8 /* Coin.swift */; };
+		2D95970353DFC35A7BAE7BA5 /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC88EA843E4B88EE5BD7634 /* WidgetSnapshot.swift */; };
+		2EDCC1BE159D32E2CBA6C817 /* WidgetSnapshotWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90DEB4EE3FDFA3728C828123 /* WidgetSnapshotWriter.swift */; };
+		30836FA3C90559BD1965BE1E /* PriceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295325D93CBBB7AC04F22104 /* PriceService.swift */; };
+		3208EC6F222383DD5A8779E1 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB613D43C8D8A45D2F7F1600 /* AppSettings.swift */; };
+		36966A085E669CE59CF422EA /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 10BF815DD92D7D362C0E37E2 /* Localizable.xcstrings */; };
+		36F116EA2A2A3E26017E0983 /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51C874DE186A6787C21BB67 /* WidgetContent.swift */; };
+		3894FE329310C2A2042BD15D /* AppSettingsCodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0992B8DD77DAECB2271D7008 /* AppSettingsCodingTests.swift */; };
+		3908EAB6A9768F1347CF6559 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97292B8CB84B2196216FBE26 /* Color+Hex.swift */; };
+		3DDD7D5D189CBA2471D1867E /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1798A8A980ED270583722C7D /* NotificationService.swift */; };
+		412A34D52D0F02997DE0CEEA /* WatchlistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E9EB67E76C106BAD1144BC1 /* WatchlistViewModel.swift */; };
+		41E726C74EC4F1758B57B0C0 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 10BF815DD92D7D362C0E37E2 /* Localizable.xcstrings */; };
+		48BE4656356EB91D70CCCDA7 /* AlertEvaluatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D523E57133652B649B6CC50 /* AlertEvaluatorTests.swift */; };
+		4A55FFA96E3843AD0110EEB1 /* PriceFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CD616D7206711932A726D2 /* PriceFormatterTests.swift */; };
+		4BEA5CD5542A0A0E97BF8496 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 886134BBD200D94E208291FA /* WidgetViews.swift */; };
+		4CBB9248A97413B9BBFF63FF /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 886134BBD200D94E208291FA /* WidgetViews.swift */; };
+		513025EADA72519832E99585 /* coins.json in Resources */ = {isa = PBXBuildFile; fileRef = C3723C032BE1902D0A5F193C /* coins.json */; };
+		52C4151D13D62DF2CCBDF7C6 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78F503CDD7896F6AABEC80D4 /* Constants.swift */; };
+		5A17724586DD38AD7B8D2F00 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFCF80F14161BC664DC3BE6 /* HTTPClient.swift */; };
+		607DED1F1DB85CF10F32F337 /* PriceFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3930C2ABA6AE479749B6AA24 /* PriceFormatter.swift */; };
+		60FD93250BA72B70939DD8FB /* ExchangeRateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A484ECC2E49835C53B69AA24 /* ExchangeRateService.swift */; };
+		654B9C45A9F625DB173AADC4 /* PriceFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3930C2ABA6AE479749B6AA24 /* PriceFormatter.swift */; };
+		67F4A0B4BC8F85BBE3BCE2FF /* MenuBarViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 489D418A338C9D27DA670117 /* MenuBarViewModelTests.swift */; };
+		695F2130A8366489CCF207A2 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB613D43C8D8A45D2F7F1600 /* AppSettings.swift */; };
+		69A8F520F5CEAAF61D480DF3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70978F71BF7D459AD504607 /* AppDelegate.swift */; };
+		6C02D47C5839D5B1038DB8E9 /* DesktopOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D83E7D1AC21D32179D9109 /* DesktopOverlayTests.swift */; };
+		6DF4651D194801ADC077BAFF /* TestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD0DBD13C028E1224882289 /* TestSupport.swift */; };
+		7D22F7059A8D5AC4081D3047 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 250A46DB114B0D19D2ACB3FD /* Assets.xcassets */; };
+		855B1D471DC2206C7EC566B5 /* CoinPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BE53218404D7EBE5721921 /* CoinPopoverView.swift */; };
+		858C44AE4A42A2B8E2DD9075 /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51C874DE186A6787C21BB67 /* WidgetContent.swift */; };
+		86F20327DF7764321DB0D978 /* CoinCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0968F3AE7F8A0F5C1E8E20 /* CoinCatalogTests.swift */; };
+		889880149B52475E2C2D3C0C /* DesktopOverlayLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E22FE438BA5F5AC27DC815 /* DesktopOverlayLayout.swift */; };
+		88DD352020842D0C6777B7A0 /* ExchangeRateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A484ECC2E49835C53B69AA24 /* ExchangeRateService.swift */; };
+		8936CC9DF1D1CD17266D75A0 /* WidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD1D1149DDDD85740E774F1 /* WidgetIntents.swift */; };
+		9071BE0E3161FFB20D44FB07 /* CoinCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE97BF404E305507A4E7BA14 /* CoinCatalog.swift */; };
+		90A14B6058C3ACDE5E749075 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8DC7CCD529C669F2B9E7B1 /* GeneralSettingsView.swift */; };
+		90B745F9041BF9D558146D41 /* WidgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3365573BC3846AFBE9C919C /* WidgetTests.swift */; };
+		91E8613E24E45CF9734CD4D6 /* CoinListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32F383236FC4BD641A24ECDC /* CoinListViewModel.swift */; };
+		98ED97C540A73129D1E66039 /* LaunchAtLoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EECCFF57EACD09C756D44DAA /* LaunchAtLoginService.swift */; };
+		9DEC1C0AF57BFEDC269D5FB8 /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC88EA843E4B88EE5BD7634 /* WidgetSnapshot.swift */; };
+		A5EC7B1DFBEFF343F45205D4 /* CoinscalApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF8F5AD7F08C0DDC70B326 /* CoinscalApp.swift */; };
+		B0FFEBCC53FEF3DB73613FCD /* CoinLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03961327D8C0162356B571A2 /* CoinLogoView.swift */; };
+		B1416A42DB13C014F46A6539 /* recommendedCoins.json in Resources */ = {isa = PBXBuildFile; fileRef = 975832DC94BAE5151FD6DD4B /* recommendedCoins.json */; };
+		B1C1CDFC5B6E9898ECAC3BE6 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5421C923DE00B0EACB2EE68 /* SettingsWindow.swift */; };
+		B8AAA5835A75FC6C27A9A550 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F9C46F1848411DC73A0FE0 /* LocalizationManager.swift */; };
+		C2D0B9DCC77638A525D33C12 /* PriceServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 536A1769D0E8A30BEACAF869 /* PriceServiceTests.swift */; };
+		C31CF93E7189D21A12E04820 /* DesktopOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4629CA7FF73E5E488992B28 /* DesktopOverlayView.swift */; };
+		C4B208C3D6A0F6F7BB6FE4CC /* AlertEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95A52C2B19A3D98ACB0C0B4 /* AlertEvaluator.swift */; };
+		C52D5BE6E5D392B4E31D2652 /* CoinRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E5DC3ED2EFF3947468FF3D /* CoinRowView.swift */; };
+		C8C2081329C0433D55E0A80A /* WatchlistAddCoinPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C270FACCC415E4325EC055B5 /* WatchlistAddCoinPanel.swift */; };
+		CAE3E8BE9585316287C0D1BF /* WatchlistViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C729FD1F790CE4C8173708C4 /* WatchlistViewModelTests.swift */; };
+		CC463AC2AB99D7D03A432FAD /* WatchlistReorderSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66EB518BF0D8AC06B3A3BEEF /* WatchlistReorderSupport.swift */; };
+		CC9C5B6B6197C6719A7A10A7 /* CoinListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B76D31912A2AA98A9D641ED /* CoinListViewModelTests.swift */; };
+		CCBCB66EF9EFE1F49FAEE190 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701FB4F02C3D8AE63F097ECD /* AboutView.swift */; };
+		D414C8B09F594AB7D0009131 /* LocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2F9C46F1848411DC73A0FE0 /* LocalizationManager.swift */; };
+		D54FE0F7847FCA08148BC231 /* CoinscalWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A66D6ADED19DEC87CA70268F /* CoinscalWidgets.swift */; };
+		D5A29988E244AC779405F1DF /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78F503CDD7896F6AABEC80D4 /* Constants.swift */; };
+		D6A20CDBB603C6990E01803E /* ColorPickerRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3753EA1AFF41CAAB98A5F8DF /* ColorPickerRow.swift */; };
+		D738E4D587E811CC5EA229C3 /* Coin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 997205431AAAC5F18BC0A1D8 /* Coin.swift */; };
+		DC1B686FEB2FA3398EDD7010 /* WatchlistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35BFD92DC151D4E33538F299 /* WatchlistView.swift */; };
+		DE9DD8AA874BC0C059FE1473 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97292B8CB84B2196216FBE26 /* Color+Hex.swift */; };
+		E152F8F520BD1FD50B3344BC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 250A46DB114B0D19D2ACB3FD /* Assets.xcassets */; };
+		E67D58181F2E10AAF06F9855 /* PriceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295325D93CBBB7AC04F22104 /* PriceService.swift */; };
+		FB54BAA8204FCDDDE1EDDB03 /* CoinscalWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D6975F76715F88CDA6683942 /* CoinscalWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		16EF3032B13077F453B8AB6B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9A65742F218BCA9A71B2BFA2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 60A6516360CA06FD3D89BD04;
+			remoteInfo = CoinscalWidget;
+		};
+		CAD2CD542F2F10CBB676964F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9A65742F218BCA9A71B2BFA2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 488F4CF6432C49CC40BC049C;
+			remoteInfo = CoinscalMac;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		43B564E0900DEA2D158F4C94 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				FB54BAA8204FCDDDE1EDDB03 /* CoinscalWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		03961327D8C0162356B571A2 /* CoinLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinLogoView.swift; sourceTree = "<group>"; };
+		0992B8DD77DAECB2271D7008 /* AppSettingsCodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsCodingTests.swift; sourceTree = "<group>"; };
+		10BF815DD92D7D362C0E37E2 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		1339945A9B351203E59265AF /* CoinscalMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoinscalMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1798A8A980ED270583722C7D /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		1A0968F3AE7F8A0F5C1E8E20 /* CoinCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinCatalogTests.swift; sourceTree = "<group>"; };
+		250A46DB114B0D19D2ACB3FD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		295325D93CBBB7AC04F22104 /* PriceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceService.swift; sourceTree = "<group>"; };
+		2BC7B73DD2E7BE30579A8B1E /* DesktopOverlayController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopOverlayController.swift; sourceTree = "<group>"; };
+		2BD1D1149DDDD85740E774F1 /* WidgetIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetIntents.swift; sourceTree = "<group>"; };
+		32F383236FC4BD641A24ECDC /* CoinListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinListViewModel.swift; sourceTree = "<group>"; };
+		35BFD92DC151D4E33538F299 /* WatchlistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistView.swift; sourceTree = "<group>"; };
+		3753EA1AFF41CAAB98A5F8DF /* ColorPickerRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerRow.swift; sourceTree = "<group>"; };
+		3930C2ABA6AE479749B6AA24 /* PriceFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceFormatter.swift; sourceTree = "<group>"; };
+		3BFCF80F14161BC664DC3BE6 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
+		47E22FE438BA5F5AC27DC815 /* DesktopOverlayLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopOverlayLayout.swift; sourceTree = "<group>"; };
+		489D418A338C9D27DA670117 /* MenuBarViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarViewModelTests.swift; sourceTree = "<group>"; };
+		4B76D31912A2AA98A9D641ED /* CoinListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinListViewModelTests.swift; sourceTree = "<group>"; };
+		536A1769D0E8A30BEACAF869 /* PriceServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceServiceTests.swift; sourceTree = "<group>"; };
+		5DCC11DCCA6C3D34E304A893 /* Coinscal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Coinscal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		60D83E7D1AC21D32179D9109 /* DesktopOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopOverlayTests.swift; sourceTree = "<group>"; };
+		64E5DC3ED2EFF3947468FF3D /* CoinRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinRowView.swift; sourceTree = "<group>"; };
+		66EB518BF0D8AC06B3A3BEEF /* WatchlistReorderSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistReorderSupport.swift; sourceTree = "<group>"; };
+		6DC88EA843E4B88EE5BD7634 /* WidgetSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSnapshot.swift; sourceTree = "<group>"; };
+		701FB4F02C3D8AE63F097ECD /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		78F503CDD7896F6AABEC80D4 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		7D523E57133652B649B6CC50 /* AlertEvaluatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertEvaluatorTests.swift; sourceTree = "<group>"; };
+		87E697D51629B2F2E8CCB6B0 /* TickerProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickerProviderTests.swift; sourceTree = "<group>"; };
+		886134BBD200D94E208291FA /* WidgetViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetViews.swift; sourceTree = "<group>"; };
+		8D19B6E36DAFD4A5CD97C17C /* WidgetProviders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetProviders.swift; sourceTree = "<group>"; };
+		90DEB4EE3FDFA3728C828123 /* WidgetSnapshotWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSnapshotWriter.swift; sourceTree = "<group>"; };
+		97292B8CB84B2196216FBE26 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		975832DC94BAE5151FD6DD4B /* recommendedCoins.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = recommendedCoins.json; sourceTree = "<group>"; };
+		997205431AAAC5F18BC0A1D8 /* Coin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coin.swift; sourceTree = "<group>"; };
+		9E9EB67E76C106BAD1144BC1 /* WatchlistViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistViewModel.swift; sourceTree = "<group>"; };
+		A4629CA7FF73E5E488992B28 /* DesktopOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopOverlayView.swift; sourceTree = "<group>"; };
+		A484ECC2E49835C53B69AA24 /* ExchangeRateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeRateService.swift; sourceTree = "<group>"; };
+		A66D6ADED19DEC87CA70268F /* CoinscalWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinscalWidgets.swift; sourceTree = "<group>"; };
+		AAD0DBD13C028E1224882289 /* TestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSupport.swift; sourceTree = "<group>"; };
+		B7238E223855713E2112736C /* MenuBarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarViewModel.swift; sourceTree = "<group>"; };
+		BB613D43C8D8A45D2F7F1600 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		C270FACCC415E4325EC055B5 /* WatchlistAddCoinPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistAddCoinPanel.swift; sourceTree = "<group>"; };
+		C3365573BC3846AFBE9C919C /* WidgetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetTests.swift; sourceTree = "<group>"; };
+		C3723C032BE1902D0A5F193C /* coins.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = coins.json; sourceTree = "<group>"; };
+		C461C59F6F2188556297293E /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		C61F5B4492437D3D3F1DE211 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		C729FD1F790CE4C8173708C4 /* WatchlistViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistViewModelTests.swift; sourceTree = "<group>"; };
+		D51C874DE186A6787C21BB67 /* WidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetContent.swift; sourceTree = "<group>"; };
+		D6975F76715F88CDA6683942 /* CoinscalWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CoinscalWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6BE53218404D7EBE5721921 /* CoinPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinPopoverView.swift; sourceTree = "<group>"; };
+		D70978F71BF7D459AD504607 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		D95A52C2B19A3D98ACB0C0B4 /* AlertEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertEvaluator.swift; sourceTree = "<group>"; };
+		E5421C923DE00B0EACB2EE68 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
+		EC8DC7CCD529C669F2B9E7B1 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		EECCFF57EACD09C756D44DAA /* LaunchAtLoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginService.swift; sourceTree = "<group>"; };
+		F1CD616D7206711932A726D2 /* PriceFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceFormatterTests.swift; sourceTree = "<group>"; };
+		F2F9C46F1848411DC73A0FE0 /* LocalizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationManager.swift; sourceTree = "<group>"; };
+		F4FF8F5AD7F08C0DDC70B326 /* CoinscalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinscalApp.swift; sourceTree = "<group>"; };
+		FE97BF404E305507A4E7BA14 /* CoinCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinCatalog.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0233EAA1BEA1C2CF14DEC444 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				D70978F71BF7D459AD504607 /* AppDelegate.swift */,
+				F4FF8F5AD7F08C0DDC70B326 /* CoinscalApp.swift */,
+				78F503CDD7896F6AABEC80D4 /* Constants.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		29E0D77D9B22714C4CE5E46F /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				03961327D8C0162356B571A2 /* CoinLogoView.swift */,
+				3753EA1AFF41CAAB98A5F8DF /* ColorPickerRow.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		35F6C38F6B9880B9F8B6350B /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				32F383236FC4BD641A24ECDC /* CoinListViewModel.swift */,
+				B7238E223855713E2112736C /* MenuBarViewModel.swift */,
+				C461C59F6F2188556297293E /* SettingsViewModel.swift */,
+				9E9EB67E76C106BAD1144BC1 /* WatchlistViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		3924FD53B444939398969D50 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				250A46DB114B0D19D2ACB3FD /* Assets.xcassets */,
+				C3723C032BE1902D0A5F193C /* coins.json */,
+				10BF815DD92D7D362C0E37E2 /* Localizable.xcstrings */,
+				975832DC94BAE5151FD6DD4B /* recommendedCoins.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		447E2C84AEBB4A9F0D493A73 /* DesktopOverlay */ = {
+			isa = PBXGroup;
+			children = (
+				2BC7B73DD2E7BE30579A8B1E /* DesktopOverlayController.swift */,
+				47E22FE438BA5F5AC27DC815 /* DesktopOverlayLayout.swift */,
+				A4629CA7FF73E5E488992B28 /* DesktopOverlayView.swift */,
+			);
+			path = DesktopOverlay;
+			sourceTree = "<group>";
+		};
+		61DB7F0F769724346A45B68E /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				D6BE53218404D7EBE5721921 /* CoinPopoverView.swift */,
+				64E5DC3ED2EFF3947468FF3D /* CoinRowView.swift */,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
+		692208A97EB9B0634144F9E4 /* MacWidget */ = {
+			isa = PBXGroup;
+			children = (
+				A66D6ADED19DEC87CA70268F /* CoinscalWidgets.swift */,
+				2BD1D1149DDDD85740E774F1 /* WidgetIntents.swift */,
+				8D19B6E36DAFD4A5CD97C17C /* WidgetProviders.swift */,
+			);
+			path = MacWidget;
+			sourceTree = "<group>";
+		};
+		7A2833C0A0C0E180105FF6F3 /* Mac */ = {
+			isa = PBXGroup;
+			children = (
+				0233EAA1BEA1C2CF14DEC444 /* App */,
+				93966EBF210A68CA8246328D /* Models */,
+				3924FD53B444939398969D50 /* Resources */,
+				A37BED30D18AD9A02F238C37 /* Services */,
+				CBDC88FFDCB2CC9F8227D620 /* Shared */,
+				93462801EBCBC0CEDD9B1506 /* Tests */,
+				E6C077F4CBD853F0DBFF4A20 /* Utilities */,
+				35F6C38F6B9880B9F8B6350B /* ViewModels */,
+				BF1FD669571F6FDB3EF5E58C /* Views */,
+			);
+			path = Mac;
+			sourceTree = "<group>";
+		};
+		93462801EBCBC0CEDD9B1506 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				7D523E57133652B649B6CC50 /* AlertEvaluatorTests.swift */,
+				0992B8DD77DAECB2271D7008 /* AppSettingsCodingTests.swift */,
+				1A0968F3AE7F8A0F5C1E8E20 /* CoinCatalogTests.swift */,
+				4B76D31912A2AA98A9D641ED /* CoinListViewModelTests.swift */,
+				60D83E7D1AC21D32179D9109 /* DesktopOverlayTests.swift */,
+				489D418A338C9D27DA670117 /* MenuBarViewModelTests.swift */,
+				F1CD616D7206711932A726D2 /* PriceFormatterTests.swift */,
+				536A1769D0E8A30BEACAF869 /* PriceServiceTests.swift */,
+				AAD0DBD13C028E1224882289 /* TestSupport.swift */,
+				87E697D51629B2F2E8CCB6B0 /* TickerProviderTests.swift */,
+				C729FD1F790CE4C8173708C4 /* WatchlistViewModelTests.swift */,
+				C3365573BC3846AFBE9C919C /* WidgetTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		93966EBF210A68CA8246328D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				BB613D43C8D8A45D2F7F1600 /* AppSettings.swift */,
+				997205431AAAC5F18BC0A1D8 /* Coin.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A37BED30D18AD9A02F238C37 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				FE97BF404E305507A4E7BA14 /* CoinCatalog.swift */,
+				A484ECC2E49835C53B69AA24 /* ExchangeRateService.swift */,
+				3BFCF80F14161BC664DC3BE6 /* HTTPClient.swift */,
+				EECCFF57EACD09C756D44DAA /* LaunchAtLoginService.swift */,
+				1798A8A980ED270583722C7D /* NotificationService.swift */,
+				295325D93CBBB7AC04F22104 /* PriceService.swift */,
+				C61F5B4492437D3D3F1DE211 /* SettingsStore.swift */,
+				90DEB4EE3FDFA3728C828123 /* WidgetSnapshotWriter.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		BF1FD669571F6FDB3EF5E58C /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				29E0D77D9B22714C4CE5E46F /* Components */,
+				447E2C84AEBB4A9F0D493A73 /* DesktopOverlay */,
+				61DB7F0F769724346A45B68E /* MenuBar */,
+				DE19775878723562495A820E /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		CBDC88FFDCB2CC9F8227D620 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				D51C874DE186A6787C21BB67 /* WidgetContent.swift */,
+				6DC88EA843E4B88EE5BD7634 /* WidgetSnapshot.swift */,
+				886134BBD200D94E208291FA /* WidgetViews.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		DE19775878723562495A820E /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				701FB4F02C3D8AE63F097ECD /* AboutView.swift */,
+				EC8DC7CCD529C669F2B9E7B1 /* GeneralSettingsView.swift */,
+				E5421C923DE00B0EACB2EE68 /* SettingsWindow.swift */,
+				C270FACCC415E4325EC055B5 /* WatchlistAddCoinPanel.swift */,
+				66EB518BF0D8AC06B3A3BEEF /* WatchlistReorderSupport.swift */,
+				35BFD92DC151D4E33538F299 /* WatchlistView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		E6C077F4CBD853F0DBFF4A20 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				D95A52C2B19A3D98ACB0C0B4 /* AlertEvaluator.swift */,
+				97292B8CB84B2196216FBE26 /* Color+Hex.swift */,
+				F2F9C46F1848411DC73A0FE0 /* LocalizationManager.swift */,
+				3930C2ABA6AE479749B6AA24 /* PriceFormatter.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		F3E18EF2501BB9F2DFC5FA7B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5DCC11DCCA6C3D34E304A893 /* Coinscal.app */,
+				1339945A9B351203E59265AF /* CoinscalMacTests.xctest */,
+				D6975F76715F88CDA6683942 /* CoinscalWidget.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F66F62D2064CCCA577E4DB0A = {
+			isa = PBXGroup;
+			children = (
+				7A2833C0A0C0E180105FF6F3 /* Mac */,
+				692208A97EB9B0634144F9E4 /* MacWidget */,
+				F3E18EF2501BB9F2DFC5FA7B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		091DEAD3994CBBFA7B5C7374 /* CoinscalMacTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 35CC4A9EBD885B74C15C7D7A /* Build configuration list for PBXNativeTarget "CoinscalMacTests" */;
+			buildPhases = (
+				94CC6D5F7D80F4D42963067A /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DD9A806EBEF6CFAFC39AE660 /* PBXTargetDependency */,
+			);
+			name = CoinscalMacTests;
+			packageProductDependencies = (
+			);
+			productName = CoinscalMacTests;
+			productReference = 1339945A9B351203E59265AF /* CoinscalMacTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		488F4CF6432C49CC40BC049C /* CoinscalMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 450DC7EC952E79B84D8E0024 /* Build configuration list for PBXNativeTarget "CoinscalMac" */;
+			buildPhases = (
+				3A4131DB1907DA9C2407285A /* Sources */,
+				7B24A4F3D9AC23B2738A6C02 /* Resources */,
+				43B564E0900DEA2D158F4C94 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				358DA1AA62B8AA9783EF5760 /* PBXTargetDependency */,
+			);
+			name = CoinscalMac;
+			packageProductDependencies = (
+			);
+			productName = CoinscalMac;
+			productReference = 5DCC11DCCA6C3D34E304A893 /* Coinscal.app */;
+			productType = "com.apple.product-type.application";
+		};
+		60A6516360CA06FD3D89BD04 /* CoinscalWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ECDCC589A35A6C50CF77FB5B /* Build configuration list for PBXNativeTarget "CoinscalWidget" */;
+			buildPhases = (
+				0F11D5012373299D9FA9BCE7 /* Sources */,
+				DA62D8C06FB4D7B38DDFF786 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CoinscalWidget;
+			packageProductDependencies = (
+			);
+			productName = CoinscalWidget;
+			productReference = D6975F76715F88CDA6683942 /* CoinscalWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9A65742F218BCA9A71B2BFA2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					091DEAD3994CBBFA7B5C7374 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					488F4CF6432C49CC40BC049C = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					60A6516360CA06FD3D89BD04 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 470430E7DF42FB1615C616C9 /* Build configuration list for PBXProject "Coinscal" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+				"zh-Hans",
+				"zh-Hant",
+			);
+			mainGroup = F66F62D2064CCCA577E4DB0A;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = F3E18EF2501BB9F2DFC5FA7B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				488F4CF6432C49CC40BC049C /* CoinscalMac */,
+				091DEAD3994CBBFA7B5C7374 /* CoinscalMacTests */,
+				60A6516360CA06FD3D89BD04 /* CoinscalWidget */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7B24A4F3D9AC23B2738A6C02 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D22F7059A8D5AC4081D3047 /* Assets.xcassets in Resources */,
+				36966A085E669CE59CF422EA /* Localizable.xcstrings in Resources */,
+				513025EADA72519832E99585 /* coins.json in Resources */,
+				B1416A42DB13C014F46A6539 /* recommendedCoins.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DA62D8C06FB4D7B38DDFF786 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E152F8F520BD1FD50B3344BC /* Assets.xcassets in Resources */,
+				41E726C74EC4F1758B57B0C0 /* Localizable.xcstrings in Resources */,
+				1D6E7451E6387D30F908140F /* coins.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0F11D5012373299D9FA9BCE7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				695F2130A8366489CCF207A2 /* AppSettings.swift in Sources */,
+				2C6C5EA02B67435939DEB1D2 /* Coin.swift in Sources */,
+				9071BE0E3161FFB20D44FB07 /* CoinCatalog.swift in Sources */,
+				D54FE0F7847FCA08148BC231 /* CoinscalWidgets.swift in Sources */,
+				3908EAB6A9768F1347CF6559 /* Color+Hex.swift in Sources */,
+				52C4151D13D62DF2CCBDF7C6 /* Constants.swift in Sources */,
+				60FD93250BA72B70939DD8FB /* ExchangeRateService.swift in Sources */,
+				0F539C7910C12182EA6E37C0 /* HTTPClient.swift in Sources */,
+				D414C8B09F594AB7D0009131 /* LocalizationManager.swift in Sources */,
+				607DED1F1DB85CF10F32F337 /* PriceFormatter.swift in Sources */,
+				30836FA3C90559BD1965BE1E /* PriceService.swift in Sources */,
+				36F116EA2A2A3E26017E0983 /* WidgetContent.swift in Sources */,
+				8936CC9DF1D1CD17266D75A0 /* WidgetIntents.swift in Sources */,
+				18624C865D26B7474E175193 /* WidgetProviders.swift in Sources */,
+				2D95970353DFC35A7BAE7BA5 /* WidgetSnapshot.swift in Sources */,
+				4CBB9248A97413B9BBFF63FF /* WidgetViews.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3A4131DB1907DA9C2407285A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CCBCB66EF9EFE1F49FAEE190 /* AboutView.swift in Sources */,
+				C4B208C3D6A0F6F7BB6FE4CC /* AlertEvaluator.swift in Sources */,
+				69A8F520F5CEAAF61D480DF3 /* AppDelegate.swift in Sources */,
+				3208EC6F222383DD5A8779E1 /* AppSettings.swift in Sources */,
+				D738E4D587E811CC5EA229C3 /* Coin.swift in Sources */,
+				039583B12AE0375F6CB68614 /* CoinCatalog.swift in Sources */,
+				91E8613E24E45CF9734CD4D6 /* CoinListViewModel.swift in Sources */,
+				B0FFEBCC53FEF3DB73613FCD /* CoinLogoView.swift in Sources */,
+				855B1D471DC2206C7EC566B5 /* CoinPopoverView.swift in Sources */,
+				C52D5BE6E5D392B4E31D2652 /* CoinRowView.swift in Sources */,
+				A5EC7B1DFBEFF343F45205D4 /* CoinscalApp.swift in Sources */,
+				DE9DD8AA874BC0C059FE1473 /* Color+Hex.swift in Sources */,
+				D6A20CDBB603C6990E01803E /* ColorPickerRow.swift in Sources */,
+				D5A29988E244AC779405F1DF /* Constants.swift in Sources */,
+				1BA517D26003D66B1D26F3DF /* DesktopOverlayController.swift in Sources */,
+				889880149B52475E2C2D3C0C /* DesktopOverlayLayout.swift in Sources */,
+				C31CF93E7189D21A12E04820 /* DesktopOverlayView.swift in Sources */,
+				88DD352020842D0C6777B7A0 /* ExchangeRateService.swift in Sources */,
+				90A14B6058C3ACDE5E749075 /* GeneralSettingsView.swift in Sources */,
+				5A17724586DD38AD7B8D2F00 /* HTTPClient.swift in Sources */,
+				98ED97C540A73129D1E66039 /* LaunchAtLoginService.swift in Sources */,
+				B8AAA5835A75FC6C27A9A550 /* LocalizationManager.swift in Sources */,
+				0E7749CEC9A076D15E4E7834 /* MenuBarViewModel.swift in Sources */,
+				3DDD7D5D189CBA2471D1867E /* NotificationService.swift in Sources */,
+				654B9C45A9F625DB173AADC4 /* PriceFormatter.swift in Sources */,
+				E67D58181F2E10AAF06F9855 /* PriceService.swift in Sources */,
+				0E7F2C24D3620756FDFF1952 /* SettingsStore.swift in Sources */,
+				18F0FC2AB250245A8432B1E6 /* SettingsViewModel.swift in Sources */,
+				B1C1CDFC5B6E9898ECAC3BE6 /* SettingsWindow.swift in Sources */,
+				C8C2081329C0433D55E0A80A /* WatchlistAddCoinPanel.swift in Sources */,
+				CC463AC2AB99D7D03A432FAD /* WatchlistReorderSupport.swift in Sources */,
+				DC1B686FEB2FA3398EDD7010 /* WatchlistView.swift in Sources */,
+				412A34D52D0F02997DE0CEEA /* WatchlistViewModel.swift in Sources */,
+				858C44AE4A42A2B8E2DD9075 /* WidgetContent.swift in Sources */,
+				9DEC1C0AF57BFEDC269D5FB8 /* WidgetSnapshot.swift in Sources */,
+				2EDCC1BE159D32E2CBA6C817 /* WidgetSnapshotWriter.swift in Sources */,
+				4BEA5CD5542A0A0E97BF8496 /* WidgetViews.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		94CC6D5F7D80F4D42963067A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				48BE4656356EB91D70CCCDA7 /* AlertEvaluatorTests.swift in Sources */,
+				3894FE329310C2A2042BD15D /* AppSettingsCodingTests.swift in Sources */,
+				86F20327DF7764321DB0D978 /* CoinCatalogTests.swift in Sources */,
+				CC9C5B6B6197C6719A7A10A7 /* CoinListViewModelTests.swift in Sources */,
+				6C02D47C5839D5B1038DB8E9 /* DesktopOverlayTests.swift in Sources */,
+				67F4A0B4BC8F85BBE3BCE2FF /* MenuBarViewModelTests.swift in Sources */,
+				4A55FFA96E3843AD0110EEB1 /* PriceFormatterTests.swift in Sources */,
+				C2D0B9DCC77638A525D33C12 /* PriceServiceTests.swift in Sources */,
+				6DF4651D194801ADC077BAFF /* TestSupport.swift in Sources */,
+				0022A0C58288ECA3AFAA2982 /* TickerProviderTests.swift in Sources */,
+				CAE3E8BE9585316287C0D1BF /* WatchlistViewModelTests.swift in Sources */,
+				90B745F9041BF9D558146D41 /* WidgetTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		358DA1AA62B8AA9783EF5760 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 60A6516360CA06FD3D89BD04 /* CoinscalWidget */;
+			targetProxy = 16EF3032B13077F453B8AB6B /* PBXContainerItemProxy */;
+		};
+		DD9A806EBEF6CFAFC39AE660 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 488F4CF6432C49CC40BC049C /* CoinscalMac */;
+			targetProxy = CAD2CD542F2F10CBB676964F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		029FAC3C7D9869CBEE6219CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Mac/Coinscal.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Mac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gicek.coinscal;
+				PRODUCT_NAME = Coinscal;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		03D3E210EA02E485864EA397 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEPLOYMENT_POSTPROCESSING = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		4E82363F08DF020F9BFACD09 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		C269E381AD46BFFC9FB897A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_ENTITLEMENTS = MacWidget/CoinscalWidget.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = MacWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.gicek.coinscal.widget;
+				PRODUCT_NAME = CoinscalWidget;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		D93CB066B05C9CA93749D814 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gicek.coinscal.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Coinscal.app/Contents/MacOS/Coinscal";
+			};
+			name = Release;
+		};
+		F10986472CB6951DA074A9A2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gicek.coinscal.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Coinscal.app/Contents/MacOS/Coinscal";
+			};
+			name = Debug;
+		};
+		F9A71E1F8D56062625530FB4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Mac/Coinscal.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Mac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gicek.coinscal;
+				PRODUCT_NAME = Coinscal;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		FB380D0E3A2DD125925C8525 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_ENTITLEMENTS = MacWidget/CoinscalWidget.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = MacWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.gicek.coinscal.widget;
+				PRODUCT_NAME = CoinscalWidget;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		35CC4A9EBD885B74C15C7D7A /* Build configuration list for PBXNativeTarget "CoinscalMacTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F10986472CB6951DA074A9A2 /* Debug */,
+				D93CB066B05C9CA93749D814 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		450DC7EC952E79B84D8E0024 /* Build configuration list for PBXNativeTarget "CoinscalMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9A71E1F8D56062625530FB4 /* Debug */,
+				029FAC3C7D9869CBEE6219CF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		470430E7DF42FB1615C616C9 /* Build configuration list for PBXProject "Coinscal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4E82363F08DF020F9BFACD09 /* Debug */,
+				03D3E210EA02E485864EA397 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		ECDCC589A35A6C50CF77FB5B /* Build configuration list for PBXNativeTarget "CoinscalWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB380D0E3A2DD125925C8525 /* Debug */,
+				C269E381AD46BFFC9FB897A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9A65742F218BCA9A71B2BFA2 /* Project object */;
+}
