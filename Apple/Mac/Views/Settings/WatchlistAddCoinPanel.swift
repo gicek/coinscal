@@ -2,7 +2,8 @@ import SwiftUI
 import AppKit
 
 /// Add-coin panel dropped below the "+" in the Watchlist title bar: a search field over the listed coins.
-/// With no query it lists every listed coin in catalog order; the panel stays open so several coins can be added.
+/// With no query it lists every listed coin in catalog order. Clicking a row adds the coin, or removes it when it is
+/// already in the watchlist; the panel stays open so several coins can be added or removed in a row.
 /// An in-window card rather than a popover: NSPopover centres on its arrow and only shifts at screen edges,
 /// so under a "+" at the window's trailing edge half of it would hang outside the window.
 struct WatchlistAddCoinPanel: View {
@@ -15,7 +16,8 @@ struct WatchlistAddCoinPanel: View {
     }
 
     let isAdded: (CoinMetadata) -> Bool
-    let add: (CoinMetadata) -> Void
+    /// Adds the coin, or removes it when it is already in the watchlist.
+    let toggle: (CoinMetadata) -> Void
     let close: () -> Void
 
     @EnvironmentObject private var vm: WatchlistViewModel
@@ -72,7 +74,7 @@ struct WatchlistAddCoinPanel: View {
                 .focused($searchFocused)
                 // Return adds the first match that is not in the watchlist yet.
                 .onSubmit {
-                    if let first = vm.addCoinResults.first(where: { !isAdded($0) }) { add(first) }
+                    if let first = vm.addCoinResults.first(where: { !isAdded($0) }) { toggle(first) }
                 }
             if !vm.searchText.isEmpty {
                 Button {
@@ -114,9 +116,9 @@ struct WatchlistAddCoinPanel: View {
 
     private func row(_ meta: CoinMetadata) -> some View {
         let added = isAdded(meta)
-        let hovered = hoveredID == meta.id && !added
-        // Added rows stay full strength (a disabled button would dim the whole row); tapping one does nothing.
-        return Button(action: { if !added { add(meta) } }) {
+        let hovered = hoveredID == meta.id
+        // Hovering an added row turns its checkmark into a red minus: clicking it removes the coin.
+        return Button(action: { toggle(meta) }) {
             HStack(spacing: 10) {
                 CoinLogoView(coinID: meta.id, assetName: meta.logoAssetName, urlString: meta.logoURL, symbol: meta.symbol)
                     .frame(width: Layout.iconSize, height: Layout.iconSize)
@@ -125,16 +127,16 @@ struct WatchlistAddCoinPanel: View {
                     Text(verbatim: meta.name).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 8)
-                Image(systemName: added ? "checkmark.circle.fill" : "plus.circle")
+                Image(systemName: added ? (hovered ? "minus.circle.fill" : "checkmark.circle.fill") : "plus.circle")
                     .font(.system(size: 14))
-                    .foregroundStyle(added ? Color.green : Color.accentColor)
+                    .foregroundStyle(added ? (hovered ? Color.red : Color.green) : Color.accentColor)
                     .opacity(added || hovered ? 1 : 0.55)
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 5)
             .background(
                 RoundedRectangle(cornerRadius: Layout.rowCornerRadius, style: .continuous)
-                    .fill(hovered ? Color.accentColor.opacity(0.12) : Color.clear)
+                    .fill(hovered ? (added ? Color.red : Color.accentColor).opacity(0.12) : Color.clear)
             )
             .contentShape(RoundedRectangle(cornerRadius: Layout.rowCornerRadius, style: .continuous))
         }

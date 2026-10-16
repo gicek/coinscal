@@ -50,7 +50,7 @@ struct WatchlistView: View {
             if showAddCoin {
                 WatchlistAddCoinPanel(
                     isAdded: isAdded,
-                    add: addCoin,
+                    toggle: toggleCoin,
                     close: { setAddCoinShown(false) }
                 )
                 // Pull the card out of the content padding: just below the title bar, right edge inside the window.
@@ -456,12 +456,6 @@ struct WatchlistView: View {
                 }
             }
         )
-    }
-
-    private func addCoin(_ meta: CoinMetadata) {
-        reorderSession.cancel()
-        vm.addCoin(meta, to: &settingsVM.settings)
-        reloadCoinData()
     }
 
     private func isAdded(_ meta: CoinMetadata) -> Bool {

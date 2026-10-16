@@ -11,6 +11,14 @@
 
 ## Records
 
+### 2026-10-16: Remove coins from the add panel
+
+Clicking an added coin in the Watchlist "+" panel removes it; hovering shows a red minus ([DESIGN](DESIGN.md)).
+
+- Verified: `make test-mac` passes.
+- Pending:
+  1. On a real Mac: hover an added row (red minus and highlight), click it (removed from the list below and from the menu bar if it was the menu bar coin), click again (added back at the end); Return still adds the first result that isn't added.
+
 ### 2026-10-16: Desktop panel text size
 
 "Text Size" Normal / Large; Large adds 2pt to every text and keeps the icons ([DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).

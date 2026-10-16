@@ -4,6 +4,11 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Changed: Remove coins from the add panel
+In Settings → Watchlist, clicking an added coin in the "+" search panel now removes it from the watchlist; before, clicking an added row did nothing. Hovering an added row turns its green checkmark into a red minus with a red highlight. Rows that aren't added still add on click, and Return still adds only the first result that isn't added. This matches the "Recommended" row, which already toggled.
+
+- Tests: `make test-mac` passes; checking on a real Mac is pending in VALIDATION.
+
 ### Changed: Recommended coins
 Settings → Watchlist → "Recommended" lists BTC, ETH, BNB, SOL, ZEC, HYPE, BCH, LTC, UNI, AAVE (was BTC, ETH, BNB, SOL, XRP, ADA, DOGE, AVAX, DOT, POL), in `recommendedCoins.json` and the `Constants.Defaults.recommendedCoinSymbols` fallback. All ten are listed and active in the catalog and trade on Binance and OKX. HYPE's logo is now bundled (`coin-hyperliquid`, 50 px from CoinGecko's image CDN; 79 bundled logos), so the recommendations show no placeholder offline. The default watchlist (BTC, ETH) is unchanged.
 
