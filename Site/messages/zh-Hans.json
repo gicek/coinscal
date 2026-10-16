@@ -113,7 +113,7 @@
     "updated": "最后更新：2026 年 10 月 16 日",
     "app": {
       "title": "应用",
-      "body": "Coinscal 没有账号、没有服务器，也没有统计分析。你的自选、提醒和设置只保存在你的 Mac 上。为了显示价格，应用会向 Binance、OKX、Bybit 请求公开行情，向 ExchangeRate-API 和 Currency API 请求汇率，并从 CoinGecko 获取币种图标。这些请求不含任何个人信息，但和普通网页请求一样，各服务能看到你的 IP 地址。"
+      "body": "Coinscal 没有账号、没有服务器，也没有统计分析。你的自选、提醒和设置只保存在你的 Mac 上。为了显示价格，应用会向 Binance、OKX、Bybit 请求公开行情，向 ExchangeRate-API 和 Currency API 请求汇率，并从 CoinGecko 获取币种图标。应用每天向 dl.coinscal.app 检查一次新版本，请求里只带应用名称和版本号。这些请求不含任何个人信息，但和普通网页请求一样，各服务能看到你的 IP 地址。"
     },
     "site": {
       "title": "本网站",
