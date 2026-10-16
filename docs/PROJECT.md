@@ -30,7 +30,7 @@ macOS 14 or later, Apple silicon (arm64).
 - Quote currencies: USD, CNY, KRW, HKD, JPY, TWD, SGD, MYR, AUD, CAD, EUR, GBP.
 - Color schemes: "Green Up, Red Down" / "Red Up, Green Down" / "Custom".
 - Desktop and Notification Center widgets: "Coin Price" (small) and "Watchlist" (medium, large). In "Edit Widget" you can choose coins, quote currency, sort order, and color by change. When the app is not running, the widget fetches prices itself (see [WIDGET](WIDGET.md)).
-- Desktop ticker: a click-through price panel pinned to the desktop (between the wallpaper and the desktop icons). It updates every 10 seconds along with the app, has the same sizes and content as the widget, has adjustable background opacity, and can be dragged to any display (see [DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).
+- Desktop ticker: a click-through price panel pinned to the desktop (between the wallpaper and the desktop icons). It updates every 10 seconds along with the app, shows up to 16 watchlist coins in the large widget's layout with a height that fits them, has adjustable background opacity, and can be dragged to any display (see [DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).
 - Open at login (off by default). UI languages: English, Simplified Chinese, and Traditional Chinese. Follows the system or switches instantly in the app.
 
 ### Out of Scope for the First Milestone

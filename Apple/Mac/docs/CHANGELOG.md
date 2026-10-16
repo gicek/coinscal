@@ -4,6 +4,13 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Changed: One desktop panel layout that fits the watchlist
+The desktop panel no longer has a "Size" setting (Small / Medium / Large, Medium by default). It always uses the large widget's list, shows the first 16 watchlist coins instead of 4 or 8, and its height fits the coins it shows (88pt for one coin, 673pt for 16; 170pt before the first prices). Adding or removing coins grows or shrinks the panel downward from its top edge.
+
+- Settings: the saved position is now the top-left corner (`desktopOverlayTopLeft`). A bottom-left position saved by an earlier version is converted once with the size it was saved with, so the top edge stays put; `desktopOverlaySize` is no longer stored.
+- Removed strings: `desktop.size`, `desktop.size.small`, `desktop.size.medium`, `desktop.size.large`.
+- Tests: `DesktopOverlayTests` covers the height for 0, 1, 8, and 20 coins, the 16-coin limit, the migration of old positions, and top-edge anchoring; one test renders `WidgetListView` and checks that the computed height matches it for 1, 5, and 16 coins. On a real Mac, a large panel saved by the old version reopened 364×361 with 8 coins and its top edge in place.
+
 ### Changed: No ellipsis on buttons and menu items
 "Settings", "Check for Updates" (right-click menu and the About pane), and "Adjust Position" (Settings → General) no longer end with "…", in all three languages. The search field placeholder keeps its ellipsis.
 

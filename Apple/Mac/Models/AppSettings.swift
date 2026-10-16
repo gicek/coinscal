@@ -15,13 +15,12 @@ struct AppSettings: Codable {
     var menuBarContent: MenuBarContent = .price
     /// Desktop overlay (docs/DESKTOP_OVERLAY.md): a click-through price panel on the desktop.
     var desktopOverlayEnabled: Bool = false
-    /// Medium by default: first-time users see the top of their watchlist (2026-10-15).
-    var desktopOverlaySize: DesktopOverlaySize = .medium
     /// Opacity of the frosted background (0...1); the text stays opaque.
     var desktopOverlayBackgroundOpacity: Double = 1
-    /// Window origin in global screen coordinates (any display); nil means the main display's default corner.
-    /// Clamped onto the display it overlaps most when applied.
-    var desktopOverlayOrigin: DesktopOverlayOrigin? = nil
+    /// Top-left corner of the window in global screen coordinates (any display); nil means the main display's
+    /// default corner. The top stays put when the height follows the watchlist. Clamped onto the display it overlaps
+    /// most when applied.
+    var desktopOverlayTopLeft: DesktopOverlayOrigin? = nil
     var displayedCoinId: String = "bitcoin"
     var watchlistCoins: [WatchlistCoin] = [
         WatchlistCoin(coinId: "bitcoin", alertKind: .change, notificationThreshold: Constants.Defaults.defaultNotificationThreshold),
@@ -33,8 +32,13 @@ struct AppSettings: Codable {
         case customUpColorHex, customDownColorHex
         case priceChangeNotificationEnabled, pollingInterval
         case showMenuBarBackground, menuBarContent, displayedCoinId
-        case desktopOverlayEnabled, desktopOverlaySize, desktopOverlayBackgroundOpacity, desktopOverlayOrigin
+        case desktopOverlayEnabled, desktopOverlayBackgroundOpacity, desktopOverlayTopLeft
         case watchlistCoins = "addedCoins"
+    }
+
+    /// Read once to migrate: the overlay had small / medium / large sizes and saved its bottom-left corner (until 2026-10-16).
+    private enum LegacyKeys: String, CodingKey {
+        case desktopOverlaySize, desktopOverlayOrigin
     }
 
     init() {}
@@ -59,15 +63,24 @@ struct AppSettings: Codable {
         showMenuBarBackground = value(.showMenuBarBackground, d.showMenuBarBackground)
         menuBarContent = value(.menuBarContent, d.menuBarContent)
         desktopOverlayEnabled = value(.desktopOverlayEnabled, d.desktopOverlayEnabled)
-        desktopOverlaySize = value(.desktopOverlaySize, d.desktopOverlaySize)
         desktopOverlayBackgroundOpacity = min(max(value(.desktopOverlayBackgroundOpacity, d.desktopOverlayBackgroundOpacity), 0), 1)
-        desktopOverlayOrigin = value(.desktopOverlayOrigin, d.desktopOverlayOrigin)
+        desktopOverlayTopLeft = (try? c.decodeIfPresent(DesktopOverlayOrigin.self, forKey: .desktopOverlayTopLeft)) ?? Self.legacyTopLeft(decoder)
         displayedCoinId = value(.displayedCoinId, d.displayedCoinId)
         if c.contains(.watchlistCoins) {
             // A broken entry drops only that entry.
             let items = (try? c.decode([LossyDecodable<WatchlistCoin>].self, forKey: .watchlistCoins)) ?? []
             watchlistCoins = items.compactMap(\.value)
         }
+    }
+
+    /// Saved bottom-left corner of an older version, moved up by the height of the size it was saved with
+    /// (small / medium 170pt, large 382pt; medium was the default), so the panel keeps its top edge.
+    private static func legacyTopLeft(_ decoder: Decoder) -> DesktopOverlayOrigin? {
+        guard let legacy = try? decoder.container(keyedBy: LegacyKeys.self),
+              let origin = try? legacy.decodeIfPresent(DesktopOverlayOrigin.self, forKey: .desktopOverlayOrigin)
+        else { return nil }
+        let size = (try? legacy.decodeIfPresent(String.self, forKey: .desktopOverlaySize)) ?? nil
+        return DesktopOverlayOrigin(x: origin.x, y: origin.y + (size == "large" ? 382 : 170))
     }
 }
 
@@ -198,25 +211,6 @@ enum MenuBarContent: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .price: return loc("menubarContent.price")
         case .icon:  return loc("menubarContent.icon")
-        }
-    }
-}
-
-/// Desktop overlay size, matching the widget sizes: small shows the menu bar coin, medium / large the first 4 / 8
-/// watchlist coins.
-enum DesktopOverlaySize: String, Codable, CaseIterable, Identifiable {
-    case small
-    case medium
-    case large
-
-    var id: String { rawValue }
-
-    @MainActor
-    var displayName: String {
-        switch self {
-        case .small:  return loc("desktop.size.small")
-        case .medium: return loc("desktop.size.medium")
-        case .large:  return loc("desktop.size.large")
         }
     }
 }

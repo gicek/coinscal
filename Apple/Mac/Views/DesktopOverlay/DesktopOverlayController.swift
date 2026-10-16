@@ -55,7 +55,7 @@ final class DesktopOverlayController {
     private func endAdjusting() {
         guard let window, model.isAdjusting else { return }
         stopAdjusting(window)
-        settingsVM?.settings.desktopOverlayOrigin = DesktopOverlayOrigin(x: window.frame.minX, y: window.frame.minY)
+        settingsVM?.settings.desktopOverlayTopLeft = DesktopOverlayLayout.topLeft(of: window.frame)
     }
 
     private func stopAdjusting(_ window: DesktopOverlayWindow) {
@@ -78,8 +78,7 @@ final class DesktopOverlayController {
             window?.orderOut(nil)
             return
         }
-        model.content = DesktopOverlayLayout.content(coins: coins, settings: settings, size: settings.desktopOverlaySize)
-        model.size = settings.desktopOverlaySize
+        model.content = DesktopOverlayLayout.content(coins: coins, settings: settings)
         model.backgroundOpacity = settings.desktopOverlayBackgroundOpacity
 
         let isNew = window == nil
@@ -87,22 +86,15 @@ final class DesktopOverlayController {
         if !model.isAdjusting {
             window.level = Self.level
         }
-        let layoutChanged = isNew || !window.isVisible || previous.desktopOverlaySize != settings.desktopOverlaySize
-            || previous.desktopOverlayOrigin != settings.desktopOverlayOrigin
-        if !isNew, window.isVisible, previous.desktopOverlaySize != settings.desktopOverlaySize {
-            // Switching size keeps the top-left corner where the panel is (the stored origin is the bottom-left,
-            // so placing by it would grow the panel upward), on whichever display it is.
-            let size = DesktopOverlayLayout.windowSize(settings.desktopOverlaySize)
-            let frame = DesktopOverlayLayout.resized(window.frame, to: size, screens: Self.screens)
-            window.setFrame(frame, display: true)
-            if !model.isAdjusting {
-                // Store the new bottom-left so a relaunch puts it in the same place; while adjusting, Done stores it.
-                // Async: this runs inside the settings publisher.
-                DispatchQueue.main.async { [weak self] in
-                    self?.settingsVM?.settings.desktopOverlayOrigin = DesktopOverlayOrigin(x: frame.minX, y: frame.minY)
-                }
+        let size = DesktopOverlayLayout.windowSize(for: model.content)
+        if model.isAdjusting {
+            // The watchlist changed while adjusting: keep the top-left corner where the panel is now; Done stores it.
+            if window.frame.size != size {
+                window.setFrame(DesktopOverlayLayout.resized(window.frame, to: size, screens: Self.screens), display: true)
             }
-        } else if layoutChanged && !model.isAdjusting {
+        } else if isNew || !window.isVisible || window.frame.size != size
+                    || previous.desktopOverlayTopLeft != settings.desktopOverlayTopLeft {
+            // The saved corner is the top-left, so a taller or shorter panel keeps its top edge.
             placeWindow()
         }
         window.orderFrontRegardless()
@@ -113,8 +105,8 @@ final class DesktopOverlayController {
 
     private func placeWindow() {
         guard let window, !model.isAdjusting else { return }
-        let size = DesktopOverlayLayout.windowSize(settings.desktopOverlaySize)
-        window.setFrame(DesktopOverlayLayout.frame(saved: settings.desktopOverlayOrigin, size: size, screens: Self.screens), display: true)
+        let size = DesktopOverlayLayout.windowSize(for: model.content)
+        window.setFrame(DesktopOverlayLayout.frame(saved: settings.desktopOverlayTopLeft, size: size, screens: Self.screens), display: true)
     }
 
     /// Visible frames of all displays, main (menu bar) display first.
@@ -122,7 +114,7 @@ final class DesktopOverlayController {
 
     private func makeWindow() -> DesktopOverlayWindow {
         let window = DesktopOverlayWindow(
-            contentRect: CGRect(origin: .zero, size: DesktopOverlayLayout.windowSize(settings.desktopOverlaySize)),
+            contentRect: CGRect(origin: .zero, size: DesktopOverlayLayout.windowSize(for: model.content)),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false

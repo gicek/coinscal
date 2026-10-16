@@ -11,6 +11,15 @@
 
 ## Records
 
+### 2026-10-16: Desktop panel with one layout that fits the watchlist
+
+No size setting; the large widget's list with up to 16 coins and a height that fits them ([DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).
+
+- Verified: `make test-mac` passes, including the rendered-height check. On a real Mac with 8 coins, a panel saved as Large by the old version reopened at 364×361 with its top edge in place; the panel ends 14pt below the last row.
+- Pending:
+  1. Add and remove coins (1, 16, more than 16): the panel grows and shrinks downward and shows at most 16.
+  2. A panel near the bottom of a display that grows past it is pulled back on screen.
+
 ### 2026-10-16: Colored text on the transparent desktop panel
 
 When the panel background is below 20%, 24h changes and the stale time are white and only the leading ▲ / ▼ or ⚠︎ keeps its color ([DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).

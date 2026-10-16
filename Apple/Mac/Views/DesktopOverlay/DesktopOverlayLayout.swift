@@ -17,21 +17,22 @@ enum DesktopOverlayLayout {
         !isAdjusting && backgroundOpacity < legibleBackgroundOpacity
     }
 
-    /// Same point sizes as the widgets, so the shared widget views fit unchanged.
-    static func windowSize(_ size: DesktopOverlaySize) -> CGSize {
-        switch size {
-        case .small:  return CGSize(width: 170, height: 170)
-        case .medium: return CGSize(width: 364, height: 170)
-        case .large:  return CGSize(width: 364, height: 382)
-        }
-    }
+    /// One layout, the large widget's: 364pt wide, its height follows the number of coins up to `rowLimit`.
+    static let width: CGFloat = 364
+    static let rowLimit = 16
+    /// Row height of the large widget list (`WidgetListView`), and the 1pt divider between rows.
+    static let rowHeight: CGFloat = 38
+    static let dividerHeight: CGFloat = 1
+    /// List header: the 16pt logo row plus its 6pt bottom padding.
+    static let headerHeight: CGFloat = 22
+    /// Before the first prices (`WidgetEmptyView`): the medium widget's height.
+    static let emptyHeight: CGFloat = 170
 
-    static func rowLimit(_ size: DesktopOverlaySize) -> Int {
-        switch size {
-        case .small:  return 1
-        case .medium: return WidgetContent.mediumRowLimit
-        case .large:  return WidgetContent.largeRowLimit
-        }
+    static func windowSize(for content: WidgetEntryContent) -> CGSize {
+        guard content.hasPrices, !content.rows.isEmpty else { return CGSize(width: width, height: emptyHeight) }
+        let rows = CGFloat(content.rows.count)
+        let height = contentPadding * 2 + headerHeight + rows * rowHeight + (rows - 1) * dividerHeight
+        return CGSize(width: width, height: height)
     }
 
     /// Top-right corner of the visible frame (below the menu bar, beside the Dock).
@@ -39,19 +40,24 @@ enum DesktopOverlayLayout {
         CGPoint(x: visibleFrame.maxX - windowSize.width - margin, y: visibleFrame.maxY - windowSize.height - margin)
     }
 
-    /// Saved origin pulled back inside the visible frame (display changed, resolution changed, size switched).
+    /// Bottom-left origin for a saved top-left corner, pulled back inside the visible frame (display changed,
+    /// resolution changed, the panel grew).
     static func origin(saved: DesktopOverlayOrigin?, windowSize: CGSize, visibleFrame: CGRect) -> CGPoint {
         guard let saved else { return defaultOrigin(windowSize: windowSize, visibleFrame: visibleFrame) }
         let maxX = max(visibleFrame.minX, visibleFrame.maxX - windowSize.width)
         let maxY = max(visibleFrame.minY, visibleFrame.maxY - windowSize.height)
-        return CGPoint(x: min(max(saved.x, visibleFrame.minX), maxX), y: min(max(saved.y, visibleFrame.minY), maxY))
+        let y = saved.y - windowSize.height
+        return CGPoint(x: min(max(saved.x, visibleFrame.minX), maxX), y: min(max(y, visibleFrame.minY), maxY))
     }
 
-    /// Size switched while adjusting: keep the top-left corner where the user put it, then pull it back onto the
-    /// display it is on.
+    /// Height changed while adjusting: keep the top-left corner where the user has dragged it so far, then pull it
+    /// back onto the display it is on.
     static func resized(_ frame: CGRect, to size: CGSize, screens: [CGRect]) -> CGRect {
-        let topLeftAnchored = DesktopOverlayOrigin(x: frame.minX, y: frame.maxY - size.height)
-        return self.frame(saved: topLeftAnchored, size: size, screens: screens)
+        self.frame(saved: topLeft(of: frame), size: size, screens: screens)
+    }
+
+    static func topLeft(of frame: CGRect) -> DesktopOverlayOrigin {
+        DesktopOverlayOrigin(x: frame.minX, y: frame.maxY)
     }
 
     /// Window frame across displays. `screens` are the visible frames with the main display first.
@@ -60,7 +66,7 @@ enum DesktopOverlayLayout {
     static func frame(saved: DesktopOverlayOrigin?, size: CGSize, screens: [CGRect]) -> CGRect {
         guard let main = screens.first else { return CGRect(origin: .zero, size: size) }
         guard let saved else { return CGRect(origin: defaultOrigin(windowSize: size, visibleFrame: main), size: size) }
-        let wanted = CGRect(origin: CGPoint(x: saved.x, y: saved.y), size: size)
+        let wanted = CGRect(origin: CGPoint(x: saved.x, y: saved.y - size.height), size: size)
         let screen = screens.max { overlap($0, wanted) < overlap($1, wanted) }.flatMap { overlap($0, wanted) > 0 ? $0 : nil }
             ?? screens.min { distance($0, wanted) < distance($1, wanted) }
             ?? main
@@ -83,14 +89,9 @@ enum DesktopOverlayLayout {
         return !previous.desktopOverlayEnabled && next.desktopOverlayEnabled
     }
 
-    /// Small: the menu bar coin (first coin if it is gone); medium / large: watchlist order up to the row limit.
-    static func content(coins: [Coin], settings: AppSettings, size: DesktopOverlaySize) -> WidgetEntryContent {
-        let shown: [Coin]
-        if size == .small {
-            shown = (coins.first { $0.id == settings.displayedCoinId } ?? coins.first).map { [$0] } ?? []
-        } else {
-            shown = Array(coins.prefix(rowLimit(size)))
-        }
+    /// Watchlist order up to the row limit.
+    static func content(coins: [Coin], settings: AppSettings) -> WidgetEntryContent {
+        let shown = coins.prefix(rowLimit)
         let rows = shown.map { coin in
             WidgetRow(
                 id: coin.id, symbol: coin.symbol, name: coin.name, logoAssetName: coin.logoAssetName,

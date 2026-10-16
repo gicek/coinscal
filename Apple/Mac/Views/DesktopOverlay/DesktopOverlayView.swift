@@ -4,7 +4,6 @@ import AppKit
 @MainActor
 final class DesktopOverlayModel: ObservableObject {
     @Published var content: WidgetEntryContent
-    @Published var size: DesktopOverlaySize = .small
     @Published var isAdjusting = false
     @Published var backgroundOpacity: Double = 1
     var onDoneAdjusting: () -> Void = {}
@@ -18,32 +17,26 @@ final class DesktopOverlayModel: ObservableObject {
     }
 }
 
-/// The overlay reuses the widget layouts on a frosted background that blurs the wallpaper behind it.
+/// The overlay reuses the large widget layout on a frosted background that blurs the wallpaper behind it.
 struct DesktopOverlayView: View {
     @ObservedObject var model: DesktopOverlayModel
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: DesktopOverlayLayout.cornerRadius, style: .continuous)
         ZStack {
-            Group {
-                if model.size == .small {
-                    WidgetPriceView(content: model.content, now: Date())
-                } else {
-                    WidgetListView(content: model.content, now: Date(), large: model.size == .large)
-                }
-            }
-            .padding(DesktopOverlayLayout.contentPadding)
-            .modifier(WallpaperLegibility(active: DesktopOverlayLayout.textNeedsHalo(
-                backgroundOpacity: model.backgroundOpacity, isAdjusting: model.isAdjusting
-            )))
+            WidgetListView(content: model.content, now: Date(), large: true)
+                .padding(DesktopOverlayLayout.contentPadding)
+                .modifier(WallpaperLegibility(active: DesktopOverlayLayout.textNeedsHalo(
+                    backgroundOpacity: model.backgroundOpacity, isAdjusting: model.isAdjusting
+                )))
 
             if model.isAdjusting {
                 adjustingOverlay
             }
         }
         .frame(
-            width: DesktopOverlayLayout.windowSize(model.size).width,
-            height: DesktopOverlayLayout.windowSize(model.size).height
+            width: DesktopOverlayLayout.windowSize(for: model.content).width,
+            height: DesktopOverlayLayout.windowSize(for: model.content).height
         )
         // While adjusting, keep enough background to see the panel's bounds and drag it anywhere:
         // fully transparent pixels of a borderless window do not receive clicks.
