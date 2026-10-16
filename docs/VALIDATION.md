@@ -11,6 +11,14 @@
 
 ## Records
 
+### 2026-10-16: 1.0.1 release
+
+1.0.1 (build 2) published with `make mac-publish CONFIRM=1.0.1` ([UPDATES](UPDATES.md)).
+
+- Verified: `make test` passes. `make mac-release-notarized`: app and DMG notarization Accepted, `spctl` reports `Notarized Developer ID` for both. `make mac-publish DRY_RUN=1` passed. After publishing, the zip, the DMG, and `Coinscal.dmg` on `dl.coinscal.app` match the local builds byte for byte; `appcast.xml` lists build 2 / 1.0.1; the release notes pages are served; GitHub Release `v1.0.1` has the zip and DMG, tagged at the release commit.
+- Pending:
+  1. With 1.0 installed: "Check for Updates" offers 1.0.1 with notes in the system language; installing relaunches into 1.0.1 with settings, watchlist, widgets, and login item intact.
+
 ### 2026-10-16: Data source limits
 
 Primary batches leave out coins an exchange doesn't list, rate-limited sources are skipped, exchange rates are shared through the App Group, and ExchangeRate-API is credited ([DATA_SOURCE_LIMITS](DATA_SOURCE_LIMITS.md)).

@@ -1,6 +1,6 @@
 # In-App Updates
 
-> Status: approved and implemented 2026-10-16; 1.0 published with the updater. The first update between two published builds is pending verification (see [VALIDATION](VALIDATION.md)). Decisions: Sparkle 2 as the update engine; update files on Cloudflare R2 at `dl.coinscal.app`; automatic daily checks that ask before installing; release notes in all three UI languages.
+> Status: approved and implemented 2026-10-16; 1.0 (build 1) and 1.0.1 (build 2) published. The update from 1.0 to 1.0.1 is pending verification (see [VALIDATION](VALIDATION.md)). Decisions: Sparkle 2 as the update engine; update files on Cloudflare R2 at `dl.coinscal.app`; automatic daily checks that ask before installing; release notes in all three UI languages.
 
 ## Goal
 

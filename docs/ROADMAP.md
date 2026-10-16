@@ -15,7 +15,7 @@ The first milestone (1.x) delivers a standalone menu bar price tool: current pri
 | Desktop ticker | Implemented | Click-through desktop price panel, refreshed every 10 seconds with the app, can be dragged to any display ([DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)); multiple panels not done |
 | Website | Deployed | Static site with a live menu bar demo in three languages at `coinscal.app` ([WEBSITE](WEBSITE.md)); Safari and Lighthouse pending verification |
 | In-app updates | Implemented | Sparkle 2 updates from Cloudflare R2 at `dl.coinscal.app`, with `make mac-publish` ([UPDATES](UPDATES.md)); the first update between two published builds is pending verification |
-| Release pipeline | Implemented | Developer ID code signing and notarization (`mac-release-notarized`) and publishing to `dl.coinscal.app` and GitHub Releases (`mac-publish`); 1.0 published 2026-10-16; first launch on another Mac pending verification |
+| Release pipeline | Implemented | Developer ID code signing and notarization (`mac-release-notarized`) and publishing to `dl.coinscal.app` and GitHub Releases (`mac-publish`); 1.0 and 1.0.1 published 2026-10-16; first launch on another Mac pending verification |
 
 ## Engineering Foundation
 

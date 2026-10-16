@@ -9,12 +9,13 @@ Design: [UPDATES](UPDATES.md) (approved 2026-10-16).
 - [x] `make sparkle-tools` and `make mac-update-keys`
 - [x] Owner: signing key created and backed up
 - [x] R2 bucket `coinscal-dl` on `dl.coinscal.app`
-- [ ] Owner: `gh auth login`
+- [x] Owner: `gh auth login`
 - [x] App: Sparkle package, `UpdateController`, menu item, About pane controls, popover header capsule, Info.plist keys, entitlements, strings, tests
 - [x] Release: sign Sparkle components in `release.sh`; `make mac-publish` (appcast, R2 upload, GitHub Release)
 - [x] Website: release notes checks, download button to `dl.coinscal.app`, privacy page (deploy with the first release)
 - [x] First public release with the updater: 1.0 (build 1), 2026-10-16
-- [ ] Publish the next build and verify the update end to end
+- [x] Publish the next build: 1.0.1 (build 2), 2026-10-16
+- [ ] Verify the update from 1.0 to 1.0.1 end to end
 
 ## Next Batch: Remote Coin Catalog Updates
 
