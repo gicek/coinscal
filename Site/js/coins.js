@@ -5,12 +5,12 @@ export const COINS = [
     { id: "ethereum", symbol: "ETH", name: "Ethereum" },
     { id: "binancecoin", symbol: "BNB", name: "BNB" },
     { id: "solana", symbol: "SOL", name: "Solana" },
-    { id: "ripple", symbol: "XRP", name: "XRP" },
-    { id: "cardano", symbol: "ADA", name: "Cardano" },
-    { id: "dogecoin", symbol: "DOGE", name: "Dogecoin" },
-    { id: "avalanche-2", symbol: "AVAX", name: "Avalanche" },
-    { id: "polkadot", symbol: "DOT", name: "Polkadot" },
-    { id: "polygon-ecosystem-token", symbol: "POL", name: "POL (ex-MATIC)" },
+    { id: "zcash", symbol: "ZEC", name: "Zcash" },
+    { id: "hyperliquid", symbol: "HYPE", name: "Hyperliquid" },
+    { id: "bitcoin-cash", symbol: "BCH", name: "Bitcoin Cash" },
+    { id: "litecoin", symbol: "LTC", name: "Litecoin" },
+    { id: "uniswap", symbol: "UNI", name: "Uniswap" },
+    { id: "aave", symbol: "AAVE", name: "Aave" },
 ];
 
 export const coinById = (id) => COINS.find((c) => c.id === id);

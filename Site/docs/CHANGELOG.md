@@ -4,6 +4,11 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Changed: Demo coins follow the new recommended coins
+The demo's coin picker offers the app's new recommended coins: BTC, ETH, BNB, SOL, ZEC, HYPE, BCH, LTC, UNI, AAVE. Logos for ZEC, HYPE, BCH, LTC, UNI, and AAVE were added to `Site/img/coins/` (64 px from CoinGecko's image CDN) and those of XRP, ADA, DOGE, AVAX, DOT, and POL removed. A coin saved in the demo settings that is no longer offered is dropped when the settings load.
+
+- Tests: a new `make test-site` check compares the demo coins with `recommendedCoins.json`, their ids and names with the catalog, and the logo files with the coin list.
+
 ### Changed: Downloads from dl.coinscal.app; release notes files
 The download buttons point to the latest DMG at `https://dl.coinscal.app/Coinscal.dmg`. The privacy page says the app checks `dl.coinscal.app` for updates once a day and sends only its name and version. Release notes for in-app updates live in `Site/releases/<version>.json` (all three languages; not served by the site); `make test-site` checks that every language has the same items. Deployed with the 1.0 release.
 

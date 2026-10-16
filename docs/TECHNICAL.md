@@ -177,4 +177,4 @@ open.er-api.com → jsDelivr currency-api → currency-api.pages.dev. The whole 
 
 ## Open Source and Dependencies
 
-The only third-party code dependency is Sparkle; Wrangler and Sparkle's command-line tools are pinned build tools. See [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md). 78 coin logos are bundled assets; the rest are downloaded from CoinGecko's image CDN when a coin is added to the watchlist. Data comes from the public APIs in the table above.
+The only third-party code dependency is Sparkle; Wrangler and Sparkle's command-line tools are pinned build tools. See [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md). 79 coin logos are bundled assets; the rest are downloaded from CoinGecko's image CDN when a coin is added to the watchlist. Data comes from the public APIs in the table above.

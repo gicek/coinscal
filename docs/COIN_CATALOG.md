@@ -47,7 +47,7 @@ The bundled snapshot has 451 coins, all listed and `active`, down to market cap 
 
 ## Logos
 
-Only 78 logos ship in the app (`coin-<id>` assets, about 640KB, mostly the top coins); bundling all of them would grow the app for coins most users never add. The rest are fetched on demand:
+Only 79 logos ship in the app (`coin-<id>` assets, about 640KB, mostly the top coins); bundling all of them would grow the app for coins most users never add. The rest are fetched on demand:
 
 - When a coin enters the watchlist (and at every launch for coins already in it), `CoinLogoStore` downloads its `logoURL` once through the injected `HTTPClient` and stores it in the App Group container (`CoinLogos/<id>.img`, `CoinLogoCache`). Only HTTPS URLs on the logo host allowlist are fetched; the response must be HTTP 200, at most 512KB, and decode as an image. A failed download is retried at the next launch or watchlist change.
 - When a coin leaves the watchlist, its cached logo is deleted. Coins with a bundled asset are never downloaded.

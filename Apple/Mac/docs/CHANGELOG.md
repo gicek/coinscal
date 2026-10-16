@@ -4,6 +4,11 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Changed: Recommended coins
+Settings → Watchlist → "Recommended" lists BTC, ETH, BNB, SOL, ZEC, HYPE, BCH, LTC, UNI, AAVE (was BTC, ETH, BNB, SOL, XRP, ADA, DOGE, AVAX, DOT, POL), in `recommendedCoins.json` and the `Constants.Defaults.recommendedCoinSymbols` fallback. All ten are listed and active in the catalog and trade on Binance and OKX. HYPE's logo is now bundled (`coin-hyperliquid`, 50 px from CoinGecko's image CDN; 79 bundled logos), so the recommendations show no placeholder offline. The default watchlist (BTC, ETH) is unchanged.
+
+- Tests: `make test` passes.
+
 ### Added: Text size for the desktop panel
 Settings → General → "Desktop" has "Text Size" (Normal / Large, Normal by default). Large adds 2pt to every text in the panel (names, prices, changes, the title, and the time) and leaves the coin icons and the logo at their size. To fit, rows grow from 38pt to 42pt, the change column from 74pt to 87pt, and the panel from 364pt to 400pt wide.
 

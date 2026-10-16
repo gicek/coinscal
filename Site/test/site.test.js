@@ -61,6 +61,19 @@ test("every demo coin has a logo", () => {
     for (const coin of COINS) assert.ok(logos.has(`${coin.id}.png`), coin.id);
 });
 
+test("demo coins are the app's recommended coins, with catalog ids and names", () => {
+    const app = `${site}/../Apple/Mac/Resources`;
+    const recommended = JSON.parse(readFileSync(`${app}/recommendedCoins.json`, "utf8"));
+    assert.deepEqual(COINS.map((c) => c.symbol), recommended);
+    const catalog = JSON.parse(readFileSync(`${app}/coins.json`, "utf8")).coins.filter((c) => c.listed);
+    for (const coin of COINS) {
+        const entry = catalog.find((c) => c.symbol === coin.symbol);
+        assert.deepEqual([coin.id, coin.name], [entry?.id, entry?.name], coin.symbol);
+    }
+    const logos = readdirSync(`${site}/img/coins`).map((f) => f.replace(/\.png$/, "")).sort();
+    assert.deepEqual(logos, COINS.map((c) => c.id).sort(), "no logos left over from earlier lists");
+});
+
 test("release notes cover every language with the same items", () => {
     const dir = `${site}/releases`;
     const files = readdirSync(dir, { withFileTypes: true }).filter((e) => e.isFile() && e.name.endsWith(".json"));

@@ -24,7 +24,7 @@ enum Constants {
     enum Defaults {
         static let pollingInterval: TimeInterval = 10
         static let defaultNotificationThreshold: Double = 2.0  // 2%
-        static let recommendedCoinSymbols = ["BTC", "ETH", "BNB", "SOL", "XRP", "ADA", "DOGE", "AVAX", "DOT", "POL"]
+        static let recommendedCoinSymbols = ["BTC", "ETH", "BNB", "SOL", "ZEC", "HYPE", "BCH", "LTC", "UNI", "AAVE"]
         static let upColorHex = "#2CBD84"
         static let downColorHex = "#F6465D"
     }
