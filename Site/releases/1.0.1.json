@@ -1,0 +1,23 @@
+{
+  "version": "1.0.1",
+  "notes": {
+    "en": [
+      "Desktop panel: one layout whose height fits up to 16 coins, a new Large text size, and price changes that stay readable over light wallpapers.",
+      "Watchlist: click an added coin in the search panel to remove it. Recommended coins are now BTC, ETH, BNB, SOL, ZEC, HYPE, BCH, LTC, UNI, and AAVE.",
+      "Fewer requests to price sources: coins an exchange doesn't list are skipped, rate limits are respected, and widgets reuse the app's exchange rates.",
+      "Menus and buttons: no icon next to Settings on first launch, and no trailing ellipsis."
+    ],
+    "zh-Hans": [
+      "桌面面板：只有一种样式，高度随币种数变化，最多 16 个；新增大号字体；浅色壁纸上的涨跌更清楚。",
+      "自选：在搜索面板中点击已添加的币种即可移除。推荐币种改为 BTC、ETH、BNB、SOL、ZEC、HYPE、BCH、LTC、UNI、AAVE。",
+      "减少对价格源的请求：跳过交易所没有的币，遵守访问频率限制，小组件复用应用的汇率。",
+      "菜单与按钮：首次启动时「设置」前不再出现图标，文字不再以省略号结尾。"
+    ],
+    "zh-Hant": [
+      "桌面面板：只有一種樣式，高度隨幣種數變化，最多 16 個；新增大號字體；淺色桌布上的漲跌更清楚。",
+      "自選：在搜尋面板中點選已新增的幣種即可移除。推薦幣種改為 BTC、ETH、BNB、SOL、ZEC、HYPE、BCH、LTC、UNI、AAVE。",
+      "減少對價格來源的請求：略過交易所沒有的幣，遵守存取頻率限制，小工具沿用 App 的匯率。",
+      "選單與按鈕：首次啟動時「設定」前不再出現圖示，文字不再以刪節號結尾。"
+    ]
+  }
+}

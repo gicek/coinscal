@@ -20,8 +20,8 @@ settings:
     # UI strings are read from the String Catalog through loc("semantic.key"), not extracted by the compiler.
     SWIFT_EMIT_LOC_STRINGS: NO
     # Single source of the version number.
-    MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "1.0.1"
+    CURRENT_PROJECT_VERSION: "2"
     CODE_SIGN_STYLE: Automatic
     # Injected from DEVELOPMENT_TEAM in local.mk on the command line; empty means local ad-hoc signing.
     DEVELOPMENT_TEAM: ""

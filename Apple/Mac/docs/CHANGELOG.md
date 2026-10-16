@@ -4,6 +4,9 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Added: Coinscal 1.0.1
+Build 2, the first update delivered through the in-app updater. It contains the changes listed below under 2026-10-16, from "Fixed: Green changes hard to read on the transparent desktop panel" to "Fixed: A coin Binance doesn't list made every price round 40 times costlier". Release notes: `Site/releases/1.0.1.json`.
+
 ### Fixed: A coin Binance doesn't list made every price round 40 times costlier
 - Symptom: with a watchlist coin that Binance doesn't list, every 10-second round sent a Binance batch that failed with HTTP 400 and then the full ticker list, about weight 82 instead of 2 (8% of the per-IP budget per user; about 12 such users behind one IP would hit Binance's limit).
 - Root cause: "this exchange doesn't list it" was remembered only for fill-in; the primary batch always included every watchlist coin.
