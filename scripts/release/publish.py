@@ -205,8 +205,15 @@ def main() -> None:
         os.environ["PATH"] = f"{a.node_bin}{os.pathsep}{os.environ['PATH']}"
     for key, path, content_type, cache in uploads:
         print(f"==> Uploading {key}")
-        run(wrangler + ["r2", "object", "put", f"{a.bucket}/{key}", "--file", str(path),
-                        "--content-type", content_type, "--cache-control", cache, "--remote"])
+        cmd = wrangler + ["r2", "object", "put", f"{a.bucket}/{key}", "--file", str(path),
+                          "--content-type", content_type, "--cache-control", cache, "--remote"]
+        # Uploads are idempotent and Wrangler's requests fail transiently now and then: retry before giving up.
+        for attempt in range(1, 4):
+            if subprocess.run(cmd, text=True).returncode == 0:
+                break
+            if attempt == 3:
+                fail(f"uploading {key} failed 3 times; appcast.xml is uploaded last, so the live feed is unchanged")
+            print(f"    retrying {key} ({attempt}/2)")
 
     notes_md = work / "github-notes.md"
     notes_md.write_text("\n".join(f"- {item}" for item in notes["en"]) + "\n", encoding="utf-8")

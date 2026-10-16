@@ -81,4 +81,4 @@ Strings live in `Site/messages/<lang>.json` (`en` is the source) with the same t
 - [ ] Safari on macOS and iOS: glass panel (`backdrop-filter`), `light-dark()` colors, select menus, and the language menu.
 - [ ] Lighthouse ≥ 90 in performance, accessibility, best practices, and SEO.
 - [x] Deployed: both custom domains serve the site over HTTPS with the headers in effect; files listed in `.assetsignore` return 404; live prices load on both domains; Cloudflare Web Analytics loads under the CSP.
-- [ ] The download buttons serve the latest DMG once the first release is published to `dl.coinscal.app`.
+- [x] The download buttons serve the latest DMG from `dl.coinscal.app`.

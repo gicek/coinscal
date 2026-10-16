@@ -13,7 +13,8 @@ Design: [UPDATES](UPDATES.md) (approved 2026-10-16).
 - [x] App: Sparkle package, `UpdateController`, menu item, About pane controls, popover header capsule, Info.plist keys, entitlements, strings, tests
 - [x] Release: sign Sparkle components in `release.sh`; `make mac-publish` (appcast, R2 upload, GitHub Release)
 - [x] Website: release notes checks, download button to `dl.coinscal.app`, privacy page (deploy with the first release)
-- [ ] First public release with the updater, then publish the next build and verify the update end to end
+- [x] First public release with the updater: 1.0 (build 1), 2026-10-16
+- [ ] Publish the next build and verify the update end to end
 
 ## Next Batch: Remote Coin Catalog Updates
 
