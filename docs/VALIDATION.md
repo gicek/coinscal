@@ -11,6 +11,14 @@
 
 ## Records
 
+### 2026-10-16: Colored text on the transparent desktop panel
+
+When the panel background is below 20%, 24h changes and the stale time are white and only the leading ▲ / ▼ or ⚠︎ keeps its color ([DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).
+
+- Verified: `make test-mac` passes. On a real desktop over a light blue-gray to beige wallpaper with the background below 20%, the changes read as clearly as the prices and the arrow colors are recognizable.
+- Pending:
+  1. The same check over a dark wallpaper; widgets look unchanged.
+
 ### 2026-10-16: In-app updates and the 1.0 release
 
 Sparkle 2.10.0 in the app, update signing key, release signing, and `make mac-publish` ([UPDATES](UPDATES.md)).

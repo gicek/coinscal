@@ -133,18 +133,15 @@ private struct WidgetChangeText: View {
                 .lineLimit(1)
                 .textHalo()
         } else if let change = row.change24hPercent {
-            Text(verbatim: "\(change >= 0 ? "▲" : "▼") \(PriceFormatter.formatPercent(change))")
+            SignalText(symbol: change >= 0 ? "▲" : "▼", text: PriceFormatter.formatPercent(change), color: color(for: change))
                 .monospacedDigit()
-                .foregroundStyle(color(for: change))
                 .lineLimit(1)
-                .textHalo()
         }
     }
 
-    private func color(for change: Double) -> Color {
-        guard content.colorByChange else { return .primary }
-        let hex = change >= 0 ? content.upColorHex : content.downColorHex
-        return Color(hex: hex) ?? .primary
+    private func color(for change: Double) -> Color? {
+        guard content.colorByChange else { return nil }
+        return Color(hex: change >= 0 ? content.upColorHex : content.downColorHex)
     }
 }
 
@@ -159,7 +156,7 @@ private struct WidgetUpdatedText: View {
                 Date.FormatStyle(date: .omitted, time: .shortened).locale(Locale(identifier: content.language.resourceCode))
             )
             if content.isStale(at: now) {
-                Text(verbatim: "⚠︎ \(time)").foregroundStyle(.orange).textHalo()
+                SignalText(symbol: "⚠︎", text: time, color: .orange)
             } else {
                 Text(verbatim: time).secondaryText().textHalo()
             }
@@ -249,6 +246,29 @@ private struct TextHalo: ViewModifier {
         } else {
             content
         }
+    }
+}
+
+/// Texts whose color carries meaning (changes, stale time). Over the wallpaper no red or green reaches enough luminance
+/// contrast against both light and dark wallpapers, and a shadow can't fix it, so only the leading symbol keeps the
+/// color and the rest is white like the prices. `nil` keeps the primary style.
+private struct SignalText: View {
+    @Environment(\.widgetTextHalo) private var halo
+    let symbol: String
+    let text: String
+    let color: Color?
+
+    var body: some View {
+        Group {
+            if let color, halo {
+                Text(verbatim: symbol).foregroundStyle(color) + Text(verbatim: " \(text)")
+            } else if let color {
+                Text(verbatim: "\(symbol) \(text)").foregroundStyle(color)
+            } else {
+                Text(verbatim: "\(symbol) \(text)")
+            }
+        }
+        .textHalo()
     }
 }
 

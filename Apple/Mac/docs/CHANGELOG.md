@@ -4,6 +4,12 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Fixed: Green changes hard to read on the transparent desktop panel
+- Symptom: with the desktop panel's background below 20%, the green 24h changes looked dark and blurry over light wallpapers, while white text stayed sharp.
+- Root cause: legibility depends on luminance contrast, and the default green #2CBD84 is about 1.3:1 against a light blue-gray wallpaper (red #F6465D about 1.9:1). The dark shadow makes white text readable because white is far brighter than the shadow; green is about as bright as the shadow, so the shadow only blurs it. Lifting the color 30% toward white with a same-hue shadow made it worse (about 1.0:1).
+- Fix: over the wallpaper, changes and the stale time are white with the same shadow as the prices; only the leading ▲ / ▼ or ⚠︎ keeps its color (`SignalText` in `WidgetViews.swift`). Widgets and opaque panels are unchanged.
+- Tests: `make test-mac` passes; checked on a real desktop over a light wallpaper (dark wallpaper pending in VALIDATION).
+
 ### Added: In-app updates
 Coinscal checks `https://dl.coinscal.app/appcast.xml` once a day with Sparkle 2.10.0 (design in docs/UPDATES.md) and installs a new version only after the user agrees. A scheduled check that finds an update doesn't open a window unless Coinscal is in front; the popover title bar shows an "Update Available" capsule instead. "Check for Updates…" is in the right-click menu and the About pane, which also has "Automatically Check for Updates" (on by default) and now lists Sparkle under open source components. Archives must carry a valid EdDSA signature (public key in `Info.plist`) and the same Team ID.
 
