@@ -330,6 +330,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // configureSettingsWindowChrome must run after contentViewController is set:
         // the NSHostingController layout pass resets the window's maxSize constraint.
         Self.configureSettingsWindowChrome(window)
+        // Setting contentViewController resizes the window to the SwiftUI view's fitting size (its minimum, 600 wide),
+        // which discards the contentRect above; apply the default again. A saved frame still wins below.
+        window.setContentSize(initialSize)
         window.center()
         window.setFrameAutosaveName("SettingsWindow")
         Self.clampSettingsWindowFrame(window)

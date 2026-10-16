@@ -2,6 +2,14 @@
 
 Features added, changed, fixed, and removed, newest first. Third-level headings start with Added / Changed / Fixed / Removed; fixes describe the symptom, root cause, fix, and tests.
 
+## 2026-10-16
+
+### Fixed: Settings window ignored its default size on first open
+- Symptom: with no saved window frame, the Settings window opened at 600×472 instead of the default 786×500. On this Mac the change had looked fine only because an 800×500 frame saved before the default changed was always restored.
+- Root cause: assigning `contentViewController` resizes the window to the SwiftUI view's fitting size (its 600pt minimum width), which discards the `contentRect` the window was created with.
+- Fix: `openSettingsWindow` applies the default size with `setContentSize` after attaching the hosting controller and before `setFrameAutosaveName`, so a saved frame still wins.
+- Tests: on a real Mac, a first open (saved frame masked via the argument domain) measured 786×500 twice in a row, and a saved 800×500 frame was still restored.
+
 ## 2026-10-15
 
 ### Changed: Searchable coins expanded to the top 1000 by market cap; logos downloaded on demand
