@@ -75,7 +75,7 @@ Build/                   # All build output (not committed)
 - [Development rules](AGENTS.md)
 - [Project definition](docs/PROJECT.md) · [Interaction design](docs/DESIGN.md) · [Technical architecture](docs/TECHNICAL.md) · [Roadmap](docs/ROADMAP.md)
 - [Work plan](docs/PLAN.md) · [Implementation and verification status](docs/VALIDATION.md) · [Development guide](docs/DEVELOPMENT.md) · [Localization](docs/LOCALIZATION.md)
-- Topics: [Coin catalog](docs/COIN_CATALOG.md) · [Widgets](docs/WIDGET.md) · [Desktop ticker](docs/DESKTOP_OVERLAY.md) · [Website](docs/WEBSITE.md)
+- Topics: [Coin catalog](docs/COIN_CATALOG.md) · [Widgets](docs/WIDGET.md) · [Desktop ticker](docs/DESKTOP_OVERLAY.md) · [Website](docs/WEBSITE.md) · [Data source limits](docs/DATA_SOURCE_LIMITS.md)
 - [Changelog](Apple/Mac/docs/CHANGELOG.md) · [Website changelog](Site/docs/CHANGELOG.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## License

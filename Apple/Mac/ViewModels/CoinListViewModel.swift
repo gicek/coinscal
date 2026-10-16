@@ -22,7 +22,7 @@ final class CoinListViewModel: ObservableObject {
     init(
         settingsViewModel: SettingsViewModel,
         catalog: CoinCatalog,
-        priceService: PriceServicing = PriceService(exchangeRateService: ExchangeRateService()),
+        priceService: PriceServicing = PriceService(exchangeRateService: ExchangeRateService(cacheStore: .appGroup)),
         notifier: PriceAlertNotifying = NotificationService.shared
     ) {
         self.settingsViewModel = settingsViewModel

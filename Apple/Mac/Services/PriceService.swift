@@ -23,8 +23,11 @@ protocol PriceServicing {
 ///
 /// - Failover: sources are tried in order; the last one that worked becomes the next starting point.
 /// - Fill-in: symbols the primary source does not list are requested from sources on other exchanges.
-///   A symbol a source has confirmed it does not list is skipped there for `unavailableTTL`, so a coin
-///   listed nowhere costs no extra requests on every poll. Request failures are transient and not remembered.
+///   A symbol a source has confirmed it does not list is skipped there for `unavailableTTL`, also in the primary
+///   batch: one coin Binance lacks would otherwise make every Binance batch fail with HTTP 400 and fall back to the
+///   full list (weight 80 instead of 2, docs/DATA_SOURCE_LIMITS.md). Request failures are transient and not remembered.
+/// - Rate limits: an exchange that answers with a rate limit is skipped until its `Retry-After` (or a default) passes,
+///   mirrors included, since they share the per-IP budget. Continuing after Binance's 429 gets the IP banned.
 ///
 /// Price and 24h change come from the same request. State is only touched on the main thread.
 final class PriceService: PriceServicing {
@@ -32,6 +35,10 @@ final class PriceService: PriceServicing {
     static let quoteAssetSymbol = "USDT"
     /// How long "this exchange does not list this symbol" is remembered.
     static let unavailableTTL: TimeInterval = 30 * 60
+    /// Pause after a rate limit without `Retry-After` (Binance 429, OKX 50011).
+    static let rateLimitBackoff: TimeInterval = 60
+    /// Pause after HTTP 403: Bybit asks to wait at least 10 minutes, Binance uses 403 for its firewall.
+    static let forbiddenBackoff: TimeInterval = 10 * 60
 
     private let client: HTTPClient
     private let exchangeRateService: ExchangeRateServicing
@@ -41,9 +48,11 @@ final class PriceService: PriceServicing {
     private var preferredProviderIndex = 0
     /// "listing/SYMBOL" → when the listing was seen without that symbol.
     private var unavailableSince: [String: Date] = [:]
+    /// Listing → when its rate limit is expected to be over.
+    private var rateLimitedUntil: [String: Date] = [:]
 
     init(
-        client: HTTPClient = URLSession.shared,
+        client: HTTPClient = URLSession.liveData,
         exchangeRateService: ExchangeRateServicing,
         providers: [TickerProvider] = PriceService.defaultProviders,
         now: @escaping () -> Date = Date.init
@@ -114,25 +123,31 @@ final class PriceService: PriceServicing {
         }
         let index = order[attempt]
         let provider = providers[index]
+        // Coins this exchange is known not to list stay out of the batch; fill-in looks for them elsewhere.
+        let wanted = symbols.filter { !isKnownUnavailable($0, on: provider.listing) }
 
-        guard let request = provider.makeRequest(symbols: symbols) else {
+        guard !isRateLimited(provider.listing), !wanted.isEmpty,
+              let request = provider.makeRequest(symbols: wanted) else {
             return fetchTickers(symbols: symbols, order: order, attempt: attempt + 1)
         }
 
-        return Self.load(request, provider: provider, symbols: symbols, client: client)
-            .tryMap { quotes -> (index: Int, quotes: [String: TickerQuote]) in
+        return Self.load(request, provider: provider, symbols: wanted, client: client)
+            .receive(on: DispatchQueue.main)
+            .tryMap { [weak self] quotes -> (index: Int, quotes: [String: TickerQuote]) in
+                // The source answered, so what it left out is not listed there.
+                self?.markMissing(wanted, in: quotes, on: provider.listing)
                 // A source that matched nothing counts as failed; try the next one.
                 guard !quotes.isEmpty else { throw URLError(.zeroByteResource) }
                 return (index, quotes)
             }
-            .receive(on: DispatchQueue.main)
             .handleEvents(receiveOutput: { [weak self] _ in
                 self?.preferredProviderIndex = index
             })
-            .catch { [weak self] _ -> AnyPublisher<(index: Int, quotes: [String: TickerQuote]), Error> in
+            .catch { [weak self] error -> AnyPublisher<(index: Int, quotes: [String: TickerQuote]), Error> in
                 guard let self else {
                     return Fail(error: URLError(.cancelled)).eraseToAnyPublisher()
                 }
+                self.noteRateLimit(error, on: provider.listing)
                 return self.fetchTickers(symbols: symbols, order: order, attempt: attempt + 1)
             }
             .eraseToAnyPublisher()
@@ -162,20 +177,22 @@ final class PriceService: PriceServicing {
         let provider = providers[index]
         let rest = candidates.dropFirst()
         let wanted = missing.filter { !isKnownUnavailable($0, on: provider.listing) }
-        guard !wanted.isEmpty, let request = provider.makeRequest(symbols: wanted) else {
+        guard !isRateLimited(provider.listing), !wanted.isEmpty, let request = provider.makeRequest(symbols: wanted) else {
             return fill(quotes, missing: missing, candidates: rest)
         }
 
         return Self.load(request, provider: provider, symbols: wanted, client: client)
             .receive(on: DispatchQueue.main)
             .map { [weak self] found -> [String: TickerQuote] in
-                for symbol in wanted where found[symbol] == nil {
-                    self?.markUnavailable(symbol, on: provider.listing)
-                }
+                self?.markMissing(wanted, in: found, on: provider.listing)
                 return quotes.merging(found) { primary, _ in primary }
             }
             // Fill-in never fails the poll: keep what the primary source returned.
-            .catch { _ in Just(quotes).setFailureType(to: Error.self) }
+            .catch { [weak self] error -> Just<[String: TickerQuote]> in
+                self?.noteRateLimit(error, on: provider.listing)
+                return Just(quotes)
+            }
+            .setFailureType(to: Error.self)
             .flatMap { [weak self] merged -> AnyPublisher<[String: TickerQuote], Error> in
                 guard let self else { return Just(merged).setFailureType(to: Error.self).eraseToAnyPublisher() }
                 return self.fill(merged, missing: missing.filter { merged[$0] == nil }, candidates: rest)
@@ -190,8 +207,20 @@ final class PriceService: PriceServicing {
         return now().timeIntervalSince(since) < Self.unavailableTTL
     }
 
-    private func markUnavailable(_ symbol: String, on listing: String) {
-        unavailableSince[unavailableKey(symbol, listing)] = now()
+    private func markMissing(_ wanted: [String], in found: [String: TickerQuote], on listing: String) {
+        for symbol in wanted where found[symbol] == nil {
+            unavailableSince[unavailableKey(symbol, listing)] = now()
+        }
+    }
+
+    private func isRateLimited(_ listing: String) -> Bool {
+        guard let until = rateLimitedUntil[listing] else { return false }
+        return now() < until
+    }
+
+    private func noteRateLimit(_ error: Error, on listing: String) {
+        guard case TickerProviderError.rateLimited(let retryAfter) = error else { return }
+        rateLimitedUntil[listing] = now().addingTimeInterval(retryAfter ?? Self.rateLimitBackoff)
     }
 
     // MARK: - Loading
@@ -215,6 +244,11 @@ final class PriceService: PriceServicing {
             .eraseToAnyPublisher()
     }
 
+    /// `Retry-After` in seconds (the form Binance sends); nil when missing or an HTTP date.
+    static func retryAfter(_ response: HTTPURLResponse) -> TimeInterval? {
+        response.value(forHTTPHeaderField: "Retry-After").flatMap(TimeInterval.init).flatMap { $0 > 0 ? $0 : nil }
+    }
+
     private static func loadOnce(
         _ request: URLRequest,
         provider: TickerProvider,
@@ -228,6 +262,8 @@ final class PriceService: PriceServicing {
                 switch http.statusCode {
                 case 200..<300: break
                 case 400: throw TickerProviderError.requestRejected
+                case 418, 429: throw TickerProviderError.rateLimited(retryAfter: Self.retryAfter(http))
+                case 403: throw TickerProviderError.rateLimited(retryAfter: Self.retryAfter(http) ?? Self.forbiddenBackoff)
                 default: throw URLError(.badServerResponse)
                 }
                 return try provider.parse(data, symbols: symbols)
@@ -241,6 +277,8 @@ final class PriceService: PriceServicing {
 enum TickerProviderError: Error {
     /// The source rejected the request parameters (HTTP 400).
     case requestRejected
+    /// The source is limiting this IP (HTTP 429 / 418 / 403, or OKX code 50011); `retryAfter` is its `Retry-After`.
+    case rateLimited(retryAfter: TimeInterval?)
 }
 
 /// One price source: builds the request and parses it into symbol → quote (USD/USDT),
@@ -260,7 +298,7 @@ extension TickerProvider {
 
 private func makeGETRequest(_ urlString: String) -> URLRequest? {
     guard let url = URL(string: urlString) else { return nil }
-    return URLRequest(url: url, timeoutInterval: Constants.API.requestTimeout)
+    return .liveData(url)
 }
 
 /// Binance /ticker/24hr: last price and 24h change in one request. The main host and the
@@ -280,7 +318,7 @@ struct BinanceTickerProvider: TickerProvider {
         var components = URLComponents(string: "\(baseURL)/ticker/24hr")
         components?.queryItems = [URLQueryItem(name: "symbols", value: "[\(pairs)]")]
         guard let url = components?.url else { return nil }
-        return URLRequest(url: url, timeoutInterval: Constants.API.requestTimeout)
+        return .liveData(url)
     }
 
     /// The whole batch fails with 400 (-1121) when any pair does not exist; fall back to the full 24hr list.
@@ -327,6 +365,11 @@ struct OKXTickerProvider: TickerProvider {
             }
             let code: String
             let data: [Item]
+        }
+        struct Status: Decodable { let code: String }
+        // OKX can report its rate limit as HTTP 200 with code 50011, with or without a `data` field.
+        if (try? JSONDecoder().decode(Status.self, from: data))?.code == "50011" {
+            throw TickerProviderError.rateLimited(retryAfter: nil)
         }
         let response = try JSONDecoder().decode(Response.self, from: data)
         guard response.code == "0" else { throw URLError(.badServerResponse) }

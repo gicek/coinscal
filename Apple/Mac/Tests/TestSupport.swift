@@ -106,7 +106,7 @@ struct FixedExchangeRateService: ExchangeRateServicing {
 /// Network double: canned replies matched by URL, recording the request order.
 final class StubHTTPClient: HTTPClient {
     enum Reply {
-        case status(Int, Data = Data())
+        case status(Int, Data = Data(), headers: [String: String] = [:])
         case failure(URLError.Code)
         /// Never completes; simulates a request in flight.
         case pending
@@ -114,6 +114,7 @@ final class StubHTTPClient: HTTPClient {
 
     private var routes: [(matches: (URL) -> Bool, reply: Reply)] = []
     private(set) var requestedURLs: [URL] = []
+    private(set) var requests: [URLRequest] = []
 
     /// Later rules win, so a test can override a reply midway.
     func on(_ matches: @escaping (URL) -> Bool, reply: Reply) {
@@ -123,10 +124,11 @@ final class StubHTTPClient: HTTPClient {
     func dataPublisher(for request: URLRequest) -> AnyPublisher<(data: Data, response: URLResponse), URLError> {
         let url = request.url!
         requestedURLs.append(url)
+        requests.append(request)
         let reply = routes.first(where: { $0.matches(url) })?.reply ?? .failure(.notConnectedToInternet)
         switch reply {
-        case .status(let code, let data):
-            let response = HTTPURLResponse(url: url, statusCode: code, httpVersion: nil, headerFields: nil)!
+        case .status(let code, let data, let headers):
+            let response = HTTPURLResponse(url: url, statusCode: code, httpVersion: nil, headerFields: headers)!
             return Just((data: data, response: response as URLResponse))
                 .setFailureType(to: URLError.self)
                 .eraseToAnyPublisher()

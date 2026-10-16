@@ -4,9 +4,30 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Fixed: A coin Binance doesn't list made every price round 40 times costlier
+- Symptom: with a watchlist coin that Binance doesn't list, every 10-second round sent a Binance batch that failed with HTTP 400 and then the full ticker list, about weight 82 instead of 2 (8% of the per-IP budget per user; about 12 such users behind one IP would hit Binance's limit).
+- Root cause: "this exchange doesn't list it" was remembered only for fill-in; the primary batch always included every watchlist coin.
+- Fix: coins an exchange is known not to list (for `PriceService.unavailableTTL`, 30 minutes) are left out of its primary batch too, and the answer of the primary source records what it lacks. Fill-in still prices those coins from OKX or Bybit.
+- Tests: `coinMissingOnBinanceLeavesTheBatch` (batch, full list, then a BTC-only batch with no full list; the coin returns after the TTL).
+
+### Added: Back off from rate-limited data sources
+An exchange that answers HTTP 429 or 418, HTTP 403, or OKX code 50011 (also as HTTP 200) is skipped, mirrors included, until its `Retry-After` has passed; without one, for 1 minute, or 10 minutes after a 403 (Bybit's documented wait). An exchange rate source that answers HTTP 429 is skipped for its `Retry-After` or 20 minutes (ExchangeRate-API's block). Before, a limited source was retried whenever its turn came, and continuing after Binance's 429 can get the IP banned for up to 3 days.
+
+- Tests: `rateLimitedExchangeIsSkippedUntilRetryAfter`, `forbiddenAndOKXCode50011BackOff`, `rateLimitedSourceIsSkipped`.
+
+### Changed: Exchange rates are shared by the app and the widgets
+The exchange rate table is also stored in the App Group container (`exchange-rates.json`, `ExchangeRateCacheStore`). The app after a relaunch and every widget process reuse a table younger than an hour instead of fetching their own; before, widgets could fetch up to about 4 times an hour while the app wasn't running, above ExchangeRate-API's hourly guidance.
+
+- Tests: `storedRatesAreSharedAcrossInstances`.
+
 ### Added: ExchangeRate-API attribution link
 Settings → About → "Data Sources" shows "Rates By Exchange Rate API" under the exchange rate line, linking to `https://www.exchangerate-api.com`, as ExchangeRate-API's open access terms require. The wording is kept in English in every language. Checked on a real Mac: the link shows in the accent color.
 
+### Changed: Prices and exchange rates bypass the URL cache
+Price and exchange rate requests now go through `URLSession.liveData`, a session without a `URLCache`, and carry `reloadIgnoringLocalCacheData`. Before, they used the shared session, whose disk cache stored responses such as Bybit's full ticker list (about 200 KB, sent without cache headers). Live data is never stored in or served from a local cache. Logos and the update feed still use the shared session.
+
+- Docs: new `docs/DATA_SOURCE_LIMITS.md` with each source's official rate limit and the headroom for normal use.
+- Tests: `liveDataRequestsSkipTheLocalCache` checks every price request, the exchange rate requests, and the session configuration.
 
 ### Changed: Remove coins from the add panel
 In Settings → Watchlist, clicking an added coin in the "+" search panel now removes it from the watchlist; before, clicking an added row did nothing. Hovering an added row turns its green checkmark into a red minus with a red highlight. Rows that aren't added still add on click, and Return still adds only the first result that isn't added. This matches the "Recommended" row, which already toggled.

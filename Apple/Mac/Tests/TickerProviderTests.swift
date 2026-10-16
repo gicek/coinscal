@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import Testing
 @testable import Coinscal
@@ -9,6 +10,26 @@ import Testing
 
     private func binance() -> BinanceTickerProvider {
         BinanceTickerProvider(baseURL: "https://example.com", now: { [now] in now })
+    }
+
+    /// Live prices and FX rates never come from or go into a local cache (the shared session caches Bybit's list).
+    @Test func liveDataRequestsSkipTheLocalCache() {
+        let requests: [URLRequest?] = [
+            binance().makeRequest(symbols: ["BTC"]), binance().makeFallbackRequest(),
+            OKXTickerProvider().makeRequest(symbols: ["BTC"]), BybitTickerProvider().makeRequest(symbols: ["BTC"]),
+        ]
+        for request in requests {
+            #expect(request?.cachePolicy == .reloadIgnoringLocalCacheData, "\(request?.url?.host() ?? "nil")")
+            #expect(request?.timeoutInterval == Constants.API.requestTimeout)
+        }
+        #expect(URLSession.liveData.configuration.urlCache == nil)
+        #expect(URLSession.liveData.configuration.requestCachePolicy == .reloadIgnoringLocalCacheData)
+
+        let client = StubHTTPClient()
+        let rates = ExchangeRateService(client: client)
+        _ = rates.fetchUSDExchangeRate(to: .cny).sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+        #expect(!client.requests.isEmpty)
+        #expect(client.requests.allSatisfy { $0.cachePolicy == .reloadIgnoringLocalCacheData }, "FX requests")
     }
 
     @Test func binanceParsesOnlyWantedUsdtPairs() throws {

@@ -12,7 +12,7 @@ struct CoinscalWidgetEntry: TimelineEntry {
 @MainActor
 enum WidgetDataLoader {
     static let catalog = CoinCatalog.bundled()
-    private static let priceService = PriceService(exchangeRateService: ExchangeRateService())
+    private static let priceService = PriceService(exchangeRateService: ExchangeRateService(cacheStore: .appGroup))
 
     static func content(
         ids: [String], currencyChoice: BaseCurrency?, colorByChange: Bool, sort: WidgetSortOrder,

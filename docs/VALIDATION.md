@@ -11,6 +11,14 @@
 
 ## Records
 
+### 2026-10-16: Data source limits
+
+Primary batches leave out coins an exchange doesn't list, rate-limited sources are skipped, exchange rates are shared through the App Group, and ExchangeRate-API is credited ([DATA_SOURCE_LIMITS](DATA_SOURCE_LIMITS.md)).
+
+- Verified: `make test` and `make mac-check-sources` pass. Real network, watchlist BTC, ETH, OKB: only the first round requested Binance's full list; later batches asked for BTC and ETH only (weight +2), and OKB was priced from OKX every round. Real Mac: a relaunch and a widget reload within the hour reused `exchange-rates.json` without requesting rates; with a table older than an hour, the widget requested rates and rewrote the file. The About pane and the local website footer show the "Rates By Exchange Rate API" link.
+- Pending:
+  1. The website footer link after the next deploy.
+
 ### 2026-10-16: Remove coins from the add panel
 
 Clicking an added coin in the Watchlist "+" panel removes it; hovering shows a red minus ([DESIGN](DESIGN.md)).
