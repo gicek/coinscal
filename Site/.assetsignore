@@ -1,0 +1,8 @@
+# Files in Site/ that Workers Static Assets must not serve.
+.assetsignore
+wrangler.jsonc
+package.json
+test
+docs
+README.md
+.wrangler

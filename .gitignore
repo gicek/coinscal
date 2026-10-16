@@ -39,6 +39,9 @@ Core/target/
 *.swp
 *~
 
+# Wrangler local state (website deploys)
+.wrangler/
+
 # Python
 __pycache__/
 

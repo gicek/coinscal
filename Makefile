@@ -46,7 +46,16 @@ VERSION := $(shell sed -nE 's/^ *MARKETING_VERSION: *"?([^"]+)"?.*/\1/p' Apple/p
 BUILD_TARGETS += mac
 TEST_TARGETS += test-mac
 
-.PHONY: help build test clean project mac-run mac-release mac-release-notarized mac-release-app mac-check-sources catalog $(BUILD_TARGETS) $(TEST_TARGETS)
+# --- Site ---
+# Static website in Site/, deployed to Cloudflare Workers Static Assets (Site/wrangler.jsonc). Wrangler runs via npx at
+# a pinned version; it isn't installed in the repo. It needs Node 22+: the newest nvm-installed Node 22+ is used when
+# there is one, without changing the default Node.
+WRANGLER_NODE_BIN := $(lastword $(sort $(wildcard $(HOME)/.nvm/versions/node/v2[2-9].*/bin)))
+WRANGLER := $(if $(WRANGLER_NODE_BIN),PATH="$(WRANGLER_NODE_BIN):$$PATH" )npx --yes wrangler@4.137.0
+SITE_PORT ?= 8787
+TEST_TARGETS += test-site
+
+.PHONY: help build test clean project site-run site-login site-whoami site-deploy mac-run mac-release mac-release-notarized mac-release-app mac-check-sources catalog $(BUILD_TARGETS) $(TEST_TARGETS)
 
 help:
 	@echo "$(PRODUCT) build commands"
@@ -61,6 +70,10 @@ help:
 	@echo "  make test-mac              Localization guards + Mac unit tests"
 	@echo "  make mac-check-sources     Manual: check all price and exchange rate data sources over the real network (not part of make test)"
 	@echo "  make catalog               Regenerate the built-in coin catalog Apple/Mac/Resources/coins.json online (run before a release)"
+	@echo "  make test-site             Website: localization guards + offline checks (Node 20+)"
+	@echo "  make site-run              Website: local preview at http://localhost:$(SITE_PORT)/ with Site/_headers applied"
+	@echo "  make site-login            Website: sign in to Cloudflare for deploys (opens a browser; needs Node 22+)"
+	@echo "  make site-deploy CONFIRM=yes  Website: test, then deploy Site/ to Cloudflare (needs wrangler login or CLOUDFLARE_API_TOKEN)"
 
 build: $(BUILD_TARGETS)
 
@@ -110,6 +123,25 @@ test-mac: project
 	    -derivedDataPath "$(MAC_BUILD_ROOT)/Tests/DerivedData" \
 	    CONFIGURATION_BUILD_DIR="$(MAC_BUILD_ROOT)/Tests/$(CONFIGURATION)" test
 
+test-site:
+	python3 scripts/i18n-guard.py --langs "$(LANGS)" --min-files 7 --platform web --root Site
+	cd Site && npm run check
+
+site-run:
+	python3 scripts/site/serve.py --port $(SITE_PORT)
+
+# Deploying publishes the site: it needs an explicit CONFIRM=yes
+# Cloudflare sign-in for deploys (opens a browser); the credentials stay in Wrangler's user config, outside the repo
+site-login:
+	$(WRANGLER) login
+
+site-whoami:
+	$(WRANGLER) whoami
+
+site-deploy: test-site
+	@test "$(CONFIRM)" = "yes" || { echo "Deploying publishes https://coinscal.app/. Run: make site-deploy CONFIRM=yes"; exit 1; }
+	cd Site && $(WRANGLER) deploy
+
 # Built-in coin catalog: generated online; --previous keeps every id from the old catalog (existing users' watchlists stay intact)
 catalog:
 	python3 scripts/catalog/generate_catalog.py generate --previous $(CATALOG_FILE) \
@@ -122,4 +154,4 @@ mac-check-sources:
 clean:
 	@test "$(BUILD_ROOT)" = "$(CURDIR)/Build" || { echo "Refusing to clean an unexpected directory: $(BUILD_ROOT)"; exit 1; }
 	rm -rf "$(BUILD_ROOT)"
-	rm -rf Apple/Build Apple/*/.build Apple/*/Build build dist
+	rm -rf Apple/Build Apple/*/.build Apple/*/Build build dist Site/.wrangler

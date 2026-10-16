@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "title": "Coinscal: Real-time crypto prices in your Mac menu bar",
+    "description": "Coinscal shows live prices for the coins you follow in the macOS menu bar, with price alerts, widgets, and 12 quote currencies. No account, no API key.",
+    "privacyTitle": "Privacy - Coinscal"
+  },
+  "nav": {
+    "features": "Features",
+    "download": "Download",
+    "github": "GitHub",
+    "skip": "Skip to content"
+  },
+  "menubar": {
+    "item": "Coinscal",
+    "itemPrice": "Coinscal: {symbol} {price}",
+    "language": "Language",
+    "online": "Prices are live",
+    "offline": "Prices are unavailable",
+    "appearance": "Switch between light and dark"
+  },
+  "lang": {
+    "en": "English",
+    "zh-Hans": "简体中文",
+    "zh-Hant": "繁體中文",
+    "short": "EN"
+  },
+  "panel": {
+    "label": "A live demo of the Coinscal menu bar panel",
+    "settings": "Settings",
+    "watchlist": "Manage Watchlist",
+    "quit": "Quit Coinscal",
+    "back": "Back",
+    "empty": "No coins added",
+    "addCoins": "Add Coins",
+    "loading": "Loading prices",
+    "add": "Add {name}",
+    "remove": "Remove {name}",
+    "catalogNote": "Many more coins are available in the app.",
+    "currency": "Display Currency",
+    "menubarCoin": "Menu Bar Coin",
+    "menubarContent": "Show",
+    "contentPrice": "Price",
+    "contentIcon": "Icon",
+    "textColor": "Color by Price Change",
+    "textBackground": "Show Background",
+    "colorScheme": "Color Scheme",
+    "greenUpRedDown": "Green Up, Red Down",
+    "redUpGreenDown": "Red Up, Green Down",
+    "hint": "Demo only. Download the app for the full experience."
+  },
+  "hero": {
+    "title": "Stop staring at prices. A glance is enough.",
+    "lead": "Coinscal keeps live prices for the coins you follow one glance away, and tells you when they move. No account, no API key.",
+    "download": "Download for Mac",
+    "more": "See what it does",
+    "note": "Free and open source · macOS 14 or later, on Apple silicon"
+  },
+  "features": {
+    "title": "What Coinscal does",
+    "lead": "A small app that stays out of the way until a price matters.",
+    "menubar": {
+      "title": "Price in the menu bar",
+      "body": "Keep the price you care about most right in the menu bar."
+    },
+    "widgets": {
+      "title": "Desktop widgets",
+      "body": "Add widgets to the desktop and Notification Center. They stay current even when the app isn't open."
+    },
+    "ticker": {
+      "title": "Pinned to the desktop",
+      "body": "Pin your watchlist to the desktop, where it blends right in."
+    },
+    "alerts": {
+      "title": "Price alerts",
+      "body": "Set price alerts for coins in your watchlist, so you never miss a move."
+    },
+    "more": "And there's more, all to keep things simple."
+  },
+  "trust": {
+    "title": "Your data stays on your Mac.",
+    "lead": "Coinscal fetches prices right on your Mac. It collects nothing, so there's nothing to leak.",
+    "account": {
+      "title": "No account",
+      "body": "Install it and go. Nothing to sign up for."
+    },
+    "collection": {
+      "title": "No data collection",
+      "body": "No analytics, no tracking."
+    },
+    "privacy": {
+      "title": "Private by design",
+      "body": "Your watchlist and settings never leave your Mac."
+    },
+    "open": {
+      "title": "Open source",
+      "body": "MIT licensed. Every line is on GitHub."
+    }
+  },
+  "install": {
+    "title": "Download Coinscal",
+    "lead": "macOS 14 or later. Free and open source.",
+    "download": "Download for Mac",
+    "releases": "All releases"
+  },
+  "footer": {
+    "license": "Coinscal is open source, released under the MIT License.",
+    "releases": "Releases",
+    "issues": "Issues",
+    "privacy": "Privacy"
+  },
+  "privacy": {
+    "title": "Privacy",
+    "updated": "Last updated Oct 16, 2026",
+    "app": {
+      "title": "The app",
+      "body": "Coinscal has no account, no server, and no analytics. Your watchlist, alerts, and settings are stored only on your Mac. To show prices, the app requests public market data from Binance, OKX, and Bybit, exchange rates from ExchangeRate-API and Currency API, and coin logos from CoinGecko. These requests carry no personal information, but each service sees your IP address as part of a normal web request."
+    },
+    "site": {
+      "title": "This website",
+      "body": "This website sets no cookies and shows no ads. It uses Cloudflare Web Analytics, which counts visits without cookies and doesn't track you across sites. Your browser loads prices from Binance, OKX, and Bybit and exchange rates from ExchangeRate-API and jsDelivr to run the live demo. Your language, appearance, and demo settings are saved in your browser's local storage and never sent anywhere."
+    },
+    "contact": {
+      "title": "Contact",
+      "body": "Questions about privacy? Open an issue on GitHub."
+    },
+    "home": "Back to Coinscal"
+  }
+}

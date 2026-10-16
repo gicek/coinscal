@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" data-title-key="meta.privacyTitle">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy - Coinscal</title>
+<meta name="description" content="Coinscal has no account, no server, and no analytics. This website sets no cookies.">
+<link rel="canonical" href="https://coinscal.app/privacy">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var a=localStorage.getItem("coinscal.theme");if(a==="light"||a==="dark")d.dataset.theme=a}catch(e){}var l="en";try{l=localStorage.getItem("coinscal.lang")||""}catch(e){}if(!l){var n=(navigator.languages&&navigator.languages[0]||navigator.language||"en").toLowerCase();l=n.indexOf("zh")===0?"zh":"en"}if(l!=="en")d.classList.add("i18n-pending")})();</script>
+<link rel="stylesheet" href="/css/site.css">
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<header class="site-header">
+    <div class="container">
+        <a class="site-brand" href="/"><img src="/img/app-icon.png" alt="" width="26" height="26"><span>Coinscal</span></a>
+        <div class="header-tools">
+            <div class="menubar-lang" data-lang-root>
+                <button type="button" class="menubar-extra menubar-input" data-lang-button aria-haspopup="menu" aria-expanded="false" aria-controls="lang-menu" aria-label="Language" data-i18n-aria="menubar.language" title="Language" data-i18n-title="menubar.language">
+                    <span class="input-glyph" data-lang-short>EN</span>
+                </button>
+                <div class="mac-menu mac-menu-end" id="lang-menu" role="menu" data-lang-menu hidden>
+                    <button type="button" role="menuitemradio" aria-checked="true" data-lang="en" lang="en" data-i18n="lang.en">English</button>
+                    <button type="button" role="menuitemradio" aria-checked="false" data-lang="zh-Hans" lang="zh-Hans" data-i18n="lang.zh-Hans">Simplified Chinese</button>
+                    <button type="button" role="menuitemradio" aria-checked="false" data-lang="zh-Hant" lang="zh-Hant" data-i18n="lang.zh-Hant">Traditional Chinese</button>
+                </div>
+            </div>
+            <button type="button" class="appearance menubar-extra menubar-appearance" data-appearance hidden aria-label="Switch between light and dark" data-i18n-aria="menubar.appearance" title="Switch between light and dark" data-i18n-title="menubar.appearance">
+                <svg class="appearance-sun" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.1" fill="currentColor"/><path d="M8 1.2v1.7M8 13.1v1.7M1.2 8h1.7M13.1 8h1.7M3.2 3.2l1.2 1.2M11.6 11.6l1.2 1.2M12.8 3.2l-1.2 1.2M4.4 11.6l-1.2 1.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <svg class="appearance-moon" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.9 9.9A6.1 6.1 0 0 1 6.1 2.1a.5.5 0 0 0-.66-.6 6.6 6.6 0 1 0 9.06 9.06.5.5 0 0 0-.6-.66z" fill="currentColor"/></svg>
+            </button>
+        </div>
+    </div>
+</header>
+<main class="container page">
+    <h1 data-i18n="privacy.title">Privacy</h1>
+    <p class="updated" data-i18n="privacy.updated">Last updated Oct 16, 2026</p>
+    <h2 data-i18n="privacy.app.title">The app</h2>
+    <p data-i18n="privacy.app.body">Coinscal has no account, no server, and no analytics. Your watchlist, alerts, and settings are stored only on your Mac. To show prices, the app requests public market data from Binance, OKX, and Bybit, exchange rates from ExchangeRate-API and Currency API, and coin logos from CoinGecko. These requests carry no personal information, but each service sees your IP address as part of a normal web request.</p>
+    <h2 data-i18n="privacy.site.title">This website</h2>
+    <p data-i18n="privacy.site.body">This website sets no cookies and shows no ads. It uses Cloudflare Web Analytics, which counts visits without cookies and doesn't track you across sites. Your browser loads prices from Binance, OKX, and Bybit and exchange rates from ExchangeRate-API and jsDelivr to run the live demo. Your language, appearance, and demo settings are saved in your browser's local storage and never sent anywhere.</p>
+    <h2 data-i18n="privacy.contact.title">Contact</h2>
+    <p data-i18n="privacy.contact.body">Questions about privacy? Open an issue on GitHub.</p>
+    <a class="back" href="/" data-i18n="privacy.home">Back to Coinscal</a>
+</main>
+<footer class="site-footer">
+    <div class="container">
+        <p data-i18n="footer.license">Coinscal is open source, released under the MIT License.</p>
+        <nav aria-label="More">
+            <a data-link="github" href="https://github.com/gicek/coinscal" data-i18n="nav.github">GitHub</a>
+            <a data-link="releases" href="https://github.com/gicek/coinscal/releases" data-i18n="footer.releases">Releases</a>
+            <a data-link="issues" href="https://github.com/gicek/coinscal/issues" data-i18n="footer.issues">Issues</a>
+            <a href="/privacy" aria-current="page" data-i18n="footer.privacy">Privacy</a>
+        </nav>
+    </div>
+</footer>
+</body>
+</html>

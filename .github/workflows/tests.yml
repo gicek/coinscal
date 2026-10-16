@@ -35,3 +35,19 @@ jobs:
       - name: Three Mac string guards
         # Same as the i18n step in make test-mac; app unit tests depend on the local Xcode 26 SDK and run locally with make test
         run: python3 scripts/i18n-guard.py --langs "en,zh-Hans,zh-Hant" --min-files 20 --platform apple --root Apple/Mac --extra Apple/MacWidget
+      - name: Three website string guards
+        # Same as the i18n step in make test-site
+        run: python3 scripts/i18n-guard.py --langs "en,zh-Hans,zh-Hant" --min-files 7 --platform web --root Site
+
+  site:
+    name: Website checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Offline checks
+        # Same as the npm step in make test-site; the site has no dependencies to install
+        run: npm run check
+        working-directory: Site

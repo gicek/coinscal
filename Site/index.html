@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en" data-title-key="meta.title">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coinscal: Real-time crypto prices in your Mac menu bar</title>
+<meta name="description" content="Coinscal shows live prices for the coins you follow in the macOS menu bar, with price alerts, widgets, and 12 quote currencies. No account, no API key." data-i18n-content="meta.description">
+<link rel="canonical" href="https://coinscal.app/">
+<meta property="og:site_name" content="Coinscal">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Coinscal: Real-time crypto prices in your Mac menu bar">
+<meta property="og:description" content="Coinscal shows live prices for the coins you follow in the macOS menu bar, with price alerts, widgets, and 12 quote currencies. No account, no API key.">
+<meta property="og:url" content="https://coinscal.app/">
+<meta property="og:image" content="https://coinscal.app/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#c9c3ff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#110d33">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<script>(function(){var d=document.documentElement;d.classList.add("js");try{var a=localStorage.getItem("coinscal.theme");if(a==="light"||a==="dark")d.dataset.theme=a}catch(e){}var l="en";try{l=localStorage.getItem("coinscal.lang")||""}catch(e){}if(!l){var n=(navigator.languages&&navigator.languages[0]||navigator.language||"en").toLowerCase();l=n.indexOf("zh")===0?"zh":"en"}if(l!=="en")d.classList.add("i18n-pending")})();</script>
+<link rel="stylesheet" href="/css/site.css">
+<script type="module" src="/js/main.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#features" data-i18n="nav.skip">Skip to content</a>
+<svg class="symbols" width="0" height="0" aria-hidden="true" focusable="false">
+    <symbol id="symbol-gear" viewBox="0 0 20 20">
+        <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8.6 2.4h2.8l.45 2.1 1.5.86 2.04-.68 1.4 2.42-1.6 1.43v1.74l1.6 1.43-1.4 2.42-2.04-.68-1.5.86-.45 2.1H8.6l-.45-2.1-1.5-.86-2.04.68-1.4-2.42 1.6-1.43V9.13l-1.6-1.43 1.4-2.42 2.04.68 1.5-.86z"/><circle cx="10" cy="10" r="2.6"/></g>
+    </symbol>
+    <symbol id="symbol-power" viewBox="0 0 20 20">
+        <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 2.8v6.4"/><path d="M6.1 5.1a6.2 6.2 0 1 0 7.8 0"/></g>
+    </symbol>
+    <symbol id="symbol-chevron-left" viewBox="0 0 20 20">
+        <path d="M12.2 4.6L6.8 10l5.4 5.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="symbol-plus" viewBox="0 0 20 20">
+        <g fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="10" cy="10" r="7.2"/><path d="M10 6.6v6.8M6.6 10h6.8" stroke-linecap="round"/></g>
+    </symbol>
+    <symbol id="symbol-checkmark" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="7.9" fill="currentColor"/>
+        <path d="M6.6 10.2l2.3 2.3 4.5-4.8" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="symbol-bitcoinsign" viewBox="0 0 40 40">
+        <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="20" r="17"/><path d="M15.5 12.5h6a3.6 3.6 0 0 1 0 7.2h-6zM15.5 19.7h7a3.9 3.9 0 0 1 0 7.8h-7zM15.5 12.5v15M13.5 12.5h2M13.5 27.5h2M18 10.2v2.3M21.5 10.2v2.3M18 27.5v2.3M21.5 27.5v2.3"/></g>
+    </symbol>
+    <symbol id="symbol-wifi" viewBox="0 0 18 14">
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1.65 4.85a10.4 10.4 0 0 1 14.7 0"/><path d="M4.4 7.6a6.5 6.5 0 0 1 9.2 0"/></g>
+        <path fill="currentColor" d="M9 13.6l2.7-3.1a3.9 3.9 0 0 0-5.4 0z"/>
+    </symbol>
+    <symbol id="symbol-wifi-off" viewBox="0 0 18 14">
+        <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".38"><path d="M1.65 4.85a10.4 10.4 0 0 1 14.7 0"/><path d="M4.4 7.6a6.5 6.5 0 0 1 9.2 0"/></g>
+        <path fill="currentColor" opacity=".38" d="M9 13.6l2.7-3.1a3.9 3.9 0 0 0-5.4 0z"/>
+        <path d="M3.2.9l11.6 12.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="feature-menubar" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="3"/><path d="M3 9h18"/><path d="M13.5 6.75h4.5"/></g>
+    </symbol>
+    <symbol id="feature-bell" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.2 16.5V11a5.8 5.8 0 0 1 11.6 0v5.5l1.6 1.8H4.6z"/><path d="M10 20.6a2.2 2.2 0 0 0 4 0"/></g>
+    </symbol>
+    <symbol id="feature-widget" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7.5" height="7.5" rx="2.2"/><rect x="13" y="3.5" width="7.5" height="7.5" rx="2.2"/><rect x="3.5" y="13" width="17" height="7.5" rx="2.2"/></g>
+    </symbol>
+    <symbol id="feature-desktop" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="4" width="18.4" height="12.6" rx="2.4"/><path d="M9 20.4h6M12 16.6v3.8"/><path d="M6.5 12.5l3-3 2.4 2.2 3.8-3.9"/></g>
+    </symbol>
+    <symbol id="trust-shield" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8l7.4 2.9v5.6c0 4.6-3 8.5-7.4 9.9-4.4-1.4-7.4-5.3-7.4-9.9V5.7z"/><path d="M8.6 12.1l2.4 2.4 4.6-4.9"/></g>
+    </symbol>
+    <symbol id="trust-account" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8.4" r="3.6"/><path d="M5 19.6c.8-3.5 3.6-5.6 7-5.6s6.2 2.1 7 5.6"/><path d="M3.6 3.6l16.8 16.8"/></g>
+    </symbol>
+    <symbol id="trust-collection" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V13M9.3 19.5V9M14.6 19.5v-4M20 19.5V6"/><path d="M3.6 3.6l16.8 16.8"/></g>
+    </symbol>
+    <symbol id="trust-lock" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.6" y="10.4" width="14.8" height="10" rx="2.6"/><path d="M8 10.4V7.6a4 4 0 0 1 8 0v2.8"/><path d="M12 14.4v2"/></g>
+    </symbol>
+    <symbol id="trust-code" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.4 7.2L3.6 12l4.8 4.8M15.6 7.2l4.8 4.8-4.8 4.8M13.4 5l-2.8 14"/></g>
+    </symbol>
+</svg>
+
+<main>
+<section class="hero" data-hero data-panel-state="open">
+    <div class="sky" aria-hidden="true">
+        <i class="glow glow-a"></i>
+        <i class="glow glow-b"></i>
+        <svg class="ridge ridge-far" viewBox="0 0 1440 320" preserveAspectRatio="none"><path d="M0 230 L60 214 L120 222 L180 190 L240 204 L300 168 L360 182 L420 150 L480 172 L540 160 L600 196 L660 178 L720 142 L780 158 L840 120 L900 136 L960 108 L1020 128 L1080 96 L1140 118 L1200 88 L1260 104 L1320 70 L1380 92 L1440 60 L1440 320 L0 320 Z"/></svg>
+        <svg class="ridge ridge-mid" viewBox="0 0 1440 320" preserveAspectRatio="none"><path d="M0 262 L70 250 L140 258 L210 228 L280 240 L350 214 L420 236 L490 206 L560 222 L630 196 L700 218 L770 186 L840 204 L910 172 L980 194 L1050 166 L1120 184 L1190 150 L1260 170 L1330 140 L1400 158 L1440 132 L1440 320 L0 320 Z"/></svg>
+        <svg class="ridge ridge-near" viewBox="0 0 1440 320" preserveAspectRatio="none"><path d="M0 296 L90 284 L180 290 L270 268 L360 280 L450 258 L540 272 L630 250 L720 266 L810 240 L900 258 L990 232 L1080 248 L1170 222 L1260 238 L1350 214 L1440 226 L1440 320 L0 320 Z"/></svg>
+    </div>
+
+    <div class="hero-inner">
+        <header class="menubar">
+            <a class="site-brand" href="/"><img src="/img/app-icon.png" alt="" width="26" height="26"><span>Coinscal</span></a>
+            <nav class="site-nav" aria-label="Site">
+                <a href="#features" data-i18n="nav.features">Features</a>
+                <a href="#download" data-i18n="nav.download">Download</a>
+                <a data-link="github" href="https://github.com/gicek/coinscal" data-i18n="nav.github">GitHub</a>
+            </nav>
+            <div class="menubar-extras">
+                <div class="menubar-app">
+                    <button type="button" class="menubar-extra menubar-coinscal" data-panel-toggle data-mode="icon" aria-expanded="true" aria-controls="panel" aria-label="Coinscal">
+                        <span class="item-icon" aria-hidden="true"></span>
+                        <span class="item-label" data-item-label></span>
+                    </button>
+                    <div class="panel-slot">
+                        <div class="panel" id="panel" data-panel data-view="list" role="group" aria-label="A live demo of the Coinscal menu bar panel" data-i18n-aria="panel.label">
+                            <div class="pn-header">
+                                <button type="button" class="pn-back" data-panel-back hidden aria-label="Back" data-i18n-aria="panel.back"><svg class="pn-glyph" aria-hidden="true"><use href="#symbol-chevron-left"/></svg></button>
+                                <span class="pn-title" data-panel-title>Coinscal</span>
+                                <span class="pn-spinner" data-panel-spinner hidden role="status" aria-label="Loading prices" data-i18n-aria="panel.loading"></span>
+                            </div>
+                            <div class="pn-body" data-panel-body>
+                                <div class="pn-list">
+                                    <div class="pn-row"><img class="pn-logo" src="/img/coins/bitcoin.png" alt="" width="32" height="32"><div class="pn-text"><div class="pn-line"><span class="pn-name">Bitcoin</span><span class="pn-price is-missing">--</span></div><div class="pn-line"><span class="pn-symbol">BTC</span><span class="pn-change"></span></div></div></div>
+                                    <div class="pn-row"><img class="pn-logo" src="/img/coins/ethereum.png" alt="" width="32" height="32"><div class="pn-text"><div class="pn-line"><span class="pn-name">Ethereum</span><span class="pn-price is-missing">--</span></div><div class="pn-line"><span class="pn-symbol">ETH</span><span class="pn-change"></span></div></div></div>
+                                </div>
+                            </div>
+                            <div class="pn-footer">
+                                <button type="button" class="pn-icon" data-action="settings" aria-pressed="false" aria-label="Settings" title="Settings" data-i18n-aria="panel.settings" data-i18n-title="panel.settings"><svg class="pn-glyph" aria-hidden="true"><use href="#symbol-gear"/></svg></button>
+                                <button type="button" class="pn-pill" data-action="watchlist" aria-pressed="false" data-i18n="panel.watchlist">Manage Watchlist</button>
+                                <button type="button" class="pn-icon" data-action="quit" aria-label="Quit Coinscal" title="Quit Coinscal" data-i18n-aria="panel.quit" data-i18n-title="panel.quit"><svg class="pn-glyph" aria-hidden="true"><use href="#symbol-power"/></svg></button>
+                            </div>
+                        </div>
+                        <p class="panel-hint" data-i18n="panel.hint">Demo only. Download the app for the full experience.</p>
+                    </div>
+                </div>
+                <div class="menubar-lang" data-lang-root>
+                    <button type="button" class="menubar-extra menubar-input" data-lang-button aria-haspopup="menu" aria-expanded="false" aria-controls="lang-menu" aria-label="Language" data-i18n-aria="menubar.language" title="Language" data-i18n-title="menubar.language">
+                        <span class="input-glyph" data-lang-short>EN</span>
+                    </button>
+                    <div class="mac-menu" id="lang-menu" role="menu" data-lang-menu hidden>
+                        <button type="button" role="menuitemradio" aria-checked="true" data-lang="en" lang="en" data-i18n="lang.en">English</button>
+                        <button type="button" role="menuitemradio" aria-checked="false" data-lang="zh-Hans" lang="zh-Hans" data-i18n="lang.zh-Hans">Simplified Chinese</button>
+                        <button type="button" role="menuitemradio" aria-checked="false" data-lang="zh-Hant" lang="zh-Hant" data-i18n="lang.zh-Hant">Traditional Chinese</button>
+                    </div>
+                </div>
+                <span class="menubar-extra menubar-wifi" data-wifi data-state="offline" role="img" aria-label="Prices are unavailable">
+                    <svg class="wifi-on" width="18" height="14" aria-hidden="true"><use href="#symbol-wifi"/></svg>
+                    <svg class="wifi-off" width="18" height="14" aria-hidden="true"><use href="#symbol-wifi-off"/></svg>
+                </span>
+                <button type="button" class="appearance menubar-extra menubar-appearance" data-appearance hidden aria-label="Switch between light and dark" data-i18n-aria="menubar.appearance" title="Switch between light and dark" data-i18n-title="menubar.appearance">
+                    <svg class="appearance-sun" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.1" fill="currentColor"/><path d="M8 1.2v1.7M8 13.1v1.7M1.2 8h1.7M13.1 8h1.7M3.2 3.2l1.2 1.2M11.6 11.6l1.2 1.2M12.8 3.2l-1.2 1.2M4.4 11.6l-1.2 1.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <svg class="appearance-moon" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.9 9.9A6.1 6.1 0 0 1 6.1 2.1a.5.5 0 0 0-.66-.6 6.6 6.6 0 1 0 9.06 9.06.5.5 0 0 0-.6-.66z" fill="currentColor"/></svg>
+                </button>
+                <time class="menubar-extra menubar-clock" data-clock><span class="clock-date" data-clock-date></span><span class="clock-time" data-clock-time></span></time>
+            </div>
+        </header>
+
+        <div class="hero-copy">
+            <h1 data-i18n="hero.title">Stop staring at prices. A glance is enough.</h1>
+            <p class="hero-lead" data-i18n="hero.lead">Coinscal keeps live prices for the coins you follow one glance away, and tells you when they move. No account, no API key.</p>
+            <div class="hero-actions">
+                <a class="button button-primary" data-link="download" href="https://github.com/gicek/coinscal/releases/latest" data-i18n="hero.download">Download for Mac</a>
+                <a class="button button-glass" href="#features" data-i18n="hero.more">See what it does</a>
+            </div>
+            <p class="hero-note" data-i18n="hero.note">Free and open source · macOS 14 or later, on Apple silicon</p>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="features">
+    <div class="container">
+        <h2 data-i18n="features.title">What Coinscal does</h2>
+        <p class="section-lead" data-i18n="features.lead">A small app that stays out of the way until a price matters.</p>
+        <div class="features">
+            <div class="feature">
+                <span class="feature-tile tile-violet"><svg aria-hidden="true"><use href="#feature-menubar"/></svg></span>
+                <h3 data-i18n="features.menubar.title">Price in the menu bar</h3>
+                <p data-i18n="features.menubar.body">Keep the price you care about most right in the menu bar.</p>
+            </div>
+            <div class="feature">
+                <span class="feature-tile tile-indigo"><svg aria-hidden="true"><use href="#feature-widget"/></svg></span>
+                <h3 data-i18n="features.widgets.title">Desktop widgets</h3>
+                <p data-i18n="features.widgets.body">Add widgets to the desktop and Notification Center. They stay current even when the app isn't open.</p>
+            </div>
+            <div class="feature">
+                <span class="feature-tile tile-teal"><svg aria-hidden="true"><use href="#feature-desktop"/></svg></span>
+                <h3 data-i18n="features.ticker.title">Pinned to the desktop</h3>
+                <p data-i18n="features.ticker.body">Pin your watchlist to the desktop, where it blends right in.</p>
+            </div>
+            <div class="feature">
+                <span class="feature-tile tile-orange"><svg aria-hidden="true"><use href="#feature-bell"/></svg></span>
+                <h3 data-i18n="features.alerts.title">Price alerts</h3>
+                <p data-i18n="features.alerts.body">Set price alerts for coins in your watchlist, so you never miss a move.</p>
+            </div>
+        </div>
+        <p class="features-more" data-i18n="features.more">And there's more, all to keep things simple.</p>
+    </div>
+</section>
+
+<section class="section section-tinted trust">
+    <div class="container">
+        <span class="trust-badge" aria-hidden="true"><svg><use href="#trust-shield"/></svg></span>
+        <h2 data-i18n="trust.title">Your data stays on your Mac.</h2>
+        <p class="section-lead" data-i18n="trust.lead">Coinscal fetches prices right on your Mac. It collects nothing, so there's nothing to leak.</p>
+        <ul class="trust-points">
+            <li class="trust-point">
+                <svg aria-hidden="true"><use href="#trust-account"/></svg>
+                <h3 data-i18n="trust.account.title">No account</h3>
+                <p data-i18n="trust.account.body">Install it and go. Nothing to sign up for.</p>
+            </li>
+            <li class="trust-point">
+                <svg aria-hidden="true"><use href="#trust-collection"/></svg>
+                <h3 data-i18n="trust.collection.title">No data collection</h3>
+                <p data-i18n="trust.collection.body">No analytics, no tracking.</p>
+            </li>
+            <li class="trust-point">
+                <svg aria-hidden="true"><use href="#trust-lock"/></svg>
+                <h3 data-i18n="trust.privacy.title">Private by design</h3>
+                <p data-i18n="trust.privacy.body">Your watchlist and settings never leave your Mac.</p>
+            </li>
+            <li class="trust-point">
+                <svg aria-hidden="true"><use href="#trust-code"/></svg>
+                <h3 data-i18n="trust.open.title">Open source</h3>
+                <p data-i18n="trust.open.body">MIT licensed. Every line is on GitHub.</p>
+            </li>
+        </ul>
+    </div>
+</section>
+
+<section class="section" id="download">
+    <div class="container install">
+        <img src="/img/app-icon.png" alt="" width="96" height="96">
+        <h2 data-i18n="install.title">Download Coinscal</h2>
+        <p class="section-lead" data-i18n="install.lead">macOS 14 or later. Free and open source.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" data-link="download" href="https://github.com/gicek/coinscal/releases/latest" data-i18n="install.download">Download for Mac</a>
+            <a class="button button-plain" data-link="releases" href="https://github.com/gicek/coinscal/releases" data-i18n="install.releases">All releases</a>
+        </div>
+    </div>
+</section>
+</main>
+
+<footer class="site-footer">
+    <div class="container">
+        <p data-i18n="footer.license">Coinscal is open source, released under the MIT License.</p>
+        <nav aria-label="More">
+            <a data-link="github" href="https://github.com/gicek/coinscal" data-i18n="nav.github">GitHub</a>
+            <a data-link="releases" href="https://github.com/gicek/coinscal/releases" data-i18n="footer.releases">Releases</a>
+            <a data-link="issues" href="https://github.com/gicek/coinscal/issues" data-i18n="footer.issues">Issues</a>
+            <a href="/privacy" data-i18n="footer.privacy">Privacy</a>
+        </nav>
+    </div>
+</footer>
+</body>
+</html>

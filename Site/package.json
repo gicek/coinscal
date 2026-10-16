@@ -1,0 +1,12 @@
+{
+  "name": "coinscal-site",
+  "private": true,
+  "type": "module",
+  "description": "Coinscal website: static HTML, CSS, and JavaScript served by Cloudflare Workers Static Assets",
+  "scripts": {
+    "check": "node --test test/"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

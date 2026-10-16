@@ -1,0 +1,12 @@
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-3pXocWCAr53C+aXPxu/9mvHlXX0pPo7hS4JTq+hxOUY=' https://static.cloudflareinsights.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.binance.com https://data-api.binance.vision wss://data-stream.binance.vision https://www.okx.com https://api.bybit.com https://open.er-api.com https://cdn.jsdelivr.net https://cloudflareinsights.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+
+/messages/*
+  Cache-Control: public, max-age=300
+
+/img/*
+  Cache-Control: public, max-age=86400

@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "title": "Coinscal：Mac 選單列裡的即時幣價",
+    "description": "Coinscal 在 macOS 選單列即時顯示你關注的幣種價格，支援價格提醒、桌面小工具與 12 種計價貨幣。無需帳號，無需 API Key。",
+    "privacyTitle": "隱私權 - Coinscal"
+  },
+  "nav": {
+    "features": "功能",
+    "download": "下載",
+    "github": "GitHub",
+    "skip": "跳到內文"
+  },
+  "menubar": {
+    "item": "Coinscal",
+    "itemPrice": "Coinscal：{symbol} {price}",
+    "language": "語言",
+    "online": "價格即時更新中",
+    "offline": "暫時無法取得價格",
+    "appearance": "切換淺色與深色"
+  },
+  "lang": {
+    "en": "English",
+    "zh-Hans": "简体中文",
+    "zh-Hant": "繁體中文",
+    "short": "繁"
+  },
+  "panel": {
+    "label": "Coinscal 選單列面板的即時示範",
+    "settings": "設定",
+    "watchlist": "管理自選",
+    "quit": "結束 Coinscal",
+    "back": "返回",
+    "empty": "尚未新增幣種",
+    "addCoins": "新增幣種",
+    "loading": "正在載入價格",
+    "add": "新增 {name}",
+    "remove": "移除 {name}",
+    "catalogNote": "App 內可選更多幣種。",
+    "currency": "計價貨幣",
+    "menubarCoin": "選單列幣種",
+    "menubarContent": "顯示",
+    "contentPrice": "價格",
+    "contentIcon": "圖示",
+    "textColor": "依漲跌著色",
+    "textBackground": "顯示背景色",
+    "colorScheme": "顏色方案",
+    "greenUpRedDown": "綠漲紅跌",
+    "redUpGreenDown": "紅漲綠跌",
+    "hint": "僅為效果示範，下載 App 即可體驗完整功能。"
+  },
+  "hero": {
+    "title": "不必再盯盤，隨時一瞥就好。",
+    "lead": "Coinscal 把你關注的幣種即時價格放在一眼可見的地方，價格異動時及時提醒。無需帳號，無需 API Key。",
+    "download": "下載 Mac 版",
+    "more": "看看能做什麼",
+    "note": "免費開源 · macOS 14 或更新版本，Apple 晶片"
+  },
+  "features": {
+    "title": "Coinscal 能做什麼",
+    "lead": "一個安靜的小工具，只在價格值得關注時出現。",
+    "menubar": {
+      "title": "選單列價格",
+      "body": "把最關注的幣價直接放在選單列顯示。"
+    },
+    "widgets": {
+      "title": "桌面小工具",
+      "body": "在桌面與通知中心加入小工具，App 不開也能看。"
+    },
+    "ticker": {
+      "title": "釘在桌面",
+      "body": "把關注清單釘在桌面，和桌面融為一體。"
+    },
+    "alerts": {
+      "title": "價格提醒",
+      "body": "為自選幣種設定價格提醒，行情波動不會錯過。"
+    },
+    "more": "不只這些，更多功能，只為更簡單的體驗。"
+  },
+  "trust": {
+    "title": "資料只在本機，隱私毫無顧慮。",
+    "lead": "Coinscal 在你的 Mac 上直接取得行情，不蒐集任何資料，也就沒有隱私風險。",
+    "account": {
+      "title": "無需帳號",
+      "body": "裝好就能用，不用註冊。"
+    },
+    "collection": {
+      "title": "無資料蒐集",
+      "body": "沒有統計，沒有追蹤。"
+    },
+    "privacy": {
+      "title": "重視隱私",
+      "body": "自選與設定只儲存在你的 Mac 上。"
+    },
+    "open": {
+      "title": "程式碼開源",
+      "body": "MIT 授權，每一行程式碼都在 GitHub 上。"
+    }
+  },
+  "install": {
+    "title": "下載 Coinscal",
+    "lead": "macOS 14 或更新版本，免費開源。",
+    "download": "下載 Mac 版",
+    "releases": "所有版本"
+  },
+  "footer": {
+    "license": "Coinscal 是開放原始碼軟體，以 MIT 授權條款發佈。",
+    "releases": "版本發佈",
+    "issues": "問題回報",
+    "privacy": "隱私權"
+  },
+  "privacy": {
+    "title": "隱私權",
+    "updated": "最後更新：2026 年 10 月 16 日",
+    "app": {
+      "title": "App",
+      "body": "Coinscal 沒有帳號、沒有伺服器，也沒有統計分析。你的自選、提醒與設定只儲存在你的 Mac 上。為了顯示價格，App 會向 Binance、OKX、Bybit 請求公開行情，向 ExchangeRate-API 與 Currency API 請求匯率，並從 CoinGecko 取得幣種圖示。這些請求不含任何個人資訊，但和一般網頁請求一樣，各服務能看到你的 IP 位址。"
+    },
+    "site": {
+      "title": "本網站",
+      "body": "本網站不設定 Cookie，也沒有廣告。網站使用 Cloudflare Web Analytics 統計造訪量，它不使用 Cookie，也不會跨網站追蹤你。為執行即時示範，你的瀏覽器會從 Binance、OKX、Bybit 取得價格，從 ExchangeRate-API 與 jsDelivr 取得匯率。你選擇的語言、外觀與示範設定儲存在瀏覽器本機儲存空間中，不會傳送到任何地方。"
+    },
+    "contact": {
+      "title": "聯絡",
+      "body": "對隱私權有疑問？請在 GitHub 上提交 issue。"
+    },
+    "home": "返回 Coinscal"
+  }
+}
