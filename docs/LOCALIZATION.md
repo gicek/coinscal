@@ -4,7 +4,7 @@
 
 ## Languages and Source
 
-Supported languages: `en`, `zh-Hans`, `zh-Hant` (matching `LANGS` in the Makefile). The source language is English. Strings live in `Apple/Mac/Resources/Localizable.xcstrings` with semantic keys (such as `menu.change`); add all three languages in the same change. On first launch the app follows the system language and falls back to English if there is no match.
+Supported languages: `en`, `zh-Hans`, `zh-Hant` (matching `LANGS` in the Makefile). The source language is English. App strings live in `Apple/Mac/Resources/Localizable.xcstrings` and website strings in `Site/messages/<lang>.json`, both with semantic keys (such as `menu.change`); add all three languages in the same change. On first launch the app follows the system language and falls back to English if there is no match.
 
 ## Manual Switching
 
@@ -25,7 +25,7 @@ Each language's display name is written in that language itself and is not local
 
 ## Guards
 
-The three guards (source scan, complete translations, matching keys) are implemented in `scripts/i18n-guard.py` and run automatically in `make test-mac` and CI. Guard 3 only recognizes literal keys in system APIs such as `Text("…")` and **doesn't check `loc("…")`**: when you add a key, confirm yourself that all three languages have it.
+The three guards (source scan, complete translations, matching keys) are implemented in `scripts/i18n-guard.py` and run automatically in `make test-mac`, `make test-site`, and CI. For the website, guard 3 checks `t("…")` calls; `make test-site` also checks every `data-i18n` key in the pages. Guard 3 only recognizes literal keys in system APIs such as `Text("…")` and **doesn't check `loc("…")`**: when you add a key, confirm yourself that all three languages have it.
 
 ## Additional Writing Rules
 

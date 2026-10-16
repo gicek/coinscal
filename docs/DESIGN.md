@@ -39,6 +39,10 @@ Two kinds: "Coin Price" (small, follows the menu bar coin by default) and "Watch
 
 A click-through price panel pinned to the desktop (between the wallpaper and the desktop icons). Its content and style match the widget. It updates every 10 seconds along with the app and has adjustable background opacity (below 20%, text switches to white with a light shadow, like Finder file names; the icon and background get no shadow). By default it sits in the top-right corner of the main display and can be dragged to any display. Turning on "Show on Desktop" goes straight into position adjustment: the panel floats to the top layer and shows a dashed border with "Drag to move / Done". Changing the size during adjustment doesn't exit it. Clicking "Done" saves the position and restores click-through. "Adjust Position…" in Settings re-enters adjustment at any time. See [DESKTOP_OVERLAY](DESKTOP_OVERLAY.md).
 
+### Website Demo
+
+The website's hero reproduces the menu bar button and the popover with live prices; see [WEBSITE](WEBSITE.md). When the look or rules of either change here, update the website in the same change.
+
 ## Core Flows
 
 ### Price Alerts
@@ -61,7 +65,7 @@ When the current data source fails or times out (5 seconds), the app switches to
 
 ## General Interaction Rules
 
-- Settings take effect and are saved immediately; there is no "Apply" button. After the quote currency, polling interval, or language changes, prices are refetched within 0.5 seconds.
+- Settings take effect and are saved immediately; there is no "Apply" button. After the quote currency or language changes, prices are refetched within 0.5 seconds.
 - Language switches take effect immediately without restarting. An open Settings window (including titles and radio groups) switches along with it.
 - Launch at login is off by default; the first launch doesn't register a login item.
 - Respect "Reduce motion": no make-way animation while dragging to reorder.

@@ -19,15 +19,16 @@ A lightweight macOS menu bar app for crypto prices. It keeps your watchlist pric
 | Item | Requirement |
 |---|---|
 | System | macOS 14 or later, Apple silicon |
-| Development | Xcode 26.5, XcodeGen (`brew install xcodegen`) |
+| Development | Xcode 26.5, XcodeGen (`brew install xcodegen`); Node.js 20+ for website checks |
 
 ## Quick Start
 
 ```bash
 make mac-run                # Generate the project, build, and launch
-make test                   # Localization guards + unit tests
+make test                   # Localization guards, unit tests, and website checks
 make mac-release            # Release: Developer ID-signed zip and DMG in Build/macOS/Dist/
 make mac-release-notarized  # Release and notarize: sign, notarize, and staple the ticket
+make site-run               # Preview the website at http://localhost:8787/
 make help                   # All commands
 ```
 
@@ -60,17 +61,20 @@ Apple/
 └── Mac/                 # App source (App / Models / Services / ViewModels / Views / Utilities / Resources)
     ├── Tests/           # Unit tests (Swift Testing)
     └── docs/CHANGELOG.md
+Site/                    # Website (static HTML / CSS / JS, deployed to Cloudflare)
 docs/                    # Project docs
-scripts/                 # Localization guard, DMG, release, coin catalog
+scripts/                 # Localization guard, DMG, release, coin catalog, website preview
 Build/                   # All build output (not committed)
 ```
 
 ## Documentation
 
+- Website: [coinscal.app](https://coinscal.app/)
 - [Development rules](AGENTS.md)
 - [Project definition](docs/PROJECT.md) · [Interaction design](docs/DESIGN.md) · [Technical architecture](docs/TECHNICAL.md) · [Roadmap](docs/ROADMAP.md)
 - [Work plan](docs/PLAN.md) · [Implementation and verification status](docs/VALIDATION.md) · [Development guide](docs/DEVELOPMENT.md) · [Localization](docs/LOCALIZATION.md)
-- [Changelog](Apple/Mac/docs/CHANGELOG.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+- Topics: [Coin catalog](docs/COIN_CATALOG.md) · [Widgets](docs/WIDGET.md) · [Desktop ticker](docs/DESKTOP_OVERLAY.md) · [Website](docs/WEBSITE.md)
+- [Changelog](Apple/Mac/docs/CHANGELOG.md) · [Website changelog](Site/docs/CHANGELOG.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
 
 ## License
 

@@ -19,6 +19,7 @@
 | XcodeGen | 2.45 |
 | Testing | Swift Testing |
 | Third-party dependencies | None |
+| Website | Static HTML, CSS, and JavaScript modules in `Site/`; Node 20+ `node:test` for offline checks; Wrangler 4.137.0 for deploys |
 
 ## System Structure
 
@@ -78,7 +79,7 @@ CoinscalWidget (Widget Extension) ── WidgetDataLoader ── snapshot, or fe
 
 ### Coin Catalog (`coins.json`, schemaVersion 1)
 
-- Generation: `scripts/catalog/generate_catalog.py` (`make catalog`). CoinGecko top 1000 by market cap ∩ USDT spot pairs on any of the three exchanges (Binance halted pairs filtered out, symbols must be ASCII, exchange price within 20% of CoinGecko) → all of them become `listed`. The bundled snapshot was rebuilt without `--previous` on 2026-10-15 (no released users yet); see [COIN_CATALOG](COIN_CATALOG.md). Every id that appeared in the previous catalog is kept (a migration target only when an old id pointing to it is kept). `scripts/catalog/migrations.json` maintains migration relationships by hand; if the target isn't tradable, the coin is treated as delisted.
+- Generation: `scripts/catalog/generate_catalog.py` (`make catalog`). CoinGecko top 1000 by market cap ∩ USDT spot pairs on any of the three exchanges (Binance halted pairs filtered out, symbols must be ASCII, exchange price within 20% of CoinGecko) → all of them become `listed`. `make catalog` passes `--previous`, so every id in the previous catalog is kept (a migration target only when an old id pointing to it is kept); see [COIN_CATALOG](COIN_CATALOG.md). `scripts/catalog/migrations.json` maintains migration relationships by hand; if the target isn't tradable, the coin is treated as delisted.
 - Entry fields: `id` (CoinGecko id, the watchlist identity), `symbol`, `name`, `rank`, `logoURL`, `status` (`active` / `delisted` / `migrated`), `listed`, `migratedTo`.
 - Validation rules exist in both Python (`generate_catalog.py validate`, run offline by `make test-mac`) and Swift (`CoinCatalog.validate`). **If you change one, change the other**: schema version, id / symbol character sets, name length, 200–1000 listed, must include tradable bitcoin and ethereum, no duplicate tradable symbols (prices are queried by symbol), logo host allowlist, listed coins must be tradable, migration target exists and is tradable.
 - Client: `CoinCatalog` is the only metadata source. Search and recommendations use only `listed`; the watchlist looks up any entry by id. Only `active` coins are included in price fetches.
@@ -146,7 +147,7 @@ open.er-api.com → jsDelivr currency-api → currency-api.pages.dev. The whole 
 
 ## Logging and Diagnostics
 
-`Logger(subsystem: "com.gicek.coinscal")`, categories: `Settings`, `Notifications`, `LaunchAtLogin`. Log only error descriptions; don't log settings content or the watchlist.
+`Logger(subsystem: "com.gicek.coinscal")`, categories: `Settings`, `Notifications`, `LaunchAtLogin`, `CoinCatalog`, `CoinLogos`, `Widget`. Log only error descriptions; don't log settings content or the watchlist.
 
 ## Test Strategy
 
@@ -158,9 +159,10 @@ open.er-api.com → jsDelivr currency-api → currency-api.pages.dev. The whole 
 - State machine: `CoinListViewModel` gets `FakePriceService` and `SpyNotifier` injected, covering polling not interrupting in-flight requests, discarding old results and avoiding false alerts on currency change, and above / below alerting only on crossings.
 - Settings storage: `UserDefaultsSettingsStore` gets `InMemoryDataStorage` injected, so tests leave no preference files on disk.
 - Real network: `Apple/Mac/scripts/manual/check-data-sources.sh` (`make mac-check-sources`).
+- Website: `Site/test/site.test.js` (`make test-site`) checks formatting parity with `PriceFormatter`, message keys, the CSP hashes, demo coin logos, and demo settings fallback. The website's price feed mirrors the app's source order but is a separate JavaScript implementation; when the app's sources change, update `Site/js/prices.js`, the CSP in `Site/_headers`, and [WEBSITE](WEBSITE.md) together.
 - Wait for main-thread delivery with `drainMainQueue()`; tests don't `sleep`.
 - Needs manual verification: menu bar appearance, drag-to-reorder feel, system notification delivery, login item, real data source reachability (see VALIDATION).
 
 ## Open Source and Dependencies
 
-No third-party code or dependencies; see [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md). 78 coin logos are bundled assets; the rest are downloaded from CoinGecko's image CDN when a coin is added to the watchlist. Data comes from the public APIs in the table above.
+No third-party code dependencies; the website is deployed with Wrangler, a pinned command-line tool. See [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md). 78 coin logos are bundled assets; the rest are downloaded from CoinGecko's image CDN when a coin is added to the watchlist. Data comes from the public APIs in the table above.

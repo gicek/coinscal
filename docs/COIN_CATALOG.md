@@ -20,7 +20,7 @@
 
 - **CoinGecko id is the identity**: the watchlist stores ids (`WatchlistCoin.coinId`). When a coin is renamed, its id stays the same and its symbol changes (for example, `render-token` went from RNDR to RENDER, and `iota` from MIOTA to IOTA). Refreshing the symbol by id restores quotes, and users don't need to change their watchlist.
 - **Old-to-successor mappings need manual maintenance**: a project that moves to a new coin gets a new id (for example, `matic-network`→`polygon-ecosystem-token`). The old id still exists but no longer trades, so this can't be detected automatically. `scripts/catalog/migrations.json` maintains these mappings; in the catalog the old id is marked `migrated` and points to the new id through `migratedTo`.
-- **Market cap rank must be intersected with exchanges**: the top 100 by market cap includes coins that don't trade on Binance / OKX / Bybit (stablecoins, RWA, exchange tokens). Taking the top N directly would produce many entries without prices.
+- **Market cap rank must be intersected with exchanges**: the top ranks by market cap include coins that don't trade on Binance / OKX / Bybit (stablecoins, RWA, exchange tokens). Taking the top N directly would produce many entries without prices.
 - **Clients don't call CoinGecko directly**: the keyless API has a very low rate limit, so users behind the same egress IP would crowd each other out, and if the API starts requiring a key, the key can't ship in the client. So the catalog is generated centrally on the repository side, and clients only read a static file.
 
 ## Generation Rules
@@ -29,13 +29,13 @@
 
 1. Take the CoinGecko top 1000 by market cap (four pages of 250).
 2. Intersect with USDT spot pairs currently tradable on any of the three exchanges: drop Binance halted pairs; symbols must be ASCII; an exchange price deviating > 20% from the CoinGecko price counts as a different coin with the same name and is dropped; only one entry per symbol.
-3. Every remaining coin is `listed` (searchable). (Until Oct 15, 2026 only the top 100 were listed, so most tradable coins couldn't be found by search.)
+3. Every remaining coin is `listed` (searchable).
 4. Keep every id from the previous catalog (`--previous`, which `make catalog` always passes) as a non-`listed` entry: still tradable → `active`; in the migration table with a tradable target → `migrated`; everything else → `delisted`. A migration target is kept only when an old id that moves to it is kept.
 5. The result is checked with `validate` first and written only if it passes.
 
 The optional environment variable `COINGECKO_API_KEY` (a CoinGecko Demo Key) raises the rate limit.
 
-The bundled snapshot was rebuilt from scratch on Oct 15, 2026, without `--previous`, because no released version had stored watchlists yet: 451 coins, all listed and `active`, down to rank 957, about 120KB. Bundled logos of coins no longer in it were removed at the same time. From the first release on, always generate with `make catalog` so existing watchlists keep their ids.
+The bundled snapshot has 451 coins, all listed and `active`, down to market cap rank 957 (about 120KB). It was generated without `--previous` before the first release, so it carries no `delisted` or `migrated` entries yet. Always regenerate with `make catalog`, which passes `--previous`, so that ids in existing watchlists are kept.
 
 ## Client
 

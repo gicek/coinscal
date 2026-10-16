@@ -1,22 +1,12 @@
 # Coinscal Project Definition
 
-> This document defines the product and the scope of the first milestone. For implementation and verification status, see [Implementation and Verification Status](VALIDATION.md). For execution order, see the [Roadmap](ROADMAP.md). Items marked "to be confirmed" need confirmation from the product owner.
+> This document defines the product and the scope of the first milestone. For implementation and verification status, see [Implementation and Verification Status](VALIDATION.md). For execution order, see the [Roadmap](ROADMAP.md).
 
 ## Product Name
 
 **Coinscal** - Real-time crypto price monitor
 
 Coinscal fills one gap: glancing at prices any time without opening an exchange app or website. It lives in the macOS menu bar, shows the current price and 24h change of the coins in your watchlist, and sends a system notification when a price hits your target. It does not handle trading, portfolio management, or market analysis.
-
-## Problem
-
-People who follow crypto prices usually keep an exchange website or phone app open and refresh it over and over, which interrupts their work. Exchange app alerts depend on an account and a phone. Coinscal puts prices in the menu bar and delivers alerts through system notifications, with no account or API key. (To be confirmed)
-
-## Target Users
-
-Individuals who work on a Mac, hold or follow a few major coins, and want to learn about price changes passively. (To be confirmed)
-
-**Not typical users or scenarios**: traders who need millisecond-level prices or order book depth; investors who need portfolio profit and loss tracking; users who follow small coins outside the catalog.
 
 ## Product Principles
 
@@ -39,8 +29,8 @@ macOS 14 or later, Apple silicon (arm64).
 - Price alerts: each coin has its own "above / below a price" or "change of N% from a reference price" condition, and sends a system notification when triggered. There is a global switch.
 - Quote currencies: USD, CNY, KRW, HKD, JPY, TWD, SGD, MYR, AUD, CAD, EUR, GBP.
 - Color schemes: "Green Up, Red Down" / "Red Up, Green Down" / "Custom".
-- Desktop and Notification Center widgets: "Coin Price" (small) and "Watchlist" (medium, large). In "Edit Widget" you can choose coins, quote currency, sort order, and color by change. When the app is not running, the widget fetches prices itself (design in [WIDGET](WIDGET.md), added 2026-10-15).
-- Desktop ticker: a click-through price panel pinned to the desktop (between the wallpaper and the desktop icons). It updates every 10 seconds along with the app, has the same sizes and content as the widget, has adjustable background opacity, and can be dragged to any display (see [DESKTOP_OVERLAY](DESKTOP_OVERLAY.md), added 2026-10-15).
+- Desktop and Notification Center widgets: "Coin Price" (small) and "Watchlist" (medium, large). In "Edit Widget" you can choose coins, quote currency, sort order, and color by change. When the app is not running, the widget fetches prices itself (see [WIDGET](WIDGET.md)).
+- Desktop ticker: a click-through price panel pinned to the desktop (between the wallpaper and the desktop icons). It updates every 10 seconds along with the app, has the same sizes and content as the widget, has adjustable background opacity, and can be dragged to any display (see [DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).
 - Open at login (off by default). UI languages: English, Simplified Chinese, and Traditional Chinese. Follows the system or switches instantly in the app.
 
 ### Out of Scope for the First Milestone
@@ -68,14 +58,15 @@ Update this document and the roadmap before adding any of these.
 | Product name | Coinscal |
 | Platform | macOS menu bar app (`LSUIElement`) |
 | Bundle ID | `com.gicek.coinscal` |
-| Minimum OS | macOS 14: the app uses macOS 14 SwiftUI APIs (two-parameter `onChange`, `withAnimation` completion, `.windowBackground`). Under the "development start year − 4" rule it should be macOS 13 (whether to lower it is to be confirmed) |
-| Distribution | Direct zip or DMG (DMG added 2026-10-15: opening it shows a guide to drag the app into Applications, with the background and drag illustration designed in brand colors); Developer ID code signing + Apple notarization (added 2026-10-15: `make mac-release` only signs; `make mac-release-notarized` also notarizes and staples the ticket. Use only the latter for public distribution) |
-| License | MIT; the repository is planned to be public |
-| Server | None. Prices and exchange rates come directly from public, keyless APIs. The coin catalog is generated as a static file by a scheduled repository job and served through jsDelivr (see [COIN_CATALOG](COIN_CATALOG.md)) |
+| Minimum OS | macOS 14: the app uses macOS 14 SwiftUI APIs (two-parameter `onChange`, `withAnimation` completion, `.windowBackground`). The "development start year − 4" rule would give macOS 13; staying on macOS 14 was confirmed 2026-10-16 |
+| Distribution | Direct download of a zip or DMG from GitHub Releases, Developer ID signed and notarized by Apple (2026-10-15). The DMG opens to a window that shows dragging the app into Applications. Only `make mac-release-notarized` output is distributed publicly |
+| License | MIT; the repository will be public on GitHub (`gicek/coinscal`) |
+| Website | Static product page at `https://coinscal.app/`, also served at `coinscal.gicek.com` (2026-10-16): features, a live demo of the menu bar panel that calls the app's public APIs from the browser, and download links to GitHub Releases. Hosted on Cloudflare Workers Static Assets. No cookies; visits are counted with cookieless Cloudflare Web Analytics. Design in [WEBSITE](WEBSITE.md) |
+| Server | None. Prices and exchange rates come directly from public, keyless APIs. The coin catalog is a snapshot bundled with the app, generated by `make catalog`; remote catalog updates are planned (see [COIN_CATALOG](COIN_CATALOG.md)) |
 | Data sources | Prices: Binance → Binance mirror → OKX → Bybit; coins missing from the primary source are filled in from other exchanges. Exchange rates: open.er-api → jsDelivr currency-api → pages.dev currency-api |
 | Default alert | Newly added coins default to "Change 2%"; notifications are on by default |
 | Open at login | Off by default; the user turns it on in Settings |
-| Projects migrated to a successor coin | The watchlist switches to the successor automatically with no migration prompt (changed 2026-10-15: previously the app showed a prompt and the user replaced the coin with one click. The user decided the UI should use the successor's name directly, with no explanation of the old-to-new migration) |
+| Projects migrated to a successor coin | The watchlist switches to the successor automatically, with no migration prompt; the UI shows only the successor's name (2026-10-15, previously a prompt with a one-click replace) |
 
 ## Adjustable Product Parameters
 
@@ -87,4 +78,4 @@ Update this document and the roadmap before adding any of these.
 | "Exchange doesn't have this coin" cache | 30 minutes | `PriceService.unavailableTTL` |
 | Change alert range | 0.5 % – 200 % | `AlertEvaluator.clampAlertThreshold` |
 | Visible popover rows | 4 – 8 rows | `Constants.Popover` |
-| Listed coins in catalog | 100 | `scripts/catalog/generate_catalog.py` `TARGET_LISTED` |
+| Catalog source range | CoinGecko top 1000 by market cap; every coin with a USDT spot pair on Binance, OKX, or Bybit is listed (200–1000 allowed) | `scripts/catalog/generate_catalog.py` `MARKET_CAP_TOP`, `MIN_LISTED`, `MAX_LISTED` |
