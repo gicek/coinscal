@@ -32,7 +32,7 @@ The three guards (source scan, complete translations, matching keys) are impleme
 ## Additional Writing Rules
 
 - Strings with multiple arguments use positional placeholders (`%1$@`, `%2$@`) so translations can reorder them. All three languages must have the same number of placeholders.
-- Menu items that open a window end with an ellipsis (`Settings…` in English, and likewise in both Chinese variants), following macOS convention.
+- Button and menu item labels never end with an ellipsis, even when they open a window (`Settings`, not `Settings…`) (2026-10-16; previously an ellipsis per macOS convention). Placeholder text such as the search field's may still end with one.
 - Traditional Chinese uses Taiwan terminology for terms such as Settings, Menu Bar, Quit, Add, Symbol (code), Default, and Component.
 
 ## Terminology
@@ -50,7 +50,7 @@ The Simplified and Traditional Chinese terms are the values of these keys in `Lo
 | Price alerts (toggle) | Price Alerts | `general.notification.priceAlert` |
 | Open at login | Open at Login | `general.launch.atLogin` |
 | Menu bar | Menu Bar | `general.section.menubar` |
-| Settings (window / menu) | Settings… | `menu.setting` |
+| Settings (window / menu) | Settings | `menu.setting` |
 | Quit | Quit | `menu.quit` (`Quit Coinscal`) |
 | No market data | No market data | `coin.status.delisted` |
 | Recommended coins | Recommended | `watchlist.recommended` |

@@ -4,6 +4,9 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Changed: No ellipsis on buttons and menu items
+"Settings", "Check for Updates" (right-click menu and the About pane), and "Adjust Position" (Settings → General) no longer end with "…", in all three languages. The search field placeholder keeps its ellipsis.
+
 ### Fixed: Gear icon in front of "Settings" on first launch
 - Symptom: on the first launch after a fresh install, the right-click menu showed a gear icon in front of "Settings" on macOS 26; later launches showed none.
 - Root cause: `NSMenuEnableActionImages = false` was written in `applicationDidFinishLaunching`, after AppKit had already read it. Only the next launch picked up the saved value.

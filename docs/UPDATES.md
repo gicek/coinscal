@@ -46,8 +46,8 @@ Appcast item fields: `sparkle:version` = `CURRENT_PROJECT_VERSION` (must increas
 
 ### User interface
 
-- Right-click menu: "Check for Updates…" (between About and Quit).
-- Settings → About: version, "Check for Updates…" button, "Automatically Check for Updates" toggle (Sparkle stores this preference itself; it isn't part of `AppSettings`).
+- Right-click menu: "Check for Updates" (between About and Quit).
+- Settings → About: version, "Check for Updates" button, "Automatically Check for Updates" toggle (Sparkle stores this preference itself; it isn't part of `AppSettings`).
 - Popover header: an "Update Available" capsule when a scheduled check found one.
 - New strings in `Localizable.xcstrings` in all three languages. Sparkle's own windows use its bundled translations, which follow the system language, not Coinscal's in-app language setting.
 
