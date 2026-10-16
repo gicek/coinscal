@@ -4,6 +4,9 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Changed: No scroll bars in the popover list and the watchlist settings list
+The menu bar popover's coin list and the added-coins list in Settings → Watchlist no longer show a vertical scroll bar (`.scrollIndicators(.never)`, which also holds with "Show scroll bars: Always"). Both still scroll with a trackpad or mouse wheel, and drag reordering still auto-scrolls. Checked on a real Mac via Accessibility: the watchlist list's scroll area no longer has a scroll bar.
+
 ### Fixed: Settings window ignored its default size on first open
 - Symptom: with no saved window frame, the Settings window opened at 600×472 instead of the default 786×500. On this Mac the change had looked fine only because an 800×500 frame saved before the default changed was always restored.
 - Root cause: assigning `contentViewController` resizes the window to the SwiftUI view's fitting size (its 600pt minimum width), which discards the `contentRect` the window was created with.

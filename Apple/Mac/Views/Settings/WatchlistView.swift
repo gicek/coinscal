@@ -210,6 +210,8 @@ struct WatchlistView: View {
                         reorderSession.updateScrollOffset(offset)
                     }
                 }
+                // No scroll bar even with "Show scroll bars: Always"; scrolling and drag auto-scroll still work.
+                .scrollIndicators(.never)
                 .coordinateSpace(name: WatchlistReorderSession.coordinateSpaceName)
                 .overlay(alignment: .topLeading) {
                     floatingRow(width: viewport.size.width)

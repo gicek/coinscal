@@ -63,6 +63,8 @@ struct CoinPopoverView: View {
                     }
                 }
             }
+            // No scroll bar even with "Show scroll bars: Always"; the list still scrolls.
+            .scrollIndicators(.never)
             .frame(maxHeight: .infinity)
         }
     }
