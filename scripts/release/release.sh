@@ -1,6 +1,6 @@
 #!/bin/bash
-# Developer ID release: verify code signing -> (optionally notarize the app) -> build zip and DMG -> sign the DMG ->
-# (optionally notarize the DMG) -> Gatekeeper check.
+# Developer ID release: sign Sparkle's nested code -> verify code signing -> (optionally notarize the app) ->
+# build zip and DMG -> sign the DMG -> (optionally notarize the DMG) -> Gatekeeper check.
 # Usage: scripts/release/release.sh <Coinscal.app> <output directory> <work directory> <version> [--notarize]
 # Environment: DEVELOPER_ID (signing identity, default "Developer ID Application"), DEVELOPMENT_TEAM;
 #   notarization credentials, one of: NOTARY_PROFILE (the keychain profile name saved by notarytool
@@ -49,11 +49,37 @@ notarize() {
     echo "    Accepted (${id})"
 }
 
-# App and embedded widget: Developer ID, this Team, Hardened Runtime, secure timestamp, no get-task-allow
+SPARKLE="$APP/Contents/Frameworks/Sparkle.framework"
+SPARKLE_CODE=(
+    "$SPARKLE/Versions/B/XPCServices/Installer.xpc"
+    "$SPARKLE/Versions/B/XPCServices/Downloader.xpc"
+    "$SPARKLE/Versions/B/Autoupdate"
+    "$SPARKLE/Versions/B/Updater.app"
+    "$SPARKLE"
+)
+
+# Xcode re-signs Sparkle.framework when embedding it but leaves its XPC services and helpers ad-hoc signed, which
+# notarization rejects. Sign them innermost first with this Developer ID (never --deep), then re-sign the app so its
+# seal covers the new signatures; the app keeps its processed entitlements.
+sign_sparkle() {
+    [ -d "$SPARKLE" ] || return 0
+    local path
+    for path in "${SPARKLE_CODE[@]}"; do
+        case "$path" in
+            *Downloader.xpc) codesign --force --sign "$IDENTITY" --options runtime --timestamp --preserve-metadata=entitlements "$path" ;;
+            *) codesign --force --sign "$IDENTITY" --options runtime --timestamp "$path" ;;
+        esac
+    done
+    codesign --force --sign "$IDENTITY" --options runtime --timestamp --preserve-metadata=entitlements,requirements,flags "$APP"
+}
+
+# App, embedded widget, and Sparkle's code: Developer ID, this Team, Hardened Runtime, secure timestamp, no get-task-allow
 verify_app_signature() {
     local bundle info ents
     codesign --verify --deep --strict --verbose=1 "$APP"
-    for bundle in "$APP" "$APP"/Contents/PlugIns/*.appex; do
+    local targets=("$APP" "$APP"/Contents/PlugIns/*.appex)
+    [ -d "$SPARKLE" ] && targets+=("${SPARKLE_CODE[@]}")
+    for bundle in "${targets[@]}"; do
         [ -d "$bundle" ] || continue
         info="$(codesign -dvv "$bundle" 2>&1)"
         grep -q "^Authority=Developer ID Application:" <<<"$info" || { echo "${bundle} is not signed with Developer ID"; exit 1; }
@@ -72,6 +98,9 @@ if [ "$NOTARIZE" = 1 ] && ! notary_args >/dev/null; then
     echo "or ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH. See \"Release\" in docs/DEVELOPMENT.md."
     exit 1
 fi
+
+echo "==> Signing Sparkle components"
+sign_sparkle
 
 echo "==> Verifying app code signing"
 verify_app_signature

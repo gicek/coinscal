@@ -11,7 +11,7 @@ This file applies to the whole repository and follows the shared project develop
 | Website | Static site in `Site/` (plain HTML, CSS, and JavaScript, no build step), served at `coinscal.app` and `coinscal.gicek.com` by Cloudflare Workers Static Assets (`make site-deploy`); see [WEBSITE](docs/WEBSITE.md) |
 | Backend | None (the client calls public price / exchange rate APIs directly) |
 | Admin console | None |
-| Distribution | Direct Mac download as zip and DMG, signed with Developer ID (`make mac-release`); notarized with the ticket stapled before public distribution (`make mac-release-notarized`) |
+| Distribution | Direct Mac download as zip and DMG, signed with Developer ID (`make mac-release`); notarized with the ticket stapled before public distribution (`make mac-release-notarized`); published to `dl.coinscal.app` and GitHub Releases (`make mac-publish`), with in-app updates through Sparkle ([UPDATES](docs/UPDATES.md)) |
 | UI languages | `en`, `zh-Hans`, `zh-Hant` (source language `en`), switchable instantly in the app and on the website |
 | Minimum OS | macOS 14 (the 4-year rule would give macOS 13; see "Confirmed Product Decisions" in PROJECT for why) |
 | License | MIT (`LICENSE`). The repo will be public: don't commit keys, internal addresses, or personal config |
@@ -77,7 +77,7 @@ If the official bundle ID needs a different organization prefix, change all targ
 ## Architecture Rules
 
 - UI state and view models are `@MainActor`. The price and exchange rate services are currently Combine publishers that deliver results on the main thread (the `PriceServicing` contract). New code uses async/await; the migration plan is in ROADMAP.
-- Inject networking, settings storage, and system notifications through protocols: `HTTPClient`, `SettingsStore`, `PriceAlertNotifying`. Don't use `URLSession.shared`, `UserDefaults.standard`, or `UNUserNotificationCenter` directly in business types.
+- Inject networking, settings storage, system notifications, and the updater through protocols: `HTTPClient`, `SettingsStore`, `PriceAlertNotifying`, `UpdaterBackend`. Don't use `URLSession.shared`, `UserDefaults.standard`, or `UNUserNotificationCenter` directly in business types.
 - Polling must not cancel and resend while the previous request is still in flight. (When a data source times out, the next poll would interrupt failover, and it would never reach the later data sources.)
 - An alert's reference price and the current price must be in the same quote currency. On a currency change, discard in-flight results and reset the reference price.
 - `AppSettings` decoding must tolerate errors field by field, and new fields need defaults. Keep `addedCoins` as the JSON key for `watchlistCoins`.
@@ -92,14 +92,15 @@ If the official bundle ID needs a different organization prefix, change all targ
 
 - Don't commit keys, signing material, or API tokens. Logs must not contain keys, tokens, or user content.
 - The sandbox requests only `network.client`. All data sources must use HTTPS; no ATS exceptions.
-- Pin versions when adding a dependency or tool, and update `THIRD_PARTY_NOTICES.md` in the same change. Don't copy, link, or derive from GPL code. There are no third-party code dependencies; the only third-party tool is Wrangler, pinned in the `Makefile`.
+- Pin versions when adding a dependency or tool, and update `THIRD_PARTY_NOTICES.md` in the same change. Don't copy, link, or derive from GPL code. The only third-party code dependency is Sparkle (Swift Package, pinned in `Apple/project.yml`, lock file committed); the third-party tools are Wrangler and Sparkle's command-line tools, pinned in the `Makefile`.
 - Cloudflare credentials stay in Wrangler's user config (`make site-login`) or the environment, never in the repository.
+- The EdDSA private key that signs updates stays in the login Keychain (account `com.gicek.coinscal`) and in the maintainer's offline backup. Only the public key (`SUPublicEDKey` in `Info.plist`) is committed. Changing the key strands installed copies on their current version.
 
 ## Tests and Definition of Done
 
 - Add tests for feature changes at the lowest effective layer (Swift Testing for the app, `node:test` in `Site/test/` for the website). Items that need a real Mac or manual verification go under pending verification in `docs/VALIDATION.md`.
 - Write user-visible strings in the source language only and add them to `Apple/Mac/Resources/Localizable.xcstrings`, filling in all three languages in the same change. A localization guard failure in `make test-mac` is a defect; don't skip it. Use `Text(verbatim:)` for literals that don't need localization.
-- **Tests never touch the real UserDefaults, notification center, login items, or network**: inject `InMemorySettingsStore`, `SpyNotifier`, `StubHTTPClient`, `FakePriceService` (`Apple/Mac/Tests/TestSupport.swift`). When the app launches as the test host, `AppDelegate` does no setup.
+- **Tests never touch the real UserDefaults, notification center, login items, updater, or network**: inject `InMemorySettingsStore`, `SpyNotifier`, `StubHTTPClient`, `FakePriceService`, `FakeUpdaterBackend` (`Apple/Mac/Tests/TestSupport.swift`). When the app launches as the test host, `AppDelegate` does no setup.
 - `make test` is the full test entry point. Judge success by the `** TEST SUCCEEDED **` result line, not by the exit code after a pipe.
 - When product decisions, user-visible interactions, milestone scope, dependencies, data sources, or file paths change, update the matching docs.
 - For string-only changes with no logic change, run `make test-mac` (includes the localization guards) and update the docs. For the website, run `make test-site`.

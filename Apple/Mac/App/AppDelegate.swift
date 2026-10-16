@@ -26,6 +26,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var desktopOverlay = DesktopOverlayController()
     /// Lazy like the snapshot writer: the App Group container and the network stay untouched in the unit-test host.
     private lazy var logoStore = CoinLogoStore(client: URLSession.shared)
+    /// Always present for the views; Sparkle is attached only outside the unit-test host (docs/UPDATES.md).
+    let updateController = UpdateController()
     /// A widget click launched the app: the URL arrives before the popover exists, so it is shown after setup.
     private var opensPopoverAfterLaunch = false
     /// Closes the popover on clicks in other apps or the desktop while it is shown (see `popoverDidShow`).
@@ -51,7 +53,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // to some NSMenuItem selectors (e.g. Settings/Quit).
         UserDefaults.standard.set(false, forKey: "NSMenuEnableActionImages")
 
-        // Hide dock icon - LSUIElement handles this via Info.plist
+        updateController.attach(SparkleUpdaterBackend(controller: updateController))
         setupStatusItem()
         setupPopover()
         widgetSnapshotWriter.bind(coinListVM: coinListVM, settingsVM: settingsVM)
@@ -191,6 +193,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let popoverView = CoinPopoverView()
             .environmentObject(coinListVM)
             .environmentObject(settingsVM)
+            .environmentObject(updateController)
             .environment(\.coinLogoStore, logoStore)
         let hosting = NSHostingController(rootView: popoverView)
         hosting.view.wantsLayer = true
@@ -234,6 +237,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showContextMenu() {
         let menu = NSMenu()
         menu.showsStateColumn = false
+        // Items are enabled as set below (the update item is disabled while a check is running).
+        menu.autoenablesItems = false
 
         // Change - submenu to switch displayed coin
         let changeItem = NSMenuItem(title: loc("menu.change"), action: nil, keyEquivalent: "")
@@ -259,6 +264,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem.separator())
         menu.addItem(makeItem(title: loc("menu.setting"), action: #selector(openSettings), key: ""))
         menu.addItem(makeItem(title: loc("menu.about"),   action: #selector(openAbout),    key: ""))
+        let updateItem = makeItem(title: loc("menu.checkForUpdates"), action: #selector(checkForUpdates), key: "")
+        updateItem.isEnabled = updateController.canCheckForUpdates
+        menu.addItem(updateItem)
         menu.addItem(NSMenuItem.separator())
         menu.addItem(makeItem(title: loc("menu.quit"),     action: #selector(handleQuit),   key: "q"))
 
@@ -293,6 +301,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         openSettingsWindow(tab: .about)
     }
 
+    @objc private func checkForUpdates() {
+        updateController.checkForUpdates()
+    }
+
     @objc private func handleQuit() {
         NSApp.terminate(nil)
     }
@@ -313,6 +325,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .environmentObject(settingsVM)
             .environmentObject(coinListVM)
             .environmentObject(watchlistVM)
+            .environmentObject(updateController)
             .environment(\.coinLogoStore, logoStore)
         let initialSize = Constants.Window.settingsDefaultSize
         let window = NSWindow(

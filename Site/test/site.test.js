@@ -61,6 +61,21 @@ test("every demo coin has a logo", () => {
     for (const coin of COINS) assert.ok(logos.has(`${coin.id}.png`), coin.id);
 });
 
+test("release notes cover every language with the same items", () => {
+    const dir = `${site}/releases`;
+    const files = readdirSync(dir, { withFileTypes: true }).filter((e) => e.isFile() && e.name.endsWith(".json"));
+    for (const { name } of files) {
+        const data = JSON.parse(read(`releases/${name}`));
+        assert.equal(`${data.version}.json`, name, `${name}: version doesn't match the file name`);
+        const counts = ["en", "zh-Hans", "zh-Hant"].map((lang) => {
+            const items = data.notes?.[lang];
+            assert.ok(Array.isArray(items) && items.length && items.every((i) => typeof i === "string" && i.trim()), `${name}: ${lang}`);
+            return items.length;
+        });
+        assert.equal(new Set(counts).size, 1, `${name}: languages have different item counts`);
+    }
+});
+
 test("demo settings fall back field by field", () => {
     const store = new Map();
     globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, v) };

@@ -4,7 +4,7 @@
 
 ## Goal
 
-A product page for Coinscal: what it does, a live demo, and a download link to the notarized zip and DMG on GitHub Releases. The hero is a Mac menu bar with the Coinscal panel hanging from it (layout modeled on [swiftvm.app](https://swiftvm.app/), with Coinscal's own wallpaper, colors, and copy).
+A product page for Coinscal: what it does, a live demo, and a download link to the latest notarized DMG (`https://dl.coinscal.app/Coinscal.dmg`, see [UPDATES](UPDATES.md)). The hero is a Mac menu bar with the Coinscal panel hanging from it (layout modeled on [swiftvm.app](https://swiftvm.app/), with Coinscal's own wallpaper, colors, and copy).
 
 ## Domains and Hosting
 
@@ -81,4 +81,4 @@ Strings live in `Site/messages/<lang>.json` (`en` is the source) with the same t
 - [ ] Safari on macOS and iOS: glass panel (`backdrop-filter`), `light-dark()` colors, select menus, and the language menu.
 - [ ] Lighthouse ≥ 90 in performance, accessibility, best practices, and SEO.
 - [x] Deployed: both custom domains serve the site over HTTPS with the headers in effect; files listed in `.assetsignore` return 404; live prices load on both domains; Cloudflare Web Analytics loads under the CSP.
-- [ ] The download buttons work once the repository and its first release are public.
+- [ ] The download buttons serve the latest DMG once the first release is published to `dl.coinscal.app`.

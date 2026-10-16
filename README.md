@@ -12,6 +12,7 @@ A lightweight macOS menu bar app for crypto prices. It keeps your watchlist pric
 - **Price alerts**: Set above, below, or percent-change alerts per coin. A triggered alert sends a system notification.
 - **Multiple quote currencies**: USD, CNY, KRW, HKD, JPY, TWD, SGD, MYR, AUD, CAD, EUR, GBP, with automatic exchange rate conversion.
 - **Multi-source failover**: Switches automatically when any price or exchange rate data source is unavailable. No API key needed.
+- **In-app updates**: Checks for a new version once a day, shows the release notes, and installs after you agree. Updates are signed and verified before installing.
 - **Launch at login** and **multiple languages**: English / Simplified Chinese / Traditional Chinese, switchable instantly while running.
 
 ## Requirements
@@ -42,6 +43,7 @@ The app calls public, key-free APIs directly and fails over in order:
 |---|---|
 | Prices | Binance → Binance mirror (data-api.binance.vision) → OKX → Bybit |
 | Exchange rates | open.er-api.com → jsDelivr currency-api → currency-api.pages.dev (cached for 1 hour) |
+| Updates | `dl.coinscal.app` (Sparkle feed and signed archives) |
 | Coin catalog | Built-in snapshot, generated from CoinGecko market cap ranks and the spot listings of the three exchanges (`make catalog`) |
 
 Only coins quoted in USDT with a spot pair on the exchanges above are supported.
@@ -49,7 +51,7 @@ Only coins quoted in USDT with a spot pair on the exchanges above are supported.
 ## Privacy
 
 - No servers, no sign-up, no data collected or uploaded.
-- Network requests go only to the public APIs above (the sandbox grants only `network.client`).
+- Network requests go only to the public APIs above and, once a day, to `dl.coinscal.app` to check for updates (the sandbox grants only `network.client`).
 - Settings stay on your Mac.
 - The app requests notification permission only for price alerts.
 

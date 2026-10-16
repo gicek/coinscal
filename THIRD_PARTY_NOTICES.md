@@ -2,7 +2,13 @@
 
 This file records every third-party dependency in Coinscal. When a dependency changes, update its locked version, license, source, purpose, and removal plan.
 
-No third-party code dependencies yet: the app uses only Apple system frameworks.
+## Code dependencies
+
+| Dependency | Version | License | Use | Removal |
+|---|---|---|---|---|
+| [Sparkle](https://github.com/sparkle-project/Sparkle) | 2.10.0, Swift Package pinned in `Apple/project.yml` (`Package.resolved` committed) | MIT | In-app updates: update checks, EdDSA signature verification, installation ([UPDATES](docs/UPDATES.md)) | Remove the package, `UpdateService.swift`, the update UI, and the `SU*` Info.plist keys and mach-lookup entitlements; users then update by downloading the DMG |
+
+Everything else in the app uses only Apple system frameworks. The About pane lists Sparkle under open source components.
 
 ## External data and assets (not code dependencies)
 
@@ -24,4 +30,5 @@ The website's live demo calls the same public price and exchange rate APIs from 
 
 | Tool | Version | License | Use | Removal |
 |---|---|---|---|---|
-| Wrangler (Cloudflare) | 4.137.0, pinned in the `Makefile` and run through `npx` | MIT OR Apache-2.0 | Deploys `Site/` to Cloudflare Workers Static Assets (`make site-deploy`) | Deploy through the Cloudflare dashboard or another static host; nothing in `Site/` depends on it |
+| Wrangler (Cloudflare) | 4.137.0, pinned in the `Makefile` and run through `npx` | MIT OR Apache-2.0 | Deploys `Site/` (`make site-deploy`) and uploads release files to R2 (`make mac-publish`) | Deploy and upload through the Cloudflare dashboard; nothing in `Site/` depends on it |
+| Sparkle command-line tools (`generate_keys`, `sign_update`) | 2.10.0 release archive, SHA-256 pinned in the `Makefile`, downloaded into `Build/Sparkle/` | MIT | Creates the update signing key and signs release archives | Needed as long as Sparkle is |

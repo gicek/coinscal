@@ -14,6 +14,7 @@ The first milestone (1.x) delivers a standalone menu bar price tool: current pri
 | Desktop and Notification Center widgets | Implemented | "Coin Price" and "Watchlist" widgets with edit options; they fetch prices themselves when the app isn't running ([WIDGET](WIDGET.md)); appearance on a real Mac pending verification |
 | Desktop ticker | Implemented | Click-through desktop price panel, refreshed every 10 seconds with the app, can be dragged to any display ([DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)); multiple panels not done |
 | Website | Deployed | Static site with a live menu bar demo in three languages at `coinscal.app` ([WEBSITE](WEBSITE.md)); Safari and Lighthouse pending verification |
+| In-app updates | In progress | Sparkle 2 updates from Cloudflare R2 at `dl.coinscal.app`, with `make mac-publish` ([UPDATES](UPDATES.md)) |
 | Release pipeline | In progress | Developer ID code signing and notarization (`mac-release` / `mac-release-notarized`, implemented; first launch on another Mac pending verification); upload via `mac-publish` (not started) |
 
 ## Engineering Foundation
@@ -40,7 +41,6 @@ Done when: `make mac-release-notarized` produces a zip and DMG that are Develope
 
 ### Distribution
 
-- In-app updates: the app checks for and installs new versions, with update files on Cloudflare's free storage. Next after the website (2026-10-16); needs a design doc and approval before implementation.
 
 ### Engineering
 

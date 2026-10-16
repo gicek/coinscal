@@ -4,6 +4,14 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Added: In-app updates
+Coinscal checks `https://dl.coinscal.app/appcast.xml` once a day with Sparkle 2.10.0 (design in docs/UPDATES.md) and installs a new version only after the user agrees. A scheduled check that finds an update doesn't open a window unless Coinscal is in front; the popover title bar shows an "Update Available" capsule instead. "Check for Updates…" is in the right-click menu and the About pane, which also has "Automatically Check for Updates" (on by default) and now lists Sparkle under open source components. Archives must carry a valid EdDSA signature (public key in `Info.plist`) and the same Team ID.
+
+- Sandbox: Sparkle's installer XPC service with the `-spks` / `-spki` mach-lookup exceptions; the Downloader service stays off.
+- `release.sh` signs Sparkle's XPC services and helpers with the Developer ID before notarization, and its checks cover them. New commands: `make mac-update-keys` (signing key), `make mac-publish` (appcast, R2 upload, GitHub Release), `make sparkle-tools`.
+- The release zip grows from about 1.3 MB to 2.3 MB.
+- Tests: 5 in `UpdateControllerTests` with `FakeUpdaterBackend`; a Developer ID-signed `make mac-release` build passes the extended signing checks.
+
 ### Changed: No scroll bars in the popover list and the watchlist settings list
 The menu bar popover's coin list and the added-coins list in Settings → Watchlist no longer show a vertical scroll bar (`.scrollIndicators(.never)`, which also holds with "Show scroll bars: Always"). Both still scroll with a trackpad or mouse wheel, and drag reordering still auto-scrolls. Checked on a real Mac via Accessibility: the watchlist list's scroll area no longer has a scroll bar.
 

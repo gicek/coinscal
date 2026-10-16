@@ -5,7 +5,7 @@
 ## Technology Choices
 
 - **Swift 6 + SwiftUI, with AppKit hosting the menu bar**: AppKit drives `NSStatusItem`, `NSPopover`, and the Settings `NSWindow`; their content is SwiftUI. The menu bar title needs an `NSAttributedString` for coloring.
-- **No third-party dependencies**: only system frameworks (Foundation, Combine, SwiftUI, AppKit, UserNotifications, ServiceManagement, OSLog).
+- **One third-party dependency**: Sparkle for in-app updates, the standard updater for directly distributed Mac apps. Everything else uses system frameworks (Foundation, Combine, SwiftUI, AppKit, UserNotifications, ServiceManagement, OSLog).
 - **No backend**: prices and exchange rates come directly from public APIs that need no key, with multi-source failover.
 - **Combine drives the data flow**: this is the current state. New code uses async/await; see ROADMAP for the migration.
 - **XcodeGen**: `Apple/project.yml` generates the project.
@@ -18,7 +18,7 @@
 | Deployment target | macOS 14.0, arm64 |
 | XcodeGen | 2.45 |
 | Testing | Swift Testing |
-| Third-party dependencies | None |
+| Third-party dependencies | Sparkle 2.10.0 (Swift Package, app target only) |
 | Website | Static HTML, CSS, and JavaScript modules in `Site/`; Node 20+ `node:test` for offline checks; Wrangler 4.137.0 for deploys |
 
 ## System Structure
@@ -30,7 +30,8 @@ CoinscalApp (@main) ──▶ AppDelegate (wiring; skipped when running as test 
    │                    └─ PriceAlertNotifying (NotificationService)
    ├─ MenuBarViewModel ──▶ NSStatusItem
    ├─ WidgetSnapshotWriter ──▶ App Group snapshot + WidgetCenter reload
-   └─ DesktopOverlayController ──▶ click-through window at desktop level (reuses widget views)
+   ├─ DesktopOverlayController ──▶ click-through window at desktop level (reuses widget views)
+   └─ UpdateController ── UpdaterBackend (SparkleUpdaterBackend ──▶ Sparkle, dl.coinscal.app)
 Views: MenuBar/ (popover), Settings/ (Settings window), Components/
 
 CoinscalWidget (Widget Extension) ── WidgetDataLoader ── snapshot, or fetches prices with its own PriceService
@@ -40,7 +41,7 @@ CoinscalWidget (Widget Extension) ── WidgetDataLoader ── snapshot, or fe
 |---|---|
 | `Apple/Mac/App` | Entry point, `AppDelegate`, `Constants` |
 | `Apple/Mac/Models` | `AppSettings`, `WatchlistCoin`, `Coin`, enums |
-| `Apple/Mac/Services` | Prices, exchange rates, HTTP, settings storage, notifications, login item |
+| `Apple/Mac/Services` | Prices, exchange rates, HTTP, settings storage, notifications, login item, updates |
 | `Apple/Mac/ViewModels` | `CoinListViewModel`, `SettingsViewModel`, `MenuBarViewModel`, `WatchlistViewModel` |
 | `Apple/Mac/Views` | SwiftUI views |
 | `Apple/Mac/Utilities` | `AlertEvaluator`, `PriceFormatter`, `LocalizationManager` |
@@ -119,6 +120,14 @@ Check per-source coverage, cross-source price differences, and failover against 
 
 open.er-api.com → jsDelivr currency-api → currency-api.pages.dev. The whole table is cached in memory for 1 hour. USD is not requested. If all sources fail, the stale cache is used. Concurrent requests share one in-flight request; it is cleared when all subscribers cancel it, so later requests don't reuse a disconnected publisher.
 
+### Updates (`UpdateService`)
+
+- Feed `https://dl.coinscal.app/appcast.xml`, set in `Info.plist` (`SUFeedURL`) with `SUPublicEDKey`, `SUEnableAutomaticChecks` = YES, and `SUScheduledCheckInterval` = 86400. Automatic installation is off. No system profile is sent.
+- Sparkle verifies each archive's EdDSA signature against `SUPublicEDKey` and requires the new app to be signed by the same Team ID.
+- Sandbox: `SUEnableInstallerLauncherService` = YES and the mach-lookup exceptions `$(PRODUCT_BUNDLE_IDENTIFIER)-spks` / `-spki` let Sparkle's installer XPC service replace the app. The Downloader XPC service is off because the app has `network.client`.
+- `SparkleUpdaterBackend` implements gentle reminders: a scheduled check shows Sparkle's window only when Coinscal is in focus; otherwise `UpdateController.updateAvailable` drives the popover capsule until Sparkle reports user attention or the session ends. Sparkle calls its user driver delegate on the main thread, so the conformance is `@preconcurrency`.
+- Release signing: Xcode leaves Sparkle's XPC services and helpers ad-hoc signed; `release.sh` re-signs `Installer.xpc`, `Downloader.xpc` (entitlements preserved), `Autoupdate`, `Updater.app`, the framework, and then the app with the Developer ID, never with `--deep`. Feed and file layout: [UPDATES](UPDATES.md).
+
 ## Concurrency and Lifecycle
 
 - ViewModels, `AppDelegate`, `NotificationService`, `LaunchAtLoginService`, and `LocalizationManager` are `@MainActor`.
@@ -158,11 +167,12 @@ open.er-api.com → jsDelivr currency-api → currency-api.pages.dev. The whole 
 - Catalog: `CoinCatalogTests` validates the bundled snapshot and each rejection case; `CoinCatalogTests` also covers automatically replacing old coins with their successors, and `WatchlistViewModelTests` covers the scope of search and of the browse list in the add panel.
 - State machine: `CoinListViewModel` gets `FakePriceService` and `SpyNotifier` injected, covering polling not interrupting in-flight requests, discarding old results and avoiding false alerts on currency change, and above / below alerting only on crossings.
 - Settings storage: `UserDefaultsSettingsStore` gets `InMemoryDataStorage` injected, so tests leave no preference files on disk.
+- Updates: `UpdateControllerTests` uses `FakeUpdaterBackend`; no Sparkle updater runs in the test host.
 - Real network: `Apple/Mac/scripts/manual/check-data-sources.sh` (`make mac-check-sources`).
 - Website: `Site/test/site.test.js` (`make test-site`) checks formatting parity with `PriceFormatter`, message keys, the CSP hashes, demo coin logos, and demo settings fallback. The website's price feed mirrors the app's source order but is a separate JavaScript implementation; when the app's sources change, update `Site/js/prices.js`, the CSP in `Site/_headers`, and [WEBSITE](WEBSITE.md) together.
 - Wait for main-thread delivery with `drainMainQueue()`; tests don't `sleep`.
-- Needs manual verification: menu bar appearance, drag-to-reorder feel, system notification delivery, login item, real data source reachability (see VALIDATION).
+- Needs manual verification: menu bar appearance, drag-to-reorder feel, system notification delivery, login item, real data source reachability, installing an update end to end (see VALIDATION).
 
 ## Open Source and Dependencies
 
-No third-party code dependencies; the website is deployed with Wrangler, a pinned command-line tool. See [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md). 78 coin logos are bundled assets; the rest are downloaded from CoinGecko's image CDN when a coin is added to the watchlist. Data comes from the public APIs in the table above.
+The only third-party code dependency is Sparkle; Wrangler and Sparkle's command-line tools are pinned build tools. See [THIRD_PARTY_NOTICES](../THIRD_PARTY_NOTICES.md). 78 coin logos are bundled assets; the rest are downloaded from CoinGecko's image CDN when a coin is added to the watchlist. Data comes from the public APIs in the table above.

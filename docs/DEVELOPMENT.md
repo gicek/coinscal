@@ -10,7 +10,9 @@ Run all commands below from the repository root. For repository rules, see the [
 | XcodeGen | 2.45 | `brew install xcodegen` |
 | Python | 3.9+ (localization guards, website preview) | Bundled with the system |
 | Node.js | 20+ for website checks (CI uses 24); 22+ for Wrangler, which the Makefile picks from nvm automatically | `nvm install 24` |
-| Wrangler | 4.137.0 (website deploys, run through `npx`; not installed in the repo) | Downloaded on first use by `make site-login` or `make site-deploy` |
+| Wrangler | 4.137.0 (website deploys and R2 uploads, run through `npx`; not installed in the repo) | Downloaded on first use by `make site-login`, `make site-deploy`, or `make mac-publish` |
+| Sparkle tools | 2.10.0 (`generate_keys`, `sign_update`; SHA-256 pinned in the `Makefile`) | Downloaded into `Build/Sparkle/` by `make sparkle-tools` |
+| GitHub CLI | Any recent version (`make mac-publish` creates the GitHub Release) | `brew install gh`, then `gh auth login` |
 
 CI (`.github/workflows/tests.yml`) runs only the repository hygiene checks, the localization guards, and the website checks. App unit tests depend on a local Xcode and run through `make test` locally. Run it before merging.
 
@@ -31,6 +33,9 @@ make site-run               # Website: local preview at http://localhost:8787/ w
 make site-login             # Website: sign in to Cloudflare for deploys (opens a browser)
 make site-whoami            # Website: show the signed-in Cloudflare account
 make site-deploy CONFIRM=yes  # Website: test, then deploy Site/ to Cloudflare
+make mac-update-keys BACKUP=<file>  # Once per signing key: create or reuse the update key in the Keychain and export a backup
+make mac-publish CONFIRM=<version>  # Publish the notarized release to dl.coinscal.app and GitHub (DRY_RUN=1 checks and renders only)
+make sparkle-tools          # Download Sparkle's command-line tools into Build/Sparkle/
 make mac-check-sources      # Manual: check all price and exchange rate data sources over the real network; exits with code 1 on failure
 make catalog                # Regenerate the built-in coin catalog online (run before a release; set COINGECKO_API_KEY for a higher rate limit)
 make clean                  # Delete Build/ and fallback outputs in the source tree
@@ -48,6 +53,8 @@ To develop in Xcode: run `make project` first, then open `Apple/Coinscal.xcodepr
 | DerivedData | `Build/macOS/DerivedData/` |
 | Tests | `Build/macOS/Tests/` |
 | Distribution packages | `Build/macOS/Dist/` |
+| Rendered appcast and release notes | `Build/macOS/Publish/<version>/` |
+| Sparkle tools | `Build/Sparkle/<version>/` |
 
 ## Local Configuration
 
@@ -67,7 +74,12 @@ Change `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` only in `Apple/project.
    - Notarization (only `mac-release-notarized`): it first zips the app, submits it to `notarytool`, and staples the ticket to the app, so the app inside the zip passes even offline. It then builds the zip and DMG from the stapled app, signs the DMG, submits it for notarization, and staples the DMG. Finally `spctl` verifies the app as `Notarized Developer ID` and checks that the DMG passes. On failure it prints the notarization log and exits with an error.
    - Put one of two notarization credentials in `local.mk`: `NOTARY_PROFILE` (first run `xcrun notarytool store-credentials <name> --apple-id <Apple ID> --team-id <Team ID>` once and enter an app-specific password), or `ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_KEY_PATH` (keep the .p8 outside the repository). Missing credentials fail before the build starts.
    - Output from `make mac-release` is blocked by Gatekeeper on first launch on other Macs; use it only locally or for internal testing. Use only `make mac-release-notarized` for public distribution.
-3. Upload: attach the zip and DMG to a GitHub Release (no upload command yet). Update `Apple/Mac/docs/CHANGELOG.md` before releasing.
+   - Sparkle: `release.sh` signs Sparkle's nested code before verification and notarization (see "Updates" in [TECHNICAL](TECHNICAL.md)), and the signing checks cover it.
+3. Publish (`make mac-publish CONFIRM=<version>`, design in [UPDATES](UPDATES.md)):
+   - Before publishing: raise `CURRENT_PROJECT_VERSION` (and `MARKETING_VERSION` for a new version) in `Apple/project.yml`, run `make mac-release-notarized`, write `Site/releases/<version>.json` in all three languages (`{"version": "<version>", "notes": {"en": [...], "zh-Hans": [...], "zh-Hant": [...]}}`, same number of items in each), and update `Apple/Mac/docs/CHANGELOG.md`.
+   - The command checks that the zip and DMG are notarized and stapled, that the build number is higher than the live appcast's, and that the release notes are complete; signs the zip with the Keychain key; renders `appcast.xml` and the notes pages; uploads the archives, `Coinscal.dmg`, the notes, and finally `appcast.xml` to the R2 bucket `coinscal-dl`; and creates the GitHub Release `v<version>`. Run with `DRY_RUN=1` first to check and render without uploading.
+   - Prerequisites: R2 enabled on the Cloudflare account, the bucket `coinscal-dl` with the custom domain `dl.coinscal.app` (the `r2.dev` URL disabled), Wrangler signed in with R2 access (`make site-login`), and `gh auth login`.
+4. Update signing key: created once with `make mac-update-keys BACKUP=<file outside the repository>`; the private key stays in the login Keychain (account `com.gicek.coinscal`) and in the offline backup. To restore it on another Mac: `Build/Sparkle/2.10.0/dist/bin/generate_keys --account com.gicek.coinscal -f <backup>`.
 
 ## Website
 

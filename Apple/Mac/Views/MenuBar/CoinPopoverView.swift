@@ -6,6 +6,7 @@ import SwiftUI
 struct CoinPopoverView: View {
     @EnvironmentObject var coinListVM: CoinListViewModel
     @EnvironmentObject var settingsVM: SettingsViewModel
+    @EnvironmentObject var updateController: UpdateController
 
     private enum Layout {
         static let cornerRadius: CGFloat = 12
@@ -45,9 +46,26 @@ struct CoinPopoverView: View {
                     .scaleEffect(0.72)
                     .controlSize(.small)
             }
+            if updateController.updateAvailable {
+                updateButton
+            }
         }
         .padding(.horizontal, Layout.horizontalPadding)
         .frame(height: Constants.Popover.headerHeight)
+    }
+
+    /// A scheduled check found an update without opening a window; this opens Sparkle's update window.
+    private var updateButton: some View {
+        Button(action: { updateController.checkForUpdates() }) {
+            Label(loc("popover.updateAvailable"), systemImage: "arrow.down.circle.fill")
+                .font(.system(size: 11, weight: .medium))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Capsule().fill(Color.accentColor.opacity(0.15)))
+                .foregroundStyle(Color.accentColor)
+        }
+        .buttonStyle(.plain)
+        .help(loc("popover.updateAvailable.help"))
     }
 
     @ViewBuilder

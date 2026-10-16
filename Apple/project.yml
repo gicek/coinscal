@@ -7,6 +7,12 @@ options:
   deploymentTarget:
     macOS: "14.0"
 
+# In-app updates (docs/UPDATES.md); pinned, listed in THIRD_PARTY_NOTICES.md.
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: 2.10.0
+
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -51,6 +57,8 @@ targets:
     dependencies:
       # Embedded in Coinscal.app/Contents/PlugIns.
       - target: CoinscalWidget
+      # App only; the widget extension doesn't update anything.
+      - package: Sparkle
   # Desktop / Notification Center widgets (docs/WIDGET.md). Shares the listed app sources instead of a framework.
   CoinscalWidget:
     type: app-extension

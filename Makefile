@@ -43,19 +43,31 @@ RELEASE_ENV := DEVELOPER_ID="$(DEVELOPER_ID)" DEVELOPMENT_TEAM="$(DEVELOPMENT_TE
     NOTARY_PROFILE="$(NOTARY_PROFILE)" ASC_KEY_ID="$(ASC_KEY_ID)" ASC_ISSUER_ID="$(ASC_ISSUER_ID)" ASC_KEY_PATH="$(ASC_KEY_PATH)"
 # Apple/project.yml is the single source of the version number
 VERSION := $(shell sed -nE 's/^ *MARKETING_VERSION: *"?([^"]+)"?.*/\1/p' Apple/project.yml | head -1)
+BUILD_NUMBER := $(shell sed -nE 's/^ *CURRENT_PROJECT_VERSION: *"?([^"]+)"?.*/\1/p' Apple/project.yml | head -1)
+MIN_MACOS := $(shell sed -nE 's/^ *macOS: *"?([^"]+)"?.*/\1/p' Apple/project.yml | head -1)
 BUILD_TARGETS += mac
 TEST_TARGETS += test-mac
+# Sparkle (in-app updates, docs/UPDATES.md): command-line tools from the pinned release; the signing key lives in the
+# login Keychain under this account
+SPARKLE_VERSION := 2.10.0
+SPARKLE_SHA256 := c2bf58aa8387266ac179357b1415d6f2635f044da8be41042af32425dae6da0c
+SPARKLE_DIR := $(BUILD_ROOT)/Sparkle/$(SPARKLE_VERSION)
+SPARKLE_KEY_ACCOUNT := com.gicek.coinscal
+# Update files (docs/UPDATES.md): R2 bucket served only through this download domain
+DOWNLOAD_BUCKET := coinscal-dl
+DOWNLOAD_URL := https://dl.coinscal.app
 
 # --- Site ---
 # Static website in Site/, deployed to Cloudflare Workers Static Assets (Site/wrangler.jsonc). Wrangler runs via npx at
 # a pinned version; it isn't installed in the repo. It needs Node 22+: the newest nvm-installed Node 22+ is used when
 # there is one, without changing the default Node.
 WRANGLER_NODE_BIN := $(lastword $(sort $(wildcard $(HOME)/.nvm/versions/node/v2[2-9].*/bin)))
-WRANGLER := $(if $(WRANGLER_NODE_BIN),PATH="$(WRANGLER_NODE_BIN):$$PATH" )npx --yes wrangler@4.137.0
+WRANGLER_PKG := wrangler@4.137.0
+WRANGLER := $(if $(WRANGLER_NODE_BIN),PATH="$(WRANGLER_NODE_BIN):$$PATH" )npx --yes $(WRANGLER_PKG)
 SITE_PORT ?= 8787
 TEST_TARGETS += test-site
 
-.PHONY: help build test clean project site-run site-login site-whoami site-deploy mac-run mac-release mac-release-notarized mac-release-app mac-check-sources catalog $(BUILD_TARGETS) $(TEST_TARGETS)
+.PHONY: help build test clean project sparkle-tools mac-update-keys mac-publish site-run site-login site-whoami site-deploy mac-run mac-release mac-release-notarized mac-release-app mac-check-sources catalog $(BUILD_TARGETS) $(TEST_TARGETS)
 
 help:
 	@echo "$(PRODUCT) build commands"
@@ -68,6 +80,8 @@ help:
 	@echo "  make mac-release           Release: Developer ID-signed zip and DMG in Build/macOS/Dist/ (no notarization or upload; needs a GUI session)"
 	@echo "  make mac-release-notarized Release and notarize: as above, then notarize the app and DMG, staple the ticket, and pass Gatekeeper checks"
 	@echo "  make test-mac              Localization guards + Mac unit tests"
+	@echo "  make mac-publish CONFIRM=<version>  Publish the notarized release: appcast and files to R2, GitHub Release (DRY_RUN=1 uploads nothing)"
+	@echo "  make mac-update-keys BACKUP=<file>  Create (or reuse) the update signing key in the Keychain and export a backup outside the repo"
 	@echo "  make mac-check-sources     Manual: check all price and exchange rate data sources over the real network (not part of make test)"
 	@echo "  make catalog               Regenerate the built-in coin catalog Apple/Mac/Resources/coins.json online (run before a release)"
 	@echo "  make test-site             Website: localization guards + offline checks (Node 20+)"
@@ -141,6 +155,24 @@ site-whoami:
 site-deploy: test-site
 	@test "$(CONFIRM)" = "yes" || { echo "Deploying publishes https://coinscal.app/. Run: make site-deploy CONFIRM=yes"; exit 1; }
 	cd Site && $(WRANGLER) deploy
+
+# Publishing is public and permanent: CONFIRM must repeat the version. Run after make mac-release-notarized.
+mac-publish:
+	@test "$(CONFIRM)" = "$(VERSION)" || test -n "$(DRY_RUN)" || { echo "Publishing $(VERSION) (build $(BUILD_NUMBER)) is public. Run: make mac-publish CONFIRM=$(VERSION)"; exit 1; }
+	@BIN="$$(scripts/release/sparkle-tools.sh "$(SPARKLE_VERSION)" "$(SPARKLE_SHA256)" "$(SPARKLE_DIR)")" && \
+	    python3 scripts/release/publish.py --version "$(VERSION)" --build "$(BUILD_NUMBER)" --min-system "$(MIN_MACOS)" \
+	        --dist "$(MAC_DIST)" --notes "Site/releases/$(VERSION).json" --work "$(MAC_BUILD_ROOT)/Publish" \
+	        --sparkle-bin "$$BIN" --key-account "$(SPARKLE_KEY_ACCOUNT)" --bucket "$(DOWNLOAD_BUCKET)" \
+	        --base-url "$(DOWNLOAD_URL)" --wrangler "npx --yes $(WRANGLER_PKG)" --node-bin "$(WRANGLER_NODE_BIN)" $(if $(DRY_RUN),--dry-run)
+
+sparkle-tools:
+	@scripts/release/sparkle-tools.sh "$(SPARKLE_VERSION)" "$(SPARKLE_SHA256)" "$(SPARKLE_DIR)"
+
+# Run by the maintainer, once per signing key: the private key stays in the Keychain and in the backup file
+mac-update-keys:
+	@test -n "$(BACKUP)" || { echo "Usage: make mac-update-keys BACKUP=<file outside the repository>"; exit 1; }
+	@BIN="$$(scripts/release/sparkle-tools.sh "$(SPARKLE_VERSION)" "$(SPARKLE_SHA256)" "$(SPARKLE_DIR)")" && \
+	    scripts/release/update-keys.sh "$$BIN" "$(SPARKLE_KEY_ACCOUNT)" "$(BACKUP)"
 
 # Built-in coin catalog: generated online; --previous keeps every id from the old catalog (existing users' watchlists stay intact)
 catalog:

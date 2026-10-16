@@ -15,6 +15,8 @@ Supported languages: `en`, `zh-Hans`, `zh-Hant` (matching `LANGS` in the Makefil
 | Simplified Chinese | `zh-Hans` | Endonym in Simplified Chinese (`lang.endonym.zh-Hans`) |
 | Traditional Chinese | `zh-Hant` | Endonym in Traditional Chinese (`lang.endonym.zh-Hant`) |
 
+Sparkle's update window uses Sparkle's own translations and follows the system language, not the in-app setting; release notes are published in all three languages and Sparkle picks the one matching the system language.
+
 Each language's display name is written in that language itself and is not localized (catalog keys `lang.endonym.*`, with the same value in all three languages). Switching takes effect immediately without a restart. The system languages `zh-TW`, `zh-HK`, and `zh-MO` resolve to Traditional Chinese.
 
 ## Writing Strings

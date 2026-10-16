@@ -160,3 +160,15 @@ func firstValue<P: Publisher>(_ publisher: P) async throws -> P.Output where P.O
     }
     throw CancellationError()
 }
+
+/// Updater double: records checks and holds the automatic-check preference in memory.
+@MainActor
+final class FakeUpdaterBackend: UpdaterBackend {
+    var canCheckForUpdates = true
+    var automaticallyChecksForUpdates = true
+    private(set) var checkCount = 0
+
+    func checkForUpdates() {
+        checkCount += 1
+    }
+}

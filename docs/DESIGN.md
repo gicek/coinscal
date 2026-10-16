@@ -15,9 +15,11 @@
 
 320pt wide: title bar + watchlist + bottom bar (Settings, Manage Watchlist, Quit). The list reserves at least 4 rows and shows at most 8; beyond that it scrolls, without a visible scroll bar. Each row: logo, name, symbol, current price (in the quote currency), 24h change. With an empty watchlist it shows an empty state and "Add Coins", which opens the "Watchlist" pane in Settings.
 
+When a scheduled update check finds a new version, the title bar shows an "Update Available" capsule on the right; clicking it opens the update window. The capsule disappears once the update window has been seen or the update session ends.
+
 ### Right-Click Menu
 
-Switch the menu bar coin (submenu, current item checked), Settings, About, Quit (⌘Q).
+Switch the menu bar coin (submenu, current item checked), Settings, About, Check for Updates… (disabled while a check is running), Quit (⌘Q).
 
 ### Settings Window
 
@@ -25,7 +27,7 @@ Three sidebar panes: General, Watchlist, About. The top of the content area is a
 
 - **General**: Launch ("Open at Login"); Menu Bar ("Show": Price / Icon segmented control, "Coin", "Color by Price Change" + "Color Scheme", "Show Background"); Desktop ("Show on Desktop", "Size" Small / Medium / Large (Medium by default), "Background Opacity", "Adjust Position…"; the rest are grayed out when off); Prices ("Display Currency", which applies to the menu bar, popover, and alerts, so it is not in the Menu Bar section); Notifications ("Price Alerts" master switch); Language. When "Show" is "Icon", the other Menu Bar options are grayed out (kept in place, not hidden).
 - **Watchlist**: A "+" button at the far right of the title bar opens an add panel below the button (an in-window card whose right edge stays inside the window, not a system popover). At the top is a search field (focused on open) that searches the roughly 450 tradable coins currently listed in the coin catalog by symbol or name. With no input it lists all listed coins. Added rows show a checkmark; clicking a row that isn't added adds it. The panel stays open for adding several coins in a row. Return adds the first result that isn't added. Esc (except during input method composition), clicking outside the panel, clicking "+" again, or switching panes closes it and clears the search. With no matches it shows "No matching coins". The content area contains only "Recommended" (click to toggle add / remove; coins that aren't listed are skipped) and the added list (drag handle to reorder, alert condition + value, delete; it scrolls without a visible scroll bar). In the added list, delisted coins show "No market data" under the symbol; popover rows show the same text in place of the change.
-- **About**: Version, contact, data sources.
+- **About**: Version; Updates ("Automatically Check for Updates" toggle, on by default, and "Check for Updates…"); contact; data sources; open source components.
 
 ### Desktop and Notification Center Widgets
 
@@ -53,6 +55,14 @@ The website's hero reproduces the menu bar button and the popover with live pric
 - With no reference price (first price after launch, after switching the quote currency), the app only records the reference price and doesn't alert, because it can't tell whether a crossing happened. If the price is already on the other side of the threshold at launch, the alert waits until it comes back to this side and crosses again.
 - Switching the quote currency: all reference prices reset, no alert.
 - When switching to Above / Below, the threshold defaults to the current price ±2%.
+
+### Updates
+
+- Coinscal checks for updates once a day. A scheduled check never opens a window by itself unless Coinscal is already in front; otherwise it shows "Update Available" in the popover title bar.
+- "Check for Updates…" (right-click menu or About pane) opens the update window right away: the new version's release notes and "Install Update", or a note that Coinscal is up to date.
+- Installing replaces the app and relaunches it; settings, watchlist, widgets, and the login item are kept. Nothing installs without the user's agreement.
+- If the check fails (offline, server unreachable), a scheduled check stays silent; a manual check shows the error.
+- The update window and its buttons come from Sparkle and follow the system language, not the in-app language setting. Release notes follow the system language too, falling back to English.
 
 ### Data Source Failure
 

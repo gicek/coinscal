@@ -2,10 +2,18 @@
 
 > Purpose: a working document for day-to-day execution that records the near-term batches and tech debt. It is not a scope commitment and can change as work proceeds. Verification status lives in [VALIDATION](VALIDATION.md).
 
-## Current Batch: In-App Updates (Design)
+## Current Batch: In-App Updates
 
-- [ ] Write `docs/UPDATES.md`: update feed format, where release files live on Cloudflare storage, signature and integrity checks, user flow, and what the website and the release scripts publish
-- [ ] Register it under "Features Under Consideration" in [ROADMAP](ROADMAP.md) and get approval before implementation
+Design: [UPDATES](UPDATES.md) (approved 2026-10-16).
+
+- [x] `make sparkle-tools` and `make mac-update-keys`
+- [x] Owner: signing key created and backed up
+- [x] R2 bucket `coinscal-dl` on `dl.coinscal.app`
+- [ ] Owner: `gh auth login`
+- [x] App: Sparkle package, `UpdateController`, menu item, About pane controls, popover header capsule, Info.plist keys, entitlements, strings, tests
+- [x] Release: sign Sparkle components in `release.sh`; `make mac-publish` (appcast, R2 upload, GitHub Release)
+- [x] Website: release notes checks, download button to `dl.coinscal.app`, privacy page (deploy with the first release)
+- [ ] First public release with the updater, then publish the next build and verify the update end to end
 
 ## Next Batch: Remote Coin Catalog Updates
 

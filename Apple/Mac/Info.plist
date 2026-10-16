@@ -47,5 +47,15 @@
 	<string>NSApplication</string>
 	<key>NSUserNotificationAlertStyle</key>
 	<string>alert</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://dl.coinscal.app/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>M+ujV4U9U66+vZ7WznIXqax87bNNthJcK9iiknp4UTs=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 </dict>
 </plist>

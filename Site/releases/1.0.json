@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "notes": {
+    "en": [
+      "Live prices and 24-hour change for your watchlist, right in the menu bar.",
+      "Price alerts for each coin: above or below a price, or a percentage move.",
+      "Desktop and Notification Center widgets, and a price panel pinned to the desktop.",
+      "12 quote currencies, English and Chinese, and automatic updates."
+    ],
+    "zh-Hans": [
+      "在菜单栏实时查看自选币种的价格和 24 小时涨跌。",
+      "为每个币种单独设置价格提醒：高于或低于某个价格，或涨跌达到设定百分比。",
+      "桌面与通知中心小组件，以及钉在桌面上的价格面板。",
+      "12 种计价货币，中英文界面，支持自动更新。"
+    ],
+    "zh-Hant": [
+      "在選單列即時查看自選幣種的價格與 24 小時漲跌。",
+      "為每個幣種個別設定價格提醒：高於或低於某個價格，或漲跌達到設定百分比。",
+      "桌面與通知中心小工具，以及釘在桌面上的價格面板。",
+      "12 種計價貨幣，中英文介面，支援自動更新。"
+    ]
+  }
+}

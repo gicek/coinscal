@@ -2,9 +2,10 @@ import SwiftUI
 
 struct AboutView: View {
     @EnvironmentObject var settingsVM: SettingsViewModel
+    @EnvironmentObject var updateController: UpdateController
 
     private let openSourceComponents: [(name: String, license: String, url: String)] = [
-        // Add open source components as they are added to the project
+        ("Sparkle", "MIT License", "https://github.com/sparkle-project/Sparkle"),
     ]
 
     var body: some View {
@@ -27,6 +28,24 @@ struct AboutView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                }
+
+                Divider()
+
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(loc("about.section.updates"))
+                        .font(.headline)
+
+                    Toggle(loc("about.updates.automatic"), isOn: Binding(
+                        get: { updateController.automaticallyChecksForUpdates },
+                        set: { updateController.setAutomaticallyChecksForUpdates($0) }
+                    ))
+                    .disabled(!updateController.isAvailable)
+
+                    Button(loc("menu.checkForUpdates")) {
+                        updateController.checkForUpdates()
+                    }
+                    .disabled(!updateController.canCheckForUpdates)
                 }
 
                 Divider()
@@ -64,8 +83,8 @@ struct AboutView: View {
                         ForEach(openSourceComponents, id: \.name) { component in
                             HStack {
                                 VStack(alignment: .leading) {
-                                    Text(component.name).font(.callout)
-                                    Text(component.license).font(.caption).foregroundStyle(.secondary)
+                                    Text(verbatim: component.name).font(.callout)
+                                    Text(verbatim: component.license).font(.caption).foregroundStyle(.secondary)
                                 }
                                 Spacer()
                                 if let url = URL(string: component.url) {
