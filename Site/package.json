@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Coinscal website: static HTML, CSS, and JavaScript served by Cloudflare Workers Static Assets",
   "scripts": {
-    "check": "node --test test/"
+    "check": "node --test test/*.test.js"
   },
   "engines": {
     "node": ">=20"
