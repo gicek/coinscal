@@ -118,7 +118,7 @@ struct WatchlistAddCoinPanel: View {
         // Added rows stay full strength (a disabled button would dim the whole row); tapping one does nothing.
         return Button(action: { if !added { add(meta) } }) {
             HStack(spacing: 10) {
-                CoinLogoView(assetName: meta.logoAssetName, urlString: meta.logoURL, symbol: meta.symbol)
+                CoinLogoView(coinID: meta.id, assetName: meta.logoAssetName, urlString: meta.logoURL, symbol: meta.symbol)
                     .frame(width: Layout.iconSize, height: Layout.iconSize)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(verbatim: meta.symbol).font(.system(size: 13, weight: .medium))

@@ -187,7 +187,7 @@ private struct WidgetEmptyView: View {
     }
 }
 
-/// Bundled logo only: widgets cannot load remote images while rendering.
+/// Bundled logo, else the logo the app cached for this watchlist coin: widgets cannot load remote images while rendering.
 private struct WidgetCoinLogo: View {
     let row: WidgetRow
     let size: CGFloat
@@ -196,6 +196,9 @@ private struct WidgetCoinLogo: View {
         Group {
             if let asset = row.logoAssetName {
                 desaturated(Image(asset).resizable())
+                    .scaledToFit()
+            } else if let cached = CoinLogoCache.appGroup.image(for: row.id) {
+                desaturated(Image(nsImage: cached).resizable())
                     .scaledToFit()
             } else {
                 ZStack {

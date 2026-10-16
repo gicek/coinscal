@@ -8,7 +8,7 @@ import OSLog
 final class CoinCatalog: ObservableObject {
     nonisolated static let schemaVersion = 1
     nonisolated static let logoHosts: Set<String> = ["coin-images.coingecko.com", "assets.coingecko.com"]
-    nonisolated static let listedRange = 50...150
+    nonisolated static let listedRange = 200...1000
     private static let logger = Logger(subsystem: "com.gicek.coinscal", category: "CoinCatalog")
 
     /// Sorted by market cap rank (unranked last).

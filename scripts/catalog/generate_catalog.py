@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Generate and validate the coin catalog coins.json (plan: docs/COIN_CATALOG.md).
 
-    generate  CoinGecko top 250 by market cap ∩ USDT spot pairs on Binance/OKX/Bybit → first 100 tradable (listed);
-                        every id from the previous catalog is kept (migrated / delisted / tradable outside the top 100) so existing watchlists keep working.
+    generate  CoinGecko top 1000 by market cap ∩ USDT spot pairs on any of Binance/OKX/Bybit → every tradable coin is listed
+              (searchable); every id from the previous catalog is kept (migrated / delisted / tradable outside the top 1000)
+              so existing watchlists keep working.
     validate  same rules as the client; CI must pass it before publishing.
 
 Standard library only. Optional COINGECKO_API_KEY (Demo key) raises the rate limit.
@@ -20,9 +21,11 @@ import urllib.parse
 import urllib.request
 
 SCHEMA_VERSION = 1
-TARGET_LISTED = 100
-MIN_LISTED = 50
-MAX_LISTED = 150
+# CoinGecko top N by market cap (pages of 250); every tradable coin among them is listed
+MARKET_CAP_TOP = 1000
+MARKETS_PAGE_SIZE = 250
+MIN_LISTED = 200
+MAX_LISTED = 1000
 # Exchange price vs CoinGecko price beyond this ratio means a different coin with the same symbol; skipped
 MAX_PRICE_DEVIATION = 0.20
 # Binance still returns halted pairs with their last price; a 24h window that ended longer ago is halted (same as the app)
@@ -143,13 +146,14 @@ def generate(previous_path, migrations_path):
         migrations = {old: value["to"] for old, value in json.load(file)["migrations"].items()}
     previous = load_previous(previous_path)
     prices = exchange_prices()
-    markets = [m for m in coingecko_markets(order="market_cap_desc", per_page=250, page=1) if m.get("market_cap_rank")]
+    markets = []
+    for page in range(1, MARKET_CAP_TOP // MARKETS_PAGE_SIZE + 1):
+        markets += coingecko_markets(order="market_cap_desc", per_page=MARKETS_PAGE_SIZE, page=page)
+    markets = [m for m in markets if m.get("market_cap_rank") and m["market_cap_rank"] <= MARKET_CAP_TOP]
     markets.sort(key=lambda m: m["market_cap_rank"])
 
     catalog = {}
     for market in markets:
-        if sum(1 for c in catalog.values() if c["listed"]) >= TARGET_LISTED:
-            break
         symbol = market["symbol"].upper()
         if market["id"] in migrations or not tradable(market, prices):
             continue
@@ -158,7 +162,7 @@ def generate(previous_path, migrations_path):
             continue
         catalog[market["id"]] = entry(market, "active", True)
 
-    # Ids from the previous catalog that are no longer in the top 100, plus migration targets: fetch current metadata by id
+    # Ids from the previous catalog that are no longer in the top 1000, plus migration targets: fetch current metadata by id
     needed = (set(previous) | set(migrations.values()) | set(migrations)) - set(catalog)
     current = {}
     needed_list = sorted(needed)
@@ -168,13 +172,15 @@ def generate(previous_path, migrations_path):
             current[market["id"]] = market
 
     listed_symbols = {c["symbol"] for c in catalog.values()}
+    # A migration target matters only when an old id that moves to it is kept (it was in the previous catalog)
+    wanted_targets = {target for old, target in migrations.items() if old in previous}
     # Decide migration targets first: if the target is not tradable, replacing would not give a price either, so the old coin counts as delisted
     def target_active(target):
         if target in catalog:
             return catalog[target]["status"] == "active"
         return target in current and tradable(current[target], prices) and current[target]["symbol"].upper() not in listed_symbols
 
-    for coin_id in sorted(set(migrations.values()) - set(catalog)):
+    for coin_id in sorted(wanted_targets - set(catalog)):
         if coin_id in current and target_active(coin_id):
             catalog[coin_id] = entry(current[coin_id], "active", False)
             listed_symbols.add(catalog[coin_id]["symbol"])
@@ -182,8 +188,8 @@ def generate(previous_path, migrations_path):
     for coin_id in needed_list:
         if coin_id in catalog:
             continue
-        if coin_id not in previous and coin_id not in migrations.values():
-            continue  # an old id from the migration table that was never in the catalog does not need to be kept
+        if coin_id not in previous and coin_id not in wanted_targets:
+            continue  # migration-table ids nothing in the previous catalog refers to are not needed
         market = current.get(coin_id) or previous.get(coin_id)
         if market is None:
             continue

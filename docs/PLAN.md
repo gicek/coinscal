@@ -22,4 +22,4 @@ External dependencies: a public repository and the Actions secret `COINGECKO_API
 | 2 | The network layer is still Combine | Inconsistent with the guidelines (async/await); cancellation semantics are hard to reason about | ROADMAP Engineering |
 | 3 | `PriceFormatter` creates a new `NumberFormatter` on every call | Extra overhead while scrolling lists | Next batch |
 | 4 | `NSApp.activate(ignoringOtherApps:)` is deprecated in macOS 14 | A future SDK may remove it | Next batch |
-| 5 | Remote logos rely only on the system URL cache | Offline, new coins outside the catalog show a symbol placeholder | Remote coin catalog updates |
+| 5 | Logos of coins not yet added (browsing the add panel) rely only on the system URL cache | Offline, the panel shows symbol placeholders for them (watchlist coins are cached since 2026-10-15) | Remote coin catalog updates |

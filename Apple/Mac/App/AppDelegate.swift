@@ -24,6 +24,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var widgetSnapshotWriter = WidgetSnapshotWriter()
     /// Lazy like the snapshot writer: nothing is created when the app is the unit-test host.
     private lazy var desktopOverlay = DesktopOverlayController()
+    /// Lazy like the snapshot writer: the App Group container and the network stay untouched in the unit-test host.
+    private lazy var logoStore = CoinLogoStore(client: URLSession.shared)
     /// A widget click launched the app: the URL arrives before the popover exists, so it is shown after setup.
     private var opensPopoverAfterLaunch = false
     /// Closes the popover on clicks in other apps or the desktop while it is shown (see `popoverDidShow`).
@@ -54,6 +56,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupPopover()
         widgetSnapshotWriter.bind(coinListVM: coinListVM, settingsVM: settingsVM)
         desktopOverlay.bind(coinListVM: coinListVM, settingsVM: settingsVM)
+        // Download logos of watchlist coins that ship without one, at launch and whenever the watchlist changes.
+        settingsVM.$settings
+            .map { $0.watchlistCoins.map(\.coinId) }
+            .removeDuplicates()
+            .sink { [weak self] ids in
+                guard let self else { return }
+                self.logoStore.sync(watchlist: ids.compactMap { self.catalog.metadata(for: $0) })
+            }
+            .store(in: &cancellables)
         NotificationCenter.default.publisher(for: .coinscalAdjustDesktopOverlay)
             .sink { [weak self] _ in self?.desktopOverlay.beginAdjusting() }
             .store(in: &cancellables)
@@ -180,6 +191,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let popoverView = CoinPopoverView()
             .environmentObject(coinListVM)
             .environmentObject(settingsVM)
+            .environment(\.coinLogoStore, logoStore)
         let hosting = NSHostingController(rootView: popoverView)
         hosting.view.wantsLayer = true
         hosting.view.layer?.isOpaque = false
@@ -301,6 +313,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .environmentObject(settingsVM)
             .environmentObject(coinListVM)
             .environmentObject(watchlistVM)
+            .environment(\.coinLogoStore, logoStore)
         let initialSize = Constants.Window.settingsDefaultSize
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: initialSize.width, height: initialSize.height),

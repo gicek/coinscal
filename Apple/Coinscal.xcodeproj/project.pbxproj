@@ -25,15 +25,18 @@
 		36F116EA2A2A3E26017E0983 /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51C874DE186A6787C21BB67 /* WidgetContent.swift */; };
 		3894FE329310C2A2042BD15D /* AppSettingsCodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0992B8DD77DAECB2271D7008 /* AppSettingsCodingTests.swift */; };
 		3908EAB6A9768F1347CF6559 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97292B8CB84B2196216FBE26 /* Color+Hex.swift */; };
+		3D48B7009EEA9EB1D2F52573 /* CoinLogoCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3F372B511C9A1A812917296 /* CoinLogoCache.swift */; };
 		3DDD7D5D189CBA2471D1867E /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1798A8A980ED270583722C7D /* NotificationService.swift */; };
 		412A34D52D0F02997DE0CEEA /* WatchlistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E9EB67E76C106BAD1144BC1 /* WatchlistViewModel.swift */; };
 		41E726C74EC4F1758B57B0C0 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 10BF815DD92D7D362C0E37E2 /* Localizable.xcstrings */; };
 		48BE4656356EB91D70CCCDA7 /* AlertEvaluatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D523E57133652B649B6CC50 /* AlertEvaluatorTests.swift */; };
+		496A0FD0D54437CD3949EA51 /* CoinLogoStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178591929C838FFC0A7F8E84 /* CoinLogoStoreTests.swift */; };
 		4A55FFA96E3843AD0110EEB1 /* PriceFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CD616D7206711932A726D2 /* PriceFormatterTests.swift */; };
 		4BEA5CD5542A0A0E97BF8496 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 886134BBD200D94E208291FA /* WidgetViews.swift */; };
 		4CBB9248A97413B9BBFF63FF /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 886134BBD200D94E208291FA /* WidgetViews.swift */; };
 		513025EADA72519832E99585 /* coins.json in Resources */ = {isa = PBXBuildFile; fileRef = C3723C032BE1902D0A5F193C /* coins.json */; };
 		52C4151D13D62DF2CCBDF7C6 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78F503CDD7896F6AABEC80D4 /* Constants.swift */; };
+		56A5A2994DE072A754B1E77A /* CoinLogoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145B785A0C4EDD6A4E33A79B /* CoinLogoStore.swift */; };
 		5A17724586DD38AD7B8D2F00 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFCF80F14161BC664DC3BE6 /* HTTPClient.swift */; };
 		607DED1F1DB85CF10F32F337 /* PriceFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3930C2ABA6AE479749B6AA24 /* PriceFormatter.swift */; };
 		60FD93250BA72B70939DD8FB /* ExchangeRateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A484ECC2E49835C53B69AA24 /* ExchangeRateService.swift */; };
@@ -50,6 +53,7 @@
 		889880149B52475E2C2D3C0C /* DesktopOverlayLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47E22FE438BA5F5AC27DC815 /* DesktopOverlayLayout.swift */; };
 		88DD352020842D0C6777B7A0 /* ExchangeRateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A484ECC2E49835C53B69AA24 /* ExchangeRateService.swift */; };
 		8936CC9DF1D1CD17266D75A0 /* WidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BD1D1149DDDD85740E774F1 /* WidgetIntents.swift */; };
+		8F6E434D449ABA181F68D353 /* CoinLogoCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3F372B511C9A1A812917296 /* CoinLogoCache.swift */; };
 		9071BE0E3161FFB20D44FB07 /* CoinCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE97BF404E305507A4E7BA14 /* CoinCatalog.swift */; };
 		90A14B6058C3ACDE5E749075 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8DC7CCD529C669F2B9E7B1 /* GeneralSettingsView.swift */; };
 		90B745F9041BF9D558146D41 /* WidgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3365573BC3846AFBE9C919C /* WidgetTests.swift */; };
@@ -118,6 +122,8 @@
 		0992B8DD77DAECB2271D7008 /* AppSettingsCodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsCodingTests.swift; sourceTree = "<group>"; };
 		10BF815DD92D7D362C0E37E2 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		1339945A9B351203E59265AF /* CoinscalMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CoinscalMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		145B785A0C4EDD6A4E33A79B /* CoinLogoStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinLogoStore.swift; sourceTree = "<group>"; };
+		178591929C838FFC0A7F8E84 /* CoinLogoStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinLogoStoreTests.swift; sourceTree = "<group>"; };
 		1798A8A980ED270583722C7D /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		1A0968F3AE7F8A0F5C1E8E20 /* CoinCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinCatalogTests.swift; sourceTree = "<group>"; };
 		250A46DB114B0D19D2ACB3FD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -171,6 +177,7 @@
 		EECCFF57EACD09C756D44DAA /* LaunchAtLoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginService.swift; sourceTree = "<group>"; };
 		F1CD616D7206711932A726D2 /* PriceFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceFormatterTests.swift; sourceTree = "<group>"; };
 		F2F9C46F1848411DC73A0FE0 /* LocalizationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationManager.swift; sourceTree = "<group>"; };
+		F3F372B511C9A1A812917296 /* CoinLogoCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinLogoCache.swift; sourceTree = "<group>"; };
 		F4FF8F5AD7F08C0DDC70B326 /* CoinscalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinscalApp.swift; sourceTree = "<group>"; };
 		FE97BF404E305507A4E7BA14 /* CoinCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinCatalog.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -269,6 +276,7 @@
 				0992B8DD77DAECB2271D7008 /* AppSettingsCodingTests.swift */,
 				1A0968F3AE7F8A0F5C1E8E20 /* CoinCatalogTests.swift */,
 				4B76D31912A2AA98A9D641ED /* CoinListViewModelTests.swift */,
+				178591929C838FFC0A7F8E84 /* CoinLogoStoreTests.swift */,
 				60D83E7D1AC21D32179D9109 /* DesktopOverlayTests.swift */,
 				489D418A338C9D27DA670117 /* MenuBarViewModelTests.swift */,
 				F1CD616D7206711932A726D2 /* PriceFormatterTests.swift */,
@@ -294,6 +302,7 @@
 			isa = PBXGroup;
 			children = (
 				FE97BF404E305507A4E7BA14 /* CoinCatalog.swift */,
+				145B785A0C4EDD6A4E33A79B /* CoinLogoStore.swift */,
 				A484ECC2E49835C53B69AA24 /* ExchangeRateService.swift */,
 				3BFCF80F14161BC664DC3BE6 /* HTTPClient.swift */,
 				EECCFF57EACD09C756D44DAA /* LaunchAtLoginService.swift */,
@@ -319,6 +328,7 @@
 		CBDC88FFDCB2CC9F8227D620 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				F3F372B511C9A1A812917296 /* CoinLogoCache.swift */,
 				D51C874DE186A6787C21BB67 /* WidgetContent.swift */,
 				6DC88EA843E4B88EE5BD7634 /* WidgetSnapshot.swift */,
 				886134BBD200D94E208291FA /* WidgetViews.swift */,
@@ -506,6 +516,7 @@
 				695F2130A8366489CCF207A2 /* AppSettings.swift in Sources */,
 				2C6C5EA02B67435939DEB1D2 /* Coin.swift in Sources */,
 				9071BE0E3161FFB20D44FB07 /* CoinCatalog.swift in Sources */,
+				8F6E434D449ABA181F68D353 /* CoinLogoCache.swift in Sources */,
 				D54FE0F7847FCA08148BC231 /* CoinscalWidgets.swift in Sources */,
 				3908EAB6A9768F1347CF6559 /* Color+Hex.swift in Sources */,
 				52C4151D13D62DF2CCBDF7C6 /* Constants.swift in Sources */,
@@ -533,6 +544,8 @@
 				D738E4D587E811CC5EA229C3 /* Coin.swift in Sources */,
 				039583B12AE0375F6CB68614 /* CoinCatalog.swift in Sources */,
 				91E8613E24E45CF9734CD4D6 /* CoinListViewModel.swift in Sources */,
+				3D48B7009EEA9EB1D2F52573 /* CoinLogoCache.swift in Sources */,
+				56A5A2994DE072A754B1E77A /* CoinLogoStore.swift in Sources */,
 				B0FFEBCC53FEF3DB73613FCD /* CoinLogoView.swift in Sources */,
 				855B1D471DC2206C7EC566B5 /* CoinPopoverView.swift in Sources */,
 				C52D5BE6E5D392B4E31D2652 /* CoinRowView.swift in Sources */,
@@ -574,6 +587,7 @@
 				3894FE329310C2A2042BD15D /* AppSettingsCodingTests.swift in Sources */,
 				86F20327DF7764321DB0D978 /* CoinCatalogTests.swift in Sources */,
 				CC9C5B6B6197C6719A7A10A7 /* CoinListViewModelTests.swift in Sources */,
+				496A0FD0D54437CD3949EA51 /* CoinLogoStoreTests.swift in Sources */,
 				6C02D47C5839D5B1038DB8E9 /* DesktopOverlayTests.swift in Sources */,
 				67F4A0B4BC8F85BBE3BCE2FF /* MenuBarViewModelTests.swift in Sources */,
 				4A55FFA96E3843AD0110EEB1 /* PriceFormatterTests.swift in Sources */,

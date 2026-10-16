@@ -27,21 +27,32 @@
 
 `generate_catalog.py generate` (`make catalog`):
 
-1. Take the CoinGecko top 250 by market cap.
-2. Intersect with USDT spot pairs currently tradable on all three exchanges: drop Binance halted pairs; symbols must be ASCII; an exchange price deviating > 20% from the CoinGecko price counts as a different coin with the same name and is dropped; only one entry per symbol.
-3. Take the top 100 by market cap as `listed`.
-4. Keep every id from the previous catalog as a non-`listed` entry: still tradable → `active`; in the migration table with a tradable target → `migrated`; everything else → `delisted`.
+1. Take the CoinGecko top 1000 by market cap (four pages of 250).
+2. Intersect with USDT spot pairs currently tradable on any of the three exchanges: drop Binance halted pairs; symbols must be ASCII; an exchange price deviating > 20% from the CoinGecko price counts as a different coin with the same name and is dropped; only one entry per symbol.
+3. Every remaining coin is `listed` (searchable). (Until Oct 15, 2026 only the top 100 were listed, so most tradable coins couldn't be found by search.)
+4. Keep every id from the previous catalog (`--previous`, which `make catalog` always passes) as a non-`listed` entry: still tradable → `active`; in the migration table with a tradable target → `migrated`; everything else → `delisted`. A migration target is kept only when an old id that moves to it is kept.
 5. The result is checked with `validate` first and written only if it passes.
 
 The optional environment variable `COINGECKO_API_KEY` (a CoinGecko Demo Key) raises the rate limit.
+
+The bundled snapshot was rebuilt from scratch on Oct 15, 2026, without `--previous`, because no released version had stored watchlists yet: 451 coins, all listed and `active`, down to rank 957, about 120KB. Bundled logos of coins no longer in it were removed at the same time. From the first release on, always generate with `make catalog` so existing watchlists keep their ids.
 
 ## Client
 
 - `CoinCatalog` is the only source of coin metadata, injected into `CoinListViewModel`, `WatchlistViewModel`, and the right-click menu.
 - Search and recommendations use only `listed`; the watchlist looks up any entry by id.
 - `active` coins are included in price fetches; `delisted` coins show "No market data"; `migrated` coins are not shown: old ids in the watchlist are automatically replaced with the successor that `migratedTo` points to (`CoinCatalog.settingsWithSuccessors`; for the rules, see "Projects Migrated to a Successor Coin" in [DESIGN](DESIGN.md)).
-- Logo: uses the local image when a bundled `coin-<id>` asset exists, otherwise the remote URL from the catalog (host allowlist).
+- Logo: see "Logos" below.
 - Validation rules exist in both Python and Swift and must match (see [TECHNICAL](TECHNICAL.md)).
+
+## Logos
+
+Only 78 logos ship in the app (`coin-<id>` assets, about 640KB, mostly the top coins); bundling all of them would grow the app for coins most users never add. The rest are fetched on demand:
+
+- When a coin enters the watchlist (and at every launch for coins already in it), `CoinLogoStore` downloads its `logoURL` once through the injected `HTTPClient` and stores it in the App Group container (`CoinLogos/<id>.img`, `CoinLogoCache`). Only HTTPS URLs on the logo host allowlist are fetched; the response must be HTTP 200, at most 512KB, and decode as an image. A failed download is retried at the next launch or watchlist change.
+- When a coin leaves the watchlist, its cached logo is deleted. Coins with a bundled asset are never downloaded.
+- Lookup order everywhere: bundled asset → cached file → remote URL (`AsyncImage`, e.g. while browsing the add panel) → symbol placeholder. The widget and the desktop ticker can't load remote images while rendering, so they use bundled → cached → placeholder.
+- Without an App Group (unsigned builds) there is no cache and nothing is downloaded; views fall back to the remote URL.
 
 ## Remote Updates (Not Implemented)
 
@@ -56,5 +67,5 @@ External conditions (to be done by the repository owner): make the repository pu
 - First launch offline: uses the bundled snapshot, and the UI is complete.
 - Remote catalog corrupt or missing `bitcoin`: discarded; the current catalog stays in use.
 - Watchlist contains `render-token`: shows RENDER with a price.
-- Watchlist contains `matic-network`: after launch it automatically shows as POL with a price, with no migration prompt; change alerts are kept, and above / below alerts reset to the default.
+- Watchlist contains `matic-network` (with a catalog that still has it as `migrated`, e.g. from a remote update): after launch it automatically shows as POL with a price, with no migration prompt; change alerts are kept, and above / below alerts reset to the default.
 - `make mac-check-sources`: PASS, and every listed coin has a price.

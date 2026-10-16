@@ -6,7 +6,7 @@ A lightweight macOS menu bar app for crypto prices. It keeps your watchlist pric
 
 - **Menu bar prices**: Shows the current price of the selected coin, colored by direction (green up / red down, red up / green down, or custom), with an optional background tint. Can also show only the app icon.
 - **Watchlist popover**: Left-click to see the price and 24h change of every coin in your watchlist. Right-click to quickly switch the menu bar coin.
-- **Watchlist management**: Search about 100 tradable coins or add from recommended coins, and drag the handle to reorder. When a project migrates to a successor coin (e.g. MATIC → POL), the app switches to the new coin automatically.
+- **Watchlist management**: Search about 450 tradable coins (the top 1000 by market cap that trade on Binance, OKX, or Bybit) or add from recommended coins, and drag the handle to reorder. When a project migrates to a successor coin (e.g. MATIC → POL), the app switches to the new coin automatically.
 - **Desktop and Notification Center widgets**: Price and 24h change for a single coin or your watchlist. You can edit the coin, quote currency, sort order, and colors. Widgets update on their own even when the app isn't running.
 - **Desktop ticker**: Pins prices to the desktop like a sticky note. Mouse clicks pass straight through, it blends into the wallpaper, and it updates with the app every 10 seconds.
 - **Price alerts**: Set above, below, or percent-change alerts per coin. A triggered alert sends a system notification.

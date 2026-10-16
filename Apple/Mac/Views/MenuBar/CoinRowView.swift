@@ -8,6 +8,7 @@ struct CoinRowView: View {
     var body: some View {
         HStack(spacing: 10) {
             CoinLogoView(
+                coinID: coin.id,
                 assetName: coin.logoAssetName,
                 urlString: coin.logoURL,
                 symbol: coin.symbol

@@ -101,7 +101,7 @@ struct WatchlistView: View {
     private func recommendedCoinTile(_ meta: CoinMetadata) -> some View {
         let added = isAdded(meta)
         return Button(action: { toggleCoin(meta) }) {
-            CoinLogoView(assetName: meta.logoAssetName, urlString: meta.logoURL, symbol: meta.symbol)
+            CoinLogoView(coinID: meta.id, assetName: meta.logoAssetName, urlString: meta.logoURL, symbol: meta.symbol)
                 .frame(width: RecommendedCoinsLayout.iconSize, height: RecommendedCoinsLayout.iconSize)
                 .padding(RecommendedCoinsLayout.cardPadding)
                 .background(
@@ -266,7 +266,7 @@ struct WatchlistView: View {
 
         return HStack {
             dragHandle(for: watchlistCoin, reorderContext: reorderContext)
-            CoinLogoView(assetName: meta.logoAssetName, urlString: meta.logoURL, symbol: meta.symbol)
+            CoinLogoView(coinID: meta.id, assetName: meta.logoAssetName, urlString: meta.logoURL, symbol: meta.symbol)
                 .frame(width: 28, height: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(meta.symbol).font(.system(size: 13, weight: .medium))
