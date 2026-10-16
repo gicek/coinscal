@@ -54,7 +54,7 @@ Sections below the hero:
 - Features: one row of four cards (menu bar price, desktop widgets, pinned to the desktop, price alerts) and a small centered line saying there is more.
 - Privacy: one statement that data is fetched on the Mac and nothing is collected, with four short points: no account, no data collection, private by design, open source.
 - Download: system requirement, "Free and open source", and the download buttons.
-- Footer links: GitHub, Releases, Issues, Privacy.
+- Footer links: GitHub, Releases, Issues, Privacy, and "Rates By Exchange Rate API" (ExchangeRate-API's terms require it on pages that show its rates; English in every language).
 
 ## Data
 

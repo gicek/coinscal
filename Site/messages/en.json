@@ -106,7 +106,8 @@
     "license": "Coinscal is open source, released under the MIT License.",
     "releases": "Releases",
     "issues": "Issues",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "rates": "Rates By Exchange Rate API"
   },
   "privacy": {
     "title": "Privacy",

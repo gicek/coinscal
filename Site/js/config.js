@@ -8,4 +8,6 @@ export const LINKS = {
     download: "https://dl.coinscal.app/Coinscal.dmg",
     releases: "https://github.com/gicek/coinscal/releases",
     issues: "https://github.com/gicek/coinscal/issues",
+    // ExchangeRate-API's open access terms ask for this link on pages that show its rates (the demo's currencies).
+    exchangeRateApi: "https://www.exchangerate-api.com",
 };

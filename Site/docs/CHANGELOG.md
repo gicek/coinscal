@@ -4,6 +4,9 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Added: ExchangeRate-API attribution link
+The footer links "Rates By Exchange Rate API" to `https://www.exchangerate-api.com` (`LINKS.exchangeRateApi`), since the demo converts prices with ExchangeRate-API's rates and its terms require the link on such pages. The text is the same in all three languages.
+
 ### Changed: Demo coins follow the new recommended coins
 The demo's coin picker offers the app's new recommended coins: BTC, ETH, BNB, SOL, ZEC, HYPE, BCH, LTC, UNI, AAVE. Logos for ZEC, HYPE, BCH, LTC, UNI, and AAVE were added to `Site/img/coins/` (64 px from CoinGecko's image CDN) and those of XRP, ADA, DOGE, AVAX, DOT, and POL removed. A coin saved in the demo settings that is no longer offered is dropped when the settings load.
 

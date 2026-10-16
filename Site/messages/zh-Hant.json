@@ -106,7 +106,8 @@
     "license": "Coinscal 是開放原始碼軟體，以 MIT 授權條款發佈。",
     "releases": "版本發佈",
     "issues": "問題回報",
-    "privacy": "隱私權"
+    "privacy": "隱私權",
+    "rates": "Rates By Exchange Rate API"
   },
   "privacy": {
     "title": "隱私權",

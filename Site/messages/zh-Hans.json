@@ -106,7 +106,8 @@
     "license": "Coinscal 是开源软件，以 MIT 许可证发布。",
     "releases": "版本发布",
     "issues": "问题反馈",
-    "privacy": "隐私"
+    "privacy": "隐私",
+    "rates": "Rates By Exchange Rate API"
   },
   "privacy": {
     "title": "隐私",

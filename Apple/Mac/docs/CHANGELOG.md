@@ -4,6 +4,10 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Added: ExchangeRate-API attribution link
+Settings → About → "Data Sources" shows "Rates By Exchange Rate API" under the exchange rate line, linking to `https://www.exchangerate-api.com`, as ExchangeRate-API's open access terms require. The wording is kept in English in every language. Checked on a real Mac: the link shows in the accent color.
+
+
 ### Changed: Remove coins from the add panel
 In Settings → Watchlist, clicking an added coin in the "+" search panel now removes it from the watchlist; before, clicking an added row did nothing. Hovering an added row turns its green checkmark into a red minus with a red highlight. Rows that aren't added still add on click, and Return still adds only the first result that isn't added. This matches the "Recommended" row, which already toggled.
 

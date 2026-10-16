@@ -65,7 +65,20 @@ struct AboutView: View {
 
                     VStack(alignment: .leading, spacing: 6) {
                         Label(loc("about.dataSource.price"), systemImage: "chart.line.uptrend.xyaxis")
-                        Label(loc("about.dataSource.exchangeRate"), systemImage: "dollarsign.arrow.circlepath")
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(loc("about.dataSource.exchangeRate"))
+                                // Required wording, kept in English in every language.
+                                Link(destination: Constants.Attribution.exchangeRateAPIURL) {
+                                    Text(verbatim: Constants.Attribution.exchangeRateAPIText)
+                                }
+                                .font(.caption)
+                                // The section is secondary-colored; keep the link looking like one.
+                                .foregroundStyle(Color.accentColor)
+                            }
+                        } icon: {
+                            Image(systemName: "dollarsign.arrow.circlepath")
+                        }
                         // CoinGecko's free data terms require attribution (coin names, logos and ranks come from it).
                         Label(loc("about.dataSource.coinInfo"), systemImage: "list.bullet")
                     }

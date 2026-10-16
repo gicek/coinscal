@@ -52,6 +52,12 @@ enum Constants {
         static let xURL = URL(string: "https://x.com/coinscal")!
     }
 
+    /// ExchangeRate-API's open access terms ask every app that shows its rates to link this text to its site.
+    enum Attribution {
+        static let exchangeRateAPIText = "Rates By Exchange Rate API"
+        static let exchangeRateAPIURL = URL(string: "https://www.exchangerate-api.com")!
+    }
+
     enum Window {
         static let settingsMaxSize = CGSize(width: 800, height: 500)
         static let settingsMinSize = CGSize(width: 600, height: 420)
