@@ -19,7 +19,7 @@ When a scheduled update check finds a new version, the title bar shows an "Updat
 
 ### Right-Click Menu
 
-Switch the menu bar coin (submenu, current item checked), Settings, About, Check for Updates… (disabled while a check is running), Quit (⌘Q).
+Switch the menu bar coin (submenu, current item checked), Settings, About, Check for Updates… (disabled while a check is running), Quit (⌘Q). No item shows an icon.
 
 ### Settings Window
 

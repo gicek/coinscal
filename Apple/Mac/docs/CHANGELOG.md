@@ -4,6 +4,12 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Fixed: Gear icon in front of "Settings" on first launch
+- Symptom: on the first launch after a fresh install, the right-click menu showed a gear icon in front of "Settings" on macOS 26; later launches showed none.
+- Root cause: `NSMenuEnableActionImages = false` was written in `applicationDidFinishLaunching`, after AppKit had already read it. Only the next launch picked up the saved value.
+- Fix: `CoinscalApp.init` writes it before any menu exists.
+- Tests: on a real Mac with the key deleted, the old build showed the gear on the first launch and the new build showed no icon on any item.
+
 ### Fixed: Green changes hard to read on the transparent desktop panel
 - Symptom: with the desktop panel's background below 20%, the green 24h changes looked dark and blurry over light wallpapers, while white text stayed sharp.
 - Root cause: legibility depends on luminance contrast, and the default green #2CBD84 is about 1.3:1 against a light blue-gray wallpaper (red #F6465D about 1.9:1). The dark shadow makes white text readable because white is far brighter than the shadow; green is about as bright as the shadow, so the shadow only blurs it. Lifting the color 30% toward white with a same-hue shadow made it worse (about 1.0:1).

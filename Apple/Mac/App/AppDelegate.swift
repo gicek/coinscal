@@ -49,10 +49,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        // On newer macOS versions, AppKit may auto-attach action images
-        // to some NSMenuItem selectors (e.g. Settings/Quit).
-        UserDefaults.standard.set(false, forKey: "NSMenuEnableActionImages")
-
         updateController.attach(SparkleUpdaterBackend(controller: updateController))
         setupStatusItem()
         setupPopover()
