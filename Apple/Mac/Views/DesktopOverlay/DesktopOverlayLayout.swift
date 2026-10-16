@@ -17,21 +17,34 @@ enum DesktopOverlayLayout {
         !isAdjusting && backgroundOpacity < legibleBackgroundOpacity
     }
 
-    /// One layout, the large widget's: 364pt wide, its height follows the number of coins up to `rowLimit`.
-    static let width: CGFloat = 364
+    /// One layout, the large widget's list; its height follows the number of coins up to `rowLimit`.
     static let rowLimit = 16
-    /// Row height of the large widget list (`WidgetListView`), and the 1pt divider between rows.
-    static let rowHeight: CGFloat = 38
+    /// The 1pt divider between rows of `WidgetListView`.
     static let dividerHeight: CGFloat = 1
-    /// List header: the 16pt logo row plus its 6pt bottom padding.
-    static let headerHeight: CGFloat = 22
     /// Before the first prices (`WidgetEmptyView`): the medium widget's height.
     static let emptyHeight: CGFloat = 170
 
-    static func windowSize(for content: WidgetEntryContent) -> CGSize {
+    /// Points added to every text (`widgetTextBoost`).
+    static func textBoost(_ textSize: DesktopOverlayTextSize) -> CGFloat {
+        textSize == .large ? 2 : 0
+    }
+
+    /// Normal is the large widget's 364pt; Large text needs more room for names and the wider change column.
+    static func width(_ textSize: DesktopOverlayTextSize) -> CGFloat {
+        textSize == .large ? 400 : 364
+    }
+
+    /// List header: the logo / title row (16pt, or the taller 14pt title line) plus its 6pt bottom padding.
+    static func headerHeight(_ textSize: DesktopOverlayTextSize) -> CGFloat {
+        textSize == .large ? 23 : 22
+    }
+
+    static func windowSize(for content: WidgetEntryContent, textSize: DesktopOverlayTextSize) -> CGSize {
+        let width = width(textSize)
         guard content.hasPrices, !content.rows.isEmpty else { return CGSize(width: width, height: emptyHeight) }
         let rows = CGFloat(content.rows.count)
-        let height = contentPadding * 2 + headerHeight + rows * rowHeight + (rows - 1) * dividerHeight
+        let rowHeight = WidgetListView.rowHeight(large: true, boost: textBoost(textSize))
+        let height = contentPadding * 2 + headerHeight(textSize) + rows * rowHeight + (rows - 1) * dividerHeight
         return CGSize(width: width, height: height)
     }
 

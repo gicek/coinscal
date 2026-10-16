@@ -116,6 +116,23 @@ struct GeneralSettingsView: View {
 
                 Group {
                     HStack {
+                        Text(loc("desktop.textSize"))
+                        Spacer()
+                        Picker("", selection: Binding(
+                            get: { settingsVM.settings.desktopOverlayTextSize },
+                            set: { settingsVM.settings.desktopOverlayTextSize = $0 }
+                        )) {
+                            ForEach(DesktopOverlayTextSize.allCases) { size in
+                                Text(size.displayName).tag(size)
+                            }
+                        }
+                        .labelsHidden()
+                        .pickerStyle(.segmented)
+                        .frame(width: 160, alignment: .trailing)
+                        .id(settingsVM.settings.language)
+                    }
+
+                    HStack {
                         Text(loc("desktop.opacity"))
                         Spacer()
                         Slider(value: Binding(

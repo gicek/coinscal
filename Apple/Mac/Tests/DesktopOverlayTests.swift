@@ -18,22 +18,26 @@ import Testing
         let defaults = AppSettings()
         #expect(!defaults.desktopOverlayEnabled)
         #expect(defaults.desktopOverlayBackgroundOpacity == 1)
+        #expect(defaults.desktopOverlayTextSize == .normal)
         #expect(defaults.desktopOverlayTopLeft == nil)
 
         let old = try JSONDecoder().decode(AppSettings.self, from: Data("{}".utf8))
         #expect(!old.desktopOverlayEnabled, "older data has no overlay")
         let unknown = try JSONDecoder().decode(AppSettings.self, from: Data(
-            #"{"desktopOverlayTopLeft":"x","desktopOverlayAboveIcons":true,"desktopOverlayBackgroundOpacity":3}"#.utf8))
+            #"{"desktopOverlayTopLeft":"x","desktopOverlayTextSize":"huge","desktopOverlayAboveIcons":true,"desktopOverlayBackgroundOpacity":3}"#.utf8))
         #expect(unknown.desktopOverlayTopLeft == nil)
+        #expect(unknown.desktopOverlayTextSize == .normal)
         #expect(unknown.desktopOverlayBackgroundOpacity == 1, "out of range is clamped; the removed above-icons key is ignored")
 
         var settings = AppSettings()
         settings.desktopOverlayEnabled = true
         settings.desktopOverlayBackgroundOpacity = 0.35
+        settings.desktopOverlayTextSize = .large
         settings.desktopOverlayTopLeft = DesktopOverlayOrigin(x: 120, y: 300)
         let decoded = try JSONDecoder().decode(AppSettings.self, from: JSONEncoder().encode(settings))
         #expect(decoded.desktopOverlayEnabled)
         #expect(decoded.desktopOverlayBackgroundOpacity == 0.35)
+        #expect(decoded.desktopOverlayTextSize == .large)
         #expect(decoded.desktopOverlayTopLeft == DesktopOverlayOrigin(x: 120, y: 300))
     }
 
@@ -56,22 +60,33 @@ import Testing
     }
 
     @Test func heightFollowsTheCoinsUpTo16() {
-        #expect(DesktopOverlayLayout.windowSize(for: content(rows: 1)) == CGSize(width: 364, height: 88))
-        #expect(DesktopOverlayLayout.windowSize(for: content(rows: 8)).height == 361, "padding, header, 8 rows, 7 dividers")
+        #expect(DesktopOverlayLayout.windowSize(for: content(rows: 1), textSize: .normal) == CGSize(width: 364, height: 88))
+        #expect(DesktopOverlayLayout.windowSize(for: content(rows: 8), textSize: .normal).height == 361, "padding, header, 8 rows, 7 dividers")
         #expect(content(rows: 20).rows.count == 16)
-        #expect(DesktopOverlayLayout.windowSize(for: content(rows: 20)).height == 673, "16 rows")
-        #expect(DesktopOverlayLayout.windowSize(for: content(rows: 0)) == CGSize(width: 364, height: 170), "no coins")
-        #expect(DesktopOverlayLayout.windowSize(for: content(rows: 3, prices: false)).height == 170, "no prices yet")
+        #expect(DesktopOverlayLayout.windowSize(for: content(rows: 20), textSize: .normal).height == 673, "16 rows")
+        #expect(DesktopOverlayLayout.windowSize(for: content(rows: 0), textSize: .normal) == CGSize(width: 364, height: 170), "no coins")
+        #expect(DesktopOverlayLayout.windowSize(for: content(rows: 3, prices: false), textSize: .normal).height == 170, "no prices yet")
+    }
+
+    @Test func largeTextGrowsTheRowsAndTheWidth() {
+        let normal = DesktopOverlayLayout.windowSize(for: content(rows: 8), textSize: .normal)
+        let large = DesktopOverlayLayout.windowSize(for: content(rows: 8), textSize: .large)
+        #expect(large.width == 400 && normal.width == 364)
+        #expect(large.height == normal.height + 1 + 8 * 4, "1pt taller header, 4pt taller rows")
+        #expect(DesktopOverlayLayout.textBoost(.large) == 2 && DesktopOverlayLayout.textBoost(.normal) == 0)
     }
 
     /// The computed height must be what the shared list view needs, or the last row is clipped or a gap is left.
-    @Test func computedHeightMatchesTheRenderedList() {
+    @Test(arguments: DesktopOverlayTextSize.allCases)
+    func computedHeightMatchesTheRenderedList(textSize: DesktopOverlayTextSize) {
         for rows in [1, 5, 16] {
             let c = content(rows: rows)
             let padding = DesktopOverlayLayout.contentPadding * 2
+            let size = DesktopOverlayLayout.windowSize(for: c, textSize: textSize)
             let view = NSHostingView(rootView: WidgetListView(content: c, now: Date(), large: true)
-                .frame(width: DesktopOverlayLayout.width - padding))
-            #expect(abs(view.fittingSize.height - (DesktopOverlayLayout.windowSize(for: c).height - padding)) < 0.5, "\(rows) rows")
+                .environment(\.widgetTextBoost, DesktopOverlayLayout.textBoost(textSize))
+                .frame(width: size.width - padding))
+            #expect(abs(view.fittingSize.height - (size.height - padding)) < 0.5, "\(rows) rows: \(view.fittingSize.height)")
         }
     }
 

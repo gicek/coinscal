@@ -6,6 +6,7 @@ final class DesktopOverlayModel: ObservableObject {
     @Published var content: WidgetEntryContent
     @Published var isAdjusting = false
     @Published var backgroundOpacity: Double = 1
+    @Published var textSize: DesktopOverlayTextSize = .normal
     var onDoneAdjusting: () -> Void = {}
 
     init() {
@@ -25,6 +26,7 @@ struct DesktopOverlayView: View {
         let shape = RoundedRectangle(cornerRadius: DesktopOverlayLayout.cornerRadius, style: .continuous)
         ZStack {
             WidgetListView(content: model.content, now: Date(), large: true)
+                .environment(\.widgetTextBoost, DesktopOverlayLayout.textBoost(model.textSize))
                 .padding(DesktopOverlayLayout.contentPadding)
                 .modifier(WallpaperLegibility(active: DesktopOverlayLayout.textNeedsHalo(
                     backgroundOpacity: model.backgroundOpacity, isAdjusting: model.isAdjusting
@@ -35,8 +37,8 @@ struct DesktopOverlayView: View {
             }
         }
         .frame(
-            width: DesktopOverlayLayout.windowSize(for: model.content).width,
-            height: DesktopOverlayLayout.windowSize(for: model.content).height
+            width: DesktopOverlayLayout.windowSize(for: model.content, textSize: model.textSize).width,
+            height: DesktopOverlayLayout.windowSize(for: model.content, textSize: model.textSize).height
         )
         // While adjusting, keep enough background to see the panel's bounds and drag it anywhere:
         // fully transparent pixels of a borderless window do not receive clicks.

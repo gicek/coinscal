@@ -17,6 +17,8 @@ struct AppSettings: Codable {
     var desktopOverlayEnabled: Bool = false
     /// Opacity of the frosted background (0...1); the text stays opaque.
     var desktopOverlayBackgroundOpacity: Double = 1
+    /// Large adds 2pt to every text; icons keep their size.
+    var desktopOverlayTextSize: DesktopOverlayTextSize = .normal
     /// Top-left corner of the window in global screen coordinates (any display); nil means the main display's
     /// default corner. The top stays put when the height follows the watchlist. Clamped onto the display it overlaps
     /// most when applied.
@@ -32,7 +34,7 @@ struct AppSettings: Codable {
         case customUpColorHex, customDownColorHex
         case priceChangeNotificationEnabled, pollingInterval
         case showMenuBarBackground, menuBarContent, displayedCoinId
-        case desktopOverlayEnabled, desktopOverlayBackgroundOpacity, desktopOverlayTopLeft
+        case desktopOverlayEnabled, desktopOverlayBackgroundOpacity, desktopOverlayTextSize, desktopOverlayTopLeft
         case watchlistCoins = "addedCoins"
     }
 
@@ -64,6 +66,7 @@ struct AppSettings: Codable {
         menuBarContent = value(.menuBarContent, d.menuBarContent)
         desktopOverlayEnabled = value(.desktopOverlayEnabled, d.desktopOverlayEnabled)
         desktopOverlayBackgroundOpacity = min(max(value(.desktopOverlayBackgroundOpacity, d.desktopOverlayBackgroundOpacity), 0), 1)
+        desktopOverlayTextSize = value(.desktopOverlayTextSize, d.desktopOverlayTextSize)
         desktopOverlayTopLeft = (try? c.decodeIfPresent(DesktopOverlayOrigin.self, forKey: .desktopOverlayTopLeft)) ?? Self.legacyTopLeft(decoder)
         displayedCoinId = value(.displayedCoinId, d.displayedCoinId)
         if c.contains(.watchlistCoins) {
@@ -211,6 +214,21 @@ enum MenuBarContent: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .price: return loc("menubarContent.price")
         case .icon:  return loc("menubarContent.icon")
+        }
+    }
+}
+
+enum DesktopOverlayTextSize: String, Codable, CaseIterable, Identifiable {
+    case normal
+    case large
+
+    var id: String { rawValue }
+
+    @MainActor
+    var displayName: String {
+        switch self {
+        case .normal: return loc("desktop.textSize.normal")
+        case .large:  return loc("desktop.textSize.large")
         }
     }
 }

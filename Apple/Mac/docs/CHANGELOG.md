@@ -4,6 +4,12 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-10-16
 
+### Added: Text size for the desktop panel
+Settings → General → "Desktop" has "Text Size" (Normal / Large, Normal by default). Large adds 2pt to every text in the panel (names, prices, changes, the title, and the time) and leaves the coin icons and the logo at their size. To fit, rows grow from 38pt to 42pt, the change column from 74pt to 87pt, and the panel from 364pt to 400pt wide.
+
+- New strings: `desktop.textSize`, `desktop.textSize.normal`, `desktop.textSize.large`.
+- Tests: settings default and tolerant decoding, the Large size, and the rendered-height check at both text sizes. On a real Mac with 7 coins, Large measured 400×351 with nothing truncated.
+
 ### Changed: One desktop panel layout that fits the watchlist
 The desktop panel no longer has a "Size" setting (Small / Medium / Large, Medium by default). It always uses the large widget's list, shows the first 16 watchlist coins instead of 4 or 8, and its height fits the coins it shows (88pt for one coin, 673pt for 16; 170pt before the first prices). Adding or removing coins grows or shrinks the panel downward from its top edge.
 

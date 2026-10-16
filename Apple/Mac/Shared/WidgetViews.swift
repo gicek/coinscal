@@ -57,6 +57,7 @@ struct WidgetListView: View {
     let content: WidgetEntryContent
     let now: Date
     let large: Bool
+    @Environment(\.widgetTextBoost) private var boost
 
     var body: some View {
         Group {
@@ -68,17 +69,17 @@ struct WidgetListView: View {
                             .scaledToFit()
                             .frame(width: 16, height: 16)
                         Text(verbatim: WidgetText.string("widget.list.title", content.language))
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.system(size: 12 + boost, weight: .semibold))
                             .textHalo()
                         Spacer()
                         WidgetUpdatedText(content: content, now: now)
-                            .font(.system(size: 11))
+                            .font(.system(size: 11 + boost))
                     }
                     .padding(.bottom, 6)
                     ForEach(Array(content.rows.enumerated()), id: \.element.id) { index, row in
                         if index > 0 { Divider().opacity(0.5) }
                         WidgetListRow(row: row, content: content)
-                            .frame(height: large ? 38 : 30)
+                            .frame(height: Self.rowHeight(large: large, boost: boost))
                     }
                     Spacer(minLength: 0)
                 }
@@ -89,20 +90,31 @@ struct WidgetListView: View {
         .widgetURL(WidgetStyle.popoverURL)
         .containerBackground(.background, for: .widget)
     }
+
+    /// Larger text gets 2pt more row height per point, so rows keep their breathing room.
+    nonisolated static func rowHeight(large: Bool, boost: CGFloat) -> CGFloat {
+        (large ? 38 : 30) + boost * 2
+    }
+
+    /// Wide enough for "▼ -99.99%" at the change font size.
+    nonisolated static func changeColumnWidth(boost: CGFloat) -> CGFloat {
+        74 + boost * 6.5
+    }
 }
 
 private struct WidgetListRow: View {
     let row: WidgetRow
     let content: WidgetEntryContent
+    @Environment(\.widgetTextBoost) private var boost
 
     var body: some View {
         HStack(spacing: 9) {
             WidgetCoinLogo(row: row, size: 22)
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text(verbatim: row.symbol)
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 13 + boost, weight: .semibold))
                 Text(verbatim: row.name)
-                    .font(.system(size: 11))
+                    .font(.system(size: 11 + boost))
                     .secondaryText()
             }
             .lineLimit(1)
@@ -110,14 +122,14 @@ private struct WidgetListRow: View {
             Spacer(minLength: 6)
             if let price = row.price {
                 Text(verbatim: PriceFormatter.format(price, currency: content.currency))
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 13 + boost, weight: .semibold))
                     .monospacedDigit()
                     .lineLimit(1)
                     .textHalo()
             }
             WidgetChangeText(row: row, content: content)
-                .font(.system(size: 11.5, weight: .semibold))
-                .frame(width: 74, alignment: .trailing)
+                .font(.system(size: 11.5 + boost, weight: .semibold))
+                .frame(width: WidgetListView.changeColumnWidth(boost: boost), alignment: .trailing)
         }
     }
 }
@@ -167,6 +179,7 @@ private struct WidgetUpdatedText: View {
 /// No prices yet: the app has never run and the widget could not fetch.
 private struct WidgetEmptyView: View {
     let content: WidgetEntryContent
+    @Environment(\.widgetTextBoost) private var boost
 
     var body: some View {
         VStack(spacing: 8) {
@@ -175,7 +188,7 @@ private struct WidgetEmptyView: View {
                 .scaledToFit()
                 .frame(width: 48, height: 48)
             Text(verbatim: WidgetText.string("widget.empty", content.language))
-                .font(.system(size: 12))
+                .font(.system(size: 12 + boost))
                 .secondaryText()
                 .multilineTextAlignment(.center)
                 .textHalo()
@@ -227,10 +240,21 @@ private struct WidgetTextHaloKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+/// Points added to every text of the list layout; icons keep their size. Set by the desktop overlay's "Large" text
+/// size (widgets never set it).
+private struct WidgetTextBoostKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 0
+}
+
 extension EnvironmentValues {
     var widgetTextHalo: Bool {
         get { self[WidgetTextHaloKey.self] }
         set { self[WidgetTextHaloKey.self] = newValue }
+    }
+
+    var widgetTextBoost: CGFloat {
+        get { self[WidgetTextBoostKey.self] }
+        set { self[WidgetTextBoostKey.self] = newValue }
     }
 }
 

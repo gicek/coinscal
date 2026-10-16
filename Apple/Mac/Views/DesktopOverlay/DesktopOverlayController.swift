@@ -80,13 +80,14 @@ final class DesktopOverlayController {
         }
         model.content = DesktopOverlayLayout.content(coins: coins, settings: settings)
         model.backgroundOpacity = settings.desktopOverlayBackgroundOpacity
+        model.textSize = settings.desktopOverlayTextSize
 
         let isNew = window == nil
         let window = window ?? makeWindow()
         if !model.isAdjusting {
             window.level = Self.level
         }
-        let size = DesktopOverlayLayout.windowSize(for: model.content)
+        let size = DesktopOverlayLayout.windowSize(for: model.content, textSize: model.textSize)
         if model.isAdjusting {
             // The watchlist changed while adjusting: keep the top-left corner where the panel is now; Done stores it.
             if window.frame.size != size {
@@ -105,7 +106,7 @@ final class DesktopOverlayController {
 
     private func placeWindow() {
         guard let window, !model.isAdjusting else { return }
-        let size = DesktopOverlayLayout.windowSize(for: model.content)
+        let size = DesktopOverlayLayout.windowSize(for: model.content, textSize: model.textSize)
         window.setFrame(DesktopOverlayLayout.frame(saved: settings.desktopOverlayTopLeft, size: size, screens: Self.screens), display: true)
     }
 
@@ -114,7 +115,7 @@ final class DesktopOverlayController {
 
     private func makeWindow() -> DesktopOverlayWindow {
         let window = DesktopOverlayWindow(
-            contentRect: CGRect(origin: .zero, size: DesktopOverlayLayout.windowSize(for: model.content)),
+            contentRect: CGRect(origin: .zero, size: DesktopOverlayLayout.windowSize(for: model.content, textSize: model.textSize)),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false

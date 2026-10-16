@@ -11,6 +11,14 @@
 
 ## Records
 
+### 2026-10-16: Desktop panel text size
+
+"Text Size" Normal / Large; Large adds 2pt to every text and keeps the icons ([DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).
+
+- Verified: `make test-mac` passes, including the rendered-height check at both sizes. On a real Mac with 7 coins, Large measured 400×351; names, prices, and changes are not truncated, and the icons keep their size.
+- Pending:
+  1. Switch between Normal and Large in Settings while the panel is shown and while adjusting: it resizes in place with its top edge fixed.
+
 ### 2026-10-16: Desktop panel with one layout that fits the watchlist
 
 No size setting; the large widget's list with up to 16 coins and a height that fits them ([DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).
