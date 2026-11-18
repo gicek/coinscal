@@ -32,6 +32,7 @@ macOS 27.2.1 with a debug build, unless noted.
 - Display → Menu Bar: the symbol switch defaults to on. Icon mode disables the price controls, and switching back retains the symbol choice. Turning off price coloring disables the color scheme menu. In the website preview, the symbol switch updates the menu bar price immediately.
 - AppKit badge render: `BTC 64,750` measures 90 × 22 pt with a background and `64,750` measures 61 × 22 pt. The width without a background is 74 pt and 45 pt respectively.
 - Update checks request the feed of the in-app language (`appcast.en.xml` in English, `appcast.zh-Hans.xml` after switching to Simplified Chinese).
+- Release: 1.2.0 (build 4) published Nov 18, 2026: notarized zip and DMG pass `spctl`; the archives and `Coinscal.dmg` on `dl.coinscal.app` match the local builds byte for byte; `appcast.xml` lists notes in three languages and each `appcast.<lang>.xml` only its own; GitHub Release `v1.2.0` carries the zip and DMG. The website is deployed with the "Show Badge" label.
 - Release: 1.1.0 (build 3) published Nov 18, 2026: notarized zip and DMG pass `spctl`; the archives and `Coinscal.dmg` on `dl.coinscal.app` match the local builds byte for byte; `appcast.xml` lists notes in three languages and each `appcast.<lang>.xml` only its own; GitHub Release `v1.1.0` carries the zip and DMG. The website is deployed with the demo fixes.
 
 ## Pending
