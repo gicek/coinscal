@@ -716,6 +716,12 @@ button.menubar-extra:hover,
     white-space: nowrap;
 }
 
+.pn-change-basis {
+    color: var(--pn-secondary);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
 .pn-back {
     display: grid;
     place-items: center;

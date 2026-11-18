@@ -77,19 +77,25 @@ final class FakePriceService: PriceServicing {
     struct Request {
         let symbols: [String]
         let currency: BaseCurrency
+        let changeBasis: PriceChangeBasis
         let subject: PassthroughSubject<PriceSnapshot, Error>
 
-        func respond(_ prices: [String: Double], rate: Double = 1) {
-            subject.send(PriceSnapshot(prices: prices, pricesUSD: prices.mapValues { $0 / rate }, changes24h: [:], usdToTargetRate: rate))
+        func respond(_ prices: [String: Double], rate: Double = 1, changes: [String: Double] = [:]) {
+            subject.send(PriceSnapshot(
+                prices: prices, pricesUSD: prices.mapValues { $0 / rate }, priceChanges: changes,
+                usdToTargetRate: rate, changeDayStart: changeBasis.dayStart(at: Date())
+            ))
             subject.send(completion: .finished)
         }
     }
 
     private(set) var requests: [Request] = []
 
-    func fetchQuotes(symbols: [String], currency: BaseCurrency) -> AnyPublisher<PriceSnapshot, Error> {
+    func fetchQuotes(
+        symbols: [String], currency: BaseCurrency, changeBasis: PriceChangeBasis
+    ) -> AnyPublisher<PriceSnapshot, Error> {
         let subject = PassthroughSubject<PriceSnapshot, Error>()
-        requests.append(Request(symbols: symbols, currency: currency, subject: subject))
+        requests.append(Request(symbols: symbols, currency: currency, changeBasis: changeBasis, subject: subject))
         return subject.eraseToAnyPublisher()
     }
 }

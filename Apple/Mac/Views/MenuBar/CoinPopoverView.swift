@@ -31,6 +31,12 @@ struct CoinPopoverView: View {
             Text(verbatim: "Coinscal")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(.primary)
+            if let key = settingsVM.settings.priceChangeBasis.dayLabelKey {
+                Text(loc(key))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
             Spacer(minLength: 0)
             if coinListVM.isLoading {
                 ProgressView()

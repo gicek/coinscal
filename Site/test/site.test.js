@@ -88,6 +88,7 @@ test("demo settings fall back field by field", () => {
         const s = loadSettings();
         assert.deepEqual(s.coins, ["solana"]);
         assert.equal(s.currency, "USD");
+        assert.equal(s.changeBasis, "rolling24h");
         assert.equal(s.colorEnabled, false);
         assert.equal(s.scheme, "greenUpRedDown");
         store.set("coinscal.demo", "{not json");
@@ -172,6 +173,36 @@ test("the first failed price round ends the loading state", async (t) => {
     await feed.poll(feed.symbols);
     assert.equal(status.loading, false);
     assert.equal(status.unavailable, true);
+});
+
+test("fixed-day changes use a matching open, cache it, and expire at midnight", async (t) => {
+    const start = Date.parse("2026-11-18T16:00:00Z");
+    let now = start + 1000;
+    t.mock.method(Date, "now", () => now);
+    replaceGlobal(t, "navigator", { onLine: true });
+    const requests = [];
+    t.mock.method(globalThis, "fetch", async (url) => {
+        requests.push(url);
+        const data = url.includes("tradingDay")
+            ? [{ symbol: "BTCUSDT", openTime: start, openPrice: "80" }]
+            : [{ symbol: "BTCUSDT", lastPrice: "100", priceChangePercent: "5", closeTime: now }];
+        return { ok: true, json: async () => data };
+    });
+    const feed = new PriceFeed();
+    feed.symbols = ["BTC"];
+    feed.changeBasis = "utc8";
+    await feed.poll(feed.symbols);
+    await feed.poll(feed.symbols);
+    assert.equal(feed.quote("BTC").change, 25);
+    assert.equal(requests.filter((url) => url.includes("tradingDay")).length, 1);
+    assert.ok(requests.some((url) => url.includes("timeZone=8")));
+
+    now = start + 86_400_000;
+    assert.equal(feed.quote("BTC").change, null);
+    await feed.poll(feed.symbols);
+    assert.equal(feed.quote("BTC").price, 100);
+    assert.equal(feed.quote("BTC").change, null, "a previous day's opening is rejected");
+    assert.equal(requests.filter((url) => url.includes("tradingDay")).length, 2);
 });
 
 test("a late language response cannot replace the user's latest choice", async (t) => {

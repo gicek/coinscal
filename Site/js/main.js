@@ -176,6 +176,7 @@ function refresh() {
 }
 
 function settingsChanged() {
+    feed.setChangeBasis(panel.settings.changeBasis);
     feed.setSymbols(panel.symbols);
     renderItem();
     layoutPanel();
@@ -240,7 +241,7 @@ scheduleClock();
 
 if (panel) {
     panel.render();
-    feed.setSymbols(panel.symbols);
+    settingsChanged();
     feed.start();
     setPanelOpen(true);
 }

@@ -6,8 +6,8 @@ Website: [coinscal.app](https://coinscal.app/) · Download: [latest release](htt
 
 ## Features
 
-- **Menu bar price**: the selected coin's price, optionally colored by 24h change and set on a colored background, or just the app icon.
-- **Watchlist panel**: click the menu bar item for the price and 24h change of every coin in your watchlist.
+- **Menu bar price**: the selected coin's price, optionally colored by price change and set on a colored background, or just the app icon.
+- **Watchlist panel**: click the menu bar item for the price and change of every coin in your watchlist. Choose a rolling 24-hour window or a day starting at midnight in UTC+0 or UTC+8.
 - **Watchlist**: search about 450 coins (the top 1000 by market cap that trade against USDT on Binance, OKX, or Bybit), add recommended coins, and drag to reorder. Coins the catalog marks as migrated to a successor are replaced automatically.
 - **Price alerts**: per coin, above or below a price, or a percentage move; delivered as system notifications.
 - **Widgets**: "Coin Price" and "Watchlist" for the desktop and Notification Center. They refresh on their own, even when the app isn't running.

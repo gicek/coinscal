@@ -39,7 +39,7 @@ import Testing
          {"symbol":"XRPUSDT","lastPrice":"0.5","priceChangePercent":"3","closeTime":\(nowMs)}]
         """)
         let quotes = try binance().parse(data, symbols: ["BTC"])
-        #expect(quotes == ["BTC": TickerQuote(priceUsd: 65000.5, change24hPercent: -1.25)])
+        #expect(quotes == ["BTC": TickerQuote(priceUsd: 65000.5, change24hPercent: -1.25, quotedAt: now)])
     }
 
     /// Regression: Binance still returns the last price of halted (BREAK) pairs; they must be dropped or stale prices show.

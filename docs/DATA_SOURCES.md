@@ -8,10 +8,10 @@ Coinscal calls public, key-free APIs directly from the Mac. All limits below are
 
 | # | Source | Request |
 |---|---|---|
-| 1 | Binance `api.binance.com/api/v3/ticker/24hr?symbols=[…]` | Only the watchlist pairs |
+| 1 | Binance `api.binance.com/api/v3/ticker/24hr?symbols=[…]` | Only the watchlist pairs; `priceChangePercent` uses the rolling window's `openPrice` |
 | 2 | Binance mirror `data-api.binance.vision` | Same as Binance |
 | 3 | OKX `/api/v5/market/tickers?instType=SPOT` | All spot pairs, filtered locally; change computed from `open24h` |
-| 4 | Bybit `/v5/market/tickers?category=spot` | All spot pairs, filtered locally; `price24hPcnt` is a ratio |
+| 4 | Bybit `/v5/market/tickers?category=spot` | All spot pairs, filtered locally; `price24hPcnt` is a ratio relative to `prevPrice24h` |
 
 - Only USDT pairs are used. A source that returns any watchlist coin becomes the primary source for the round.
 - **Fill-in**: coins the primary source lacks are requested from sources on other exchanges. A mirror can be tried after a request failure and is skipped once its exchange has given a definitive listing answer or is rate-limited. A failed fill-in request keeps the primary result.
@@ -19,6 +19,18 @@ Coinscal calls public, key-free APIs directly from the Mac. All limits below are
 - **Halted pairs**: Binance still returns halted pairs with their last price; tickers whose `closeTime` is more than an hour old are dropped.
 - **Rate limits**: HTTP 429, 418, or 403, and OKX code 50011 (also sent as HTTP 200), pause that exchange, mirror included, until its `Retry-After`; without one, for 1 minute, or 10 minutes after a 403 (Bybit's documented wait). Continuing after a Binance 429 leads to an IP ban.
 - Each request times out after 5 seconds without data and bypasses the URL cache.
+
+### Fixed-day opening prices
+
+The regular tickers supply current prices and rolling 24-hour statistics. With a fixed midnight selected, the app computes the change as `(last − open) / open × 100`, using the opening price on the exchange that supplied that coin's latest quote.
+
+| Exchange | Opening price |
+|---|---|
+| Binance and mirror | `/api/v3/ticker/tradingDay` with `timeZone=0` or `8`, `type=MINI`, and batches of up to 100 symbols. The returned `openTime` must match the selected boundary. |
+| OKX | `sodUtc0` or `sodUtc8` in the regular ticker response. |
+| Bybit | `/v5/market/kline` for the first 1-hour spot candle of the selected day, using the candle's exact start and open. Up to 8 coin requests are started in a polling round. |
+
+The app caches opens in memory by exchange, symbol, and day start. Opening requests run after quote failover and fill-in, and wait at most 3 seconds or the time remaining in the widget's request budget. Missing opens are retried after a minute, subject to the exchange's existing rate-limit pause. The app publishes prices even if the opening requests fail. A fixed-day change is absent until a valid open is available.
 
 ## Exchange Rates
 
@@ -31,6 +43,7 @@ ExchangeRate-API's terms ask apps that show its rates to link "Rates By Exchange
 | Source | Documented limit | Cost per Coinscal request | When exceeded |
 |---|---|---|---|
 | Binance REST | 6000 weight/min, 300,000 requests/5 min | 1–20 pairs: weight 2; 21–100: 40; more, or the full list: 80 | HTTP 429 with `Retry-After`; repeated violations: HTTP 418 bans from 2 minutes to 3 days |
+| Binance trading-day ticker | Shares the Binance REST limit | Weight 4 per pair, capped at 200 per request; opens cached for the trading day | Same as Binance REST |
 | Binance mirror | Not documented | As Binance | Observed: shares Binance's weight budget |
 | OKX tickers | 20 requests/2 s | 1 request | Code 50011 as HTTP 429 or 200 |
 | Bybit tickers | 600 requests/5 s for all `api.bybit.com` traffic | 1 request | HTTP 403; lifts after at least 10 minutes |
@@ -79,7 +92,7 @@ The current snapshot has 447 listed coins. 79 logos are bundled (`coin-<id>` ass
 
 ## Checking the Sources
 
-`make mac-check-sources` queries every source over the real network: coverage of the catalog per source, price agreement (more than 20% apart for the same symbol is an error, 2–20% a warning), failover with Binance unreachable, and exchange rate agreement (more than 1% apart is an error). It is manual and not part of `make test`.
+`make mac-check-sources` queries every source over the real network: coverage of the catalog per source, both fixed-day modes for BTC and ETH, price agreement (more than 20% apart for the same symbol is an error, 2–20% a warning), failover with Binance unreachable, and exchange rate agreement (more than 1% apart is an error). It is manual and runs separately from `make test`.
 
 ## References
 

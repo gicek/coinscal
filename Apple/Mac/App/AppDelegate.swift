@@ -4,6 +4,7 @@ import Combine
 
 private struct ReloadSettingsSnapshot: Equatable {
     let baseCurrency: BaseCurrency
+    let priceChangeBasis: PriceChangeBasis
     let priceChangeNotificationEnabled: Bool
     let pollingInterval: TimeInterval
     let language: AppLanguage
@@ -78,6 +79,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .map {
                 ReloadSettingsSnapshot(
                     baseCurrency: $0.baseCurrency,
+                    priceChangeBasis: $0.priceChangeBasis,
                     priceChangeNotificationEnabled: $0.priceChangeNotificationEnabled,
                     pollingInterval: $0.pollingInterval,
                     language: $0.language

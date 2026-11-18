@@ -22,9 +22,15 @@ struct Coin: Identifiable, Hashable {
     var status: CoinStatus = .active
 
     var currentPrice: Double?
-    var priceChange24hPercent: Double?  // e.g. 2.5 means +2.5%
+    var priceChangePercent: Double?  // e.g. 2.5 means +2.5%
     var referencePrice: Double?         // for threshold notification tracking
     var lastUpdated: Date?
+    var priceChangeBasis: PriceChangeBasis = .rolling24h
+
+    func change(for basis: PriceChangeBasis, at date: Date) -> Double? {
+        guard basis == priceChangeBasis, basis.includes(lastUpdated, at: date) else { return nil }
+        return priceChangePercent
+    }
 }
 
 /// One catalog entry. `id` is the CoinGecko id and identifies a watchlist coin; the symbol can change with a rename.

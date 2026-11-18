@@ -2,7 +2,9 @@
 
 ## Status
 
-Version 1.x, as defined in [Product](PRODUCT.md), is implemented and released: menu bar price, panel, watchlist, alerts, display currencies, widgets, the desktop ticker, in-app updates, and the website. 1.1.0 is the latest release. Open verification items are tracked in [Validation](VALIDATION.md).
+Version 1.1.0 is the latest release. It includes the menu bar price, panel, watchlist, alerts, display currencies, widgets, desktop ticker, in-app updates, and website.
+
+The upcoming 1.2.0 adds a price change basis setting with rolling 24 hours, UTC+0 midnight, and UTC+8 midnight. Stale rows in the menu bar panel show their last retrieval time. Release verification is tracked in [Validation](VALIDATION.md).
 
 ## Candidates
 

@@ -39,7 +39,7 @@ struct WidgetPriceView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                         .textHalo()
-                    WidgetChangeText(row: row, content: content)
+                    WidgetChangeText(row: row, content: content, now: now)
                         .font(.system(size: 13, weight: .semibold))
                         .padding(.top, 2)
                     WidgetUpdatedText(content: content, now: now)
@@ -138,7 +138,7 @@ private struct WidgetListRow: View {
                         .foregroundStyle(.orange)
                         .accessibilityLabel(Text(verbatim: WidgetText.string("coin.status.stale", content.language)))
                 } else {
-                    WidgetChangeText(row: row, content: content)
+                    WidgetChangeText(row: row, content: content, now: now)
                 }
             }
             .font(.system(size: 11.5 + boost, weight: .semibold))
@@ -150,6 +150,7 @@ private struct WidgetListRow: View {
 private struct WidgetChangeText: View {
     let row: WidgetRow
     let content: WidgetEntryContent
+    let now: Date
 
     var body: some View {
         if !row.hasMarket {
@@ -157,10 +158,13 @@ private struct WidgetChangeText: View {
                 .secondaryText()
                 .lineLimit(1)
                 .textHalo()
-        } else if let change = row.change24hPercent {
+        } else if let change = row.changePercent, content.changeBasis.includes(row.fetchedAt, at: now) {
             SignalText(symbol: change >= 0 ? "▲" : "▼", text: PriceFormatter.formatPercent(change), color: color(for: change))
                 .monospacedDigit()
                 .lineLimit(1)
+                .accessibilityLabel(Text(verbatim: "\(WidgetText.string(content.changeBasis.titleKey, content.language)), \(PriceFormatter.formatPercent(change))"))
+        } else if row.price != nil, content.changeBasis != .rolling24h {
+            Text(verbatim: "—").secondaryText().textHalo()
         }
     }
 

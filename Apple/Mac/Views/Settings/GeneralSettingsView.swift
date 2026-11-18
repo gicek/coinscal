@@ -174,6 +174,20 @@ struct GeneralSettingsView: View {
                     .pickerStyle(.menu)
                     .frame(width: 220, alignment: .trailing)
                 }
+
+                HStack {
+                    Text(loc("general.display.priceChangeBasis"))
+                    Spacer()
+                    Picker(loc("general.display.priceChangeBasis"), selection: $settingsVM.settings.priceChangeBasis) {
+                        ForEach(PriceChangeBasis.allCases, id: \.self) { basis in
+                            Text(loc(basis.titleKey)).tag(basis)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .frame(width: 220, alignment: .trailing)
+                    .id(settingsVM.settings.language)
+                }
             }
 
             Section(loc("general.section.notification")) {

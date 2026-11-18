@@ -19,6 +19,7 @@ enum WidgetDataLoader {
         snapshot: WidgetSnapshot?, fetchTimeout: TimeInterval = WidgetContent.fetchTimeout
     ) async -> WidgetEntryContent {
         let now = Date()
+        let changeBasis = snapshot?.priceChangeBasis ?? .rolling24h
         let currency = WidgetContent.currency(choice: currencyChoice, snapshot: snapshot)
         let metas = ids.compactMap { catalog.metadata(for: $0) }
         let tradable = metas.filter { $0.status == .active }
@@ -30,16 +31,19 @@ enum WidgetDataLoader {
             quotes = fresh
         } else {
             let previous = cached?.quotes.filter { tradableIDs.contains($0.key) } ?? [:]
-            let fetched = await fetch(tradable, currency: currency, timeout: fetchTimeout) ?? [:]
+            let fetched = await fetch(tradable, currency: currency, changeBasis: changeBasis, timeout: fetchTimeout) ?? [:]
             quotes = previous.merging(fetched) { _, current in current }
         }
         let updatedAt = quotes.values.compactMap { $0.fetchedAt ?? cached?.writtenAt }.min()
+        let displayedAt = Date()
 
         let rows = metas.map { meta in
-            WidgetRow(
+            let quote = quotes[meta.id]
+            let change = changeBasis.includes(quote?.fetchedAt, at: displayedAt) ? quote?.changePercent : nil
+            return WidgetRow(
                 id: meta.id, symbol: meta.symbol, name: meta.name, logoAssetName: meta.logoAssetName,
                 hasMarket: meta.status == .active,
-                price: quotes[meta.id]?.price, change24hPercent: quotes[meta.id]?.change24hPercent, fetchedAt: quotes[meta.id]?.fetchedAt
+                price: quote?.price, changePercent: change, fetchedAt: quote?.fetchedAt
             )
         }
         let defaults = AppSettings()
@@ -50,19 +54,23 @@ enum WidgetDataLoader {
             language: snapshot?.language ?? defaults.language,
             colorByChange: colorByChange,
             upColorHex: snapshot?.upColorHex ?? defaults.resolvedUpColorHex,
-            downColorHex: snapshot?.downColorHex ?? defaults.resolvedDownColorHex
+            downColorHex: snapshot?.downColorHex ?? defaults.resolvedDownColorHex,
+            changeBasis: changeBasis
         )
     }
 
     /// nil when every source failed or the request took longer than `timeout`.
     private static func fetch(
-        _ coins: [CoinMetadata], currency: BaseCurrency, timeout: TimeInterval
+        _ coins: [CoinMetadata], currency: BaseCurrency, changeBasis: PriceChangeBasis, timeout: TimeInterval
     ) async -> [String: WidgetSnapshot.Quote]? {
         guard !coins.isEmpty else { return [:] }
         var cancellable: AnyCancellable?
         let result: PriceSnapshot? = await withCheckedContinuation { continuation in
             var resumed = false
-            cancellable = priceService.fetchQuotes(symbols: coins.map(\.symbol), currency: currency)
+            cancellable = priceService.fetchQuotes(
+                symbols: coins.map(\.symbol), currency: currency,
+                changeBasis: changeBasis, deadline: Date().addingTimeInterval(timeout)
+            )
                 .receive(on: DispatchQueue.main)
                 // Finishes without a value on timeout, which resumes with nil below.
                 .timeout(.seconds(timeout), scheduler: DispatchQueue.main)
@@ -75,10 +83,13 @@ enum WidgetDataLoader {
         cancellable?.cancel()
         guard let result else { return nil }
         let fetchedAt = Date()
+        let validWindow = changeBasis.dayStart(at: fetchedAt) == result.changeDayStart
         var quotes: [String: WidgetSnapshot.Quote] = [:]
         for coin in coins {
             guard let price = result.prices[coin.symbol] else { continue }
-            quotes[coin.id] = WidgetSnapshot.Quote(price: price, change24hPercent: result.changes24h[coin.symbol], fetchedAt: fetchedAt)
+            quotes[coin.id] = WidgetSnapshot.Quote(
+                price: price, changePercent: validWindow ? result.priceChanges[coin.symbol] : nil, fetchedAt: fetchedAt
+            )
         }
         return quotes.isEmpty ? nil : quotes
     }
@@ -104,7 +115,7 @@ enum WidgetDataLoader {
         let rows = ids.compactMap { catalog.metadata(for: $0) }.map { meta in
             WidgetRow(
                 id: meta.id, symbol: meta.symbol, name: meta.name, logoAssetName: meta.logoAssetName, hasMarket: true,
-                price: samples[meta.id]?.0, change24hPercent: samples[meta.id]?.1, fetchedAt: Date()
+                price: samples[meta.id]?.0, changePercent: samples[meta.id]?.1, fetchedAt: Date()
             )
         }
         let defaults = AppSettings()
@@ -117,8 +128,15 @@ enum WidgetDataLoader {
     nonisolated static let sampleListIDs = ["bitcoin", "ethereum", "solana", "binancecoin", "ripple", "dogecoin", "cardano", "tron"]
 }
 
-private func nextReload(after entry: CoinscalWidgetEntry) -> Date {
-    entry.date.addingTimeInterval(WidgetContent.refreshInterval)
+private func priceTimeline(startingWith entry: CoinscalWidgetEntry) -> Timeline<CoinscalWidgetEntry> {
+    let regular = entry.date.addingTimeInterval(WidgetContent.refreshInterval)
+    guard let start = entry.content.changeBasis.dayStart(at: entry.date) else {
+        return Timeline(entries: [entry], policy: .after(regular))
+    }
+    let midnight = start.addingTimeInterval(86_400)
+    // The view uses the entry's date to hide expired changes even if WidgetKit delays the next fetch.
+    let rollover = CoinscalWidgetEntry(date: midnight, content: entry.content)
+    return Timeline(entries: [entry, rollover], policy: .after(min(regular, midnight)))
 }
 
 struct CoinPriceProvider: AppIntentTimelineProvider {
@@ -136,7 +154,7 @@ struct CoinPriceProvider: AppIntentTimelineProvider {
 
     func timeline(for configuration: CoinPriceConfigurationIntent, in context: Context) async -> Timeline<CoinscalWidgetEntry> {
         let entry = await entry(for: configuration)
-        return Timeline(entries: [entry], policy: .after(nextReload(after: entry)))
+        return priceTimeline(startingWith: entry)
     }
 
     private func entry(for configuration: CoinPriceConfigurationIntent) async -> CoinscalWidgetEntry {
@@ -170,7 +188,7 @@ struct WatchlistProvider: AppIntentTimelineProvider {
 
     func timeline(for configuration: WatchlistConfigurationIntent, in context: Context) async -> Timeline<CoinscalWidgetEntry> {
         let entry = await entry(for: configuration, family: context.family)
-        return Timeline(entries: [entry], policy: .after(nextReload(after: entry)))
+        return priceTimeline(startingWith: entry)
     }
 
     private func entry(for configuration: WatchlistConfigurationIntent, family: WidgetFamily) async -> CoinscalWidgetEntry {

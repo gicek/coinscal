@@ -5,6 +5,7 @@ struct AppSettings: Codable {
     var launchAtLogin: Bool = false
     var language: AppLanguage = .system
     var baseCurrency: BaseCurrency = .usd
+    var priceChangeBasis: PriceChangeBasis = .rolling24h
     var priceColorEnabled: Bool = true
     var colorScheme: PriceColorScheme = .greenUpRedDown
     var customUpColorHex: String = Constants.Defaults.upColorHex
@@ -30,7 +31,7 @@ struct AppSettings: Codable {
     ]
 
     enum CodingKeys: String, CodingKey {
-        case launchAtLogin, language, baseCurrency, priceColorEnabled, colorScheme
+        case launchAtLogin, language, baseCurrency, priceChangeBasis, priceColorEnabled, colorScheme
         case customUpColorHex, customDownColorHex
         case priceChangeNotificationEnabled, pollingInterval
         case showMenuBarBackground, menuBarContent, displayedCoinId
@@ -56,6 +57,7 @@ struct AppSettings: Codable {
         launchAtLogin = value(.launchAtLogin, d.launchAtLogin)
         language = value(.language, d.language)
         baseCurrency = value(.baseCurrency, d.baseCurrency)
+        priceChangeBasis = value(.priceChangeBasis, d.priceChangeBasis)
         priceColorEnabled = value(.priceColorEnabled, d.priceColorEnabled)
         colorScheme = value(.colorScheme, d.colorScheme)
         customUpColorHex = value(.customUpColorHex, d.customUpColorHex)
@@ -84,6 +86,46 @@ struct AppSettings: Codable {
         else { return nil }
         let size = (try? legacy.decodeIfPresent(String.self, forKey: .desktopOverlaySize)) ?? nil
         return DesktopOverlayOrigin(x: origin.x, y: origin.y + (size == "large" ? 382 : 170))
+    }
+}
+
+/// The time window used to display price changes. Alert rules have their own reference prices.
+enum PriceChangeBasis: String, Codable, CaseIterable, Sendable {
+    case rolling24h, utc0, utc8
+
+    var utcOffset: Int? {
+        switch self {
+        case .rolling24h: nil
+        case .utc0: 0
+        case .utc8: 8
+        }
+    }
+
+    var titleKey: String {
+        switch self {
+        case .rolling24h: "priceChange.rolling24h"
+        case .utc0: "priceChange.utc0"
+        case .utc8: "priceChange.utc8"
+        }
+    }
+
+    var dayLabelKey: String? {
+        switch self {
+        case .rolling24h: nil
+        case .utc0: "priceChange.dayUTC0"
+        case .utc8: "priceChange.dayUTC8"
+        }
+    }
+
+    func dayStart(at date: Date) -> Date? {
+        guard let utcOffset else { return nil }
+        let offset = Double(utcOffset * 3600)
+        let day: TimeInterval = 86_400
+        return Date(timeIntervalSince1970: floor((date.timeIntervalSince1970 + offset) / day) * day - offset)
+    }
+
+    func includes(_ quoteDate: Date?, at date: Date) -> Bool {
+        self == .rolling24h || quoteDate.flatMap { dayStart(at: $0) } == dayStart(at: date)
     }
 }
 

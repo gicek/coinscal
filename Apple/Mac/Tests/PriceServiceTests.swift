@@ -24,8 +24,118 @@ import Testing
         let snapshot = try await firstValue(service.fetchQuotes(symbols: ["btc"], currency: .cny))
         #expect(snapshot.prices["BTC"] == 700)
         #expect(snapshot.pricesUSD["BTC"] == 100)
-        #expect(snapshot.changes24h["BTC"] == 1)
+        #expect(snapshot.priceChanges["BTC"] == 1)
         #expect(snapshot.usdToTargetRate == 7)
+    }
+
+    @Test func fixedDayCachesBinanceOpensAndChangesAtMidnight() async throws {
+        let basis = PriceChangeBasis.utc8
+        let start = try #require(basis.dayStart(at: Date(timeIntervalSince1970: 1_800_000_000)))
+        var date = start.addingTimeInterval(86_399)
+        let newDay = date.addingTimeInterval(1)
+        let client = StubHTTPClient()
+        let ticker = { (date: Date) in
+            json(#"[{"symbol":"BTCUSDT","lastPrice":"110","priceChangePercent":"1","closeTime":\#(Int(date.timeIntervalSince1970 * 1000))}]"#)
+        }
+        let opening = { (day: Date, value: String) in
+            json(#"[{"symbol":"BTCUSDT","openPrice":"\#(value)","openTime":\#(Int(day.timeIntervalSince1970 * 1000))}]"#)
+        }
+        let isOpen: (URL) -> Bool = { $0.path.hasSuffix("/tradingDay") }
+        let isTicker: (URL) -> Bool = { $0.path.hasSuffix("/24hr") }
+        client.on(isTicker, reply: .status(200, ticker(date)))
+        client.on(isOpen, reply: .status(200, opening(start, "100")))
+        let service = PriceService(
+            client: client, exchangeRateService: FixedExchangeRateService(rate: 7),
+            providers: [BinanceTickerProvider(baseURL: Constants.API.binanceBaseURL, now: { newDay })],
+            now: { date }
+        )
+
+        for _ in 1...2 {
+            let snapshot = try await firstValue(service.fetchQuotes(symbols: ["BTC"], currency: .cny, changeBasis: basis))
+            #expect(snapshot.prices["BTC"] == 770)
+            #expect(snapshot.priceChanges["BTC"] == 10)
+            #expect(snapshot.changeDayStart == start)
+        }
+        #expect(client.requestedURLs.filter(isOpen).count == 1)
+        #expect(client.requestedURLs.first(where: isOpen)?.query?.contains("timeZone=8") == true)
+
+        date = newDay
+        client.on(isTicker, reply: .status(200, ticker(newDay)))
+        client.on(isOpen, reply: .status(200, opening(newDay, "110")))
+        let next = try await firstValue(service.fetchQuotes(symbols: ["BTC"], currency: .cny, changeBasis: basis))
+        #expect(next.priceChanges["BTC"] == 0)
+        #expect(next.changeDayStart == newDay)
+        #expect(client.requestedURLs.filter(isOpen).count == 2)
+    }
+
+    @Test func fixedDayUsesTheExchangeThatPricedEachCoin() async throws {
+        let client = StubHTTPClient()
+        let date = Date()
+        let start = try #require(PriceChangeBasis.utc0.dayStart(at: date))
+        let timestamp = Int(date.timeIntervalSince1970 * 1000)
+        client.on({ $0.path.hasSuffix("/24hr") }, reply: .status(200, binanceBTC))
+        client.on({ $0.path.hasSuffix("/tradingDay") }, reply: .status(200, json("""
+        [{"symbol":"BTCUSDT","openPrice":"80","openTime":\(Int(start.timeIntervalSince1970 * 1000))}]
+        """)))
+        client.on(isOKX, reply: .status(200, json("""
+        {"code":"0","data":[{"instId":"OKB-USDT","last":"120","open24h":"100","sodUtc0":"120","sodUtc8":"80","ts":"\(timestamp)"}]}
+        """)))
+        let service = PriceService(client: client, exchangeRateService: FixedExchangeRateService(), now: { date })
+
+        let fixed = try await firstValue(service.fetchQuotes(symbols: ["BTC", "OKB"], currency: .usd, changeBasis: .utc0))
+        #expect(fixed.priceChanges == ["BTC": 25, "OKB": 0])
+
+        let previousWindow = try #require(PriceChangeBasis.utc8.dayStart(at: date)?.addingTimeInterval(-86_400))
+        client.on({ $0.path.hasSuffix("/tradingDay") }, reply: .status(200, json("""
+        [{"symbol":"BTCUSDT","openPrice":"80","openTime":\(Int(previousWindow.timeIntervalSince1970 * 1000))}]
+        """)))
+        let otherDay = try await firstValue(service.fetchQuotes(symbols: ["BTC", "OKB"], currency: .usd, changeBasis: .utc8))
+        #expect(otherDay.prices["BTC"] == 100)
+        #expect(otherDay.priceChanges == ["OKB": 50], "an old opening must not replace the current day")
+    }
+
+    @Test func bybitOpeningFailureKeepsPriceAndBacksOff() async throws {
+        let client = StubHTTPClient()
+        let date = Date(timeIntervalSince1970: 1_800_000_000)
+        let start = try #require(PriceChangeBasis.utc0.dayStart(at: date))
+        let ticker = json(#"{"retCode":0,"result":{"list":[{"symbol":"BTCUSDT","lastPrice":"100","price24hPcnt":"0.01"}]}}"#)
+        let isKline: (URL) -> Bool = { $0.path.hasSuffix("/kline") }
+        client.on({ $0.path.hasSuffix("/tickers") }, reply: .status(200, ticker))
+        client.on(isKline, reply: .status(503))
+        var now = date
+        let service = PriceService(
+            client: client, exchangeRateService: FixedExchangeRateService(), providers: [BybitTickerProvider()], now: { now }
+        )
+        for _ in 1...2 {
+            let snapshot = try await firstValue(service.fetchQuotes(symbols: ["BTC"], currency: .usd, changeBasis: .utc0))
+            #expect(snapshot.prices["BTC"] == 100)
+            #expect(snapshot.priceChanges["BTC"] == nil)
+        }
+        #expect(client.requestedURLs.filter(isKline).count == 1)
+
+        now = now.addingTimeInterval(61)
+        let startMs = Int(start.timeIntervalSince1970 * 1000)
+        client.on(isKline, reply: .status(200, json("""
+        {"retCode":0,"result":{"symbol":"BTCUSDT","list":[["\(startMs + 3_600_000)","1"],["\(startMs)","80"]]}}
+        """)))
+        let snapshot = try await firstValue(service.fetchQuotes(symbols: ["BTC"], currency: .usd, changeBasis: .utc0))
+        #expect(snapshot.priceChanges["BTC"] == 25)
+        #expect(client.requestedURLs.last?.query?.contains("start=\(startMs)") == true)
+    }
+
+    @Test func shortWidgetBudgetKeepsPriceWithoutWaitingForAnOpen() async throws {
+        let client = StubHTTPClient()
+        let date = Date()
+        client.on({ $0.path.hasSuffix("/24hr") }, reply: .status(200, binanceBTC))
+        client.on({ $0.path.hasSuffix("/tradingDay") }, reply: .pending)
+        let service = PriceService(client: client, exchangeRateService: FixedExchangeRateService(), now: { date })
+
+        let snapshot = try await firstValue(service.fetchQuotes(
+            symbols: ["BTC"], currency: .usd, changeBasis: .utc8, deadline: date.addingTimeInterval(0.05)
+        ))
+        #expect(snapshot.prices["BTC"] == 100)
+        #expect(snapshot.priceChanges["BTC"] == nil)
+        #expect(client.requestedURLs.map(\.path) == ["/api/v3/ticker/24hr"])
     }
 
     @Test func failsOverAndRemembersWorkingProvider() async throws {
@@ -68,7 +178,7 @@ import Testing
 
         let snapshot = try await firstValue(service.fetchQuotes(symbols: ["BTC", "OKB"], currency: .usd))
         #expect(snapshot.prices == ["BTC": 100, "OKB": 120])
-        #expect(abs((snapshot.changes24h["OKB"] ?? 0) - 20) < 1e-9)
+        #expect(abs((snapshot.priceChanges["OKB"] ?? 0) - 20) < 1e-9)
         #expect(!client.requestedURLs.contains { self.isBinanceVision($0) })
         #expect(!client.requestedURLs.contains { self.isBybit($0) }, "nothing left to fill after OKX")
     }

@@ -11,6 +11,7 @@ enum Constants {
         static let binanceVisionBaseURL = "https://data-api.binance.vision/api/v3"
         static let okxTickersURL = "https://www.okx.com/api/v5/market/tickers?instType=SPOT"
         static let bybitTickersURL = "https://api.bybit.com/v5/market/tickers?category=spot"
+        static let bybitKlineURL = "https://api.bybit.com/v5/market/kline"
 
         /// FX rate sources (public, key-free, updated daily), tried in declaration order.
         static let erApiRatesURL = "https://open.er-api.com/v6/latest/USD"

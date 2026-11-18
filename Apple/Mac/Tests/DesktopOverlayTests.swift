@@ -11,7 +11,7 @@ import Testing
 
     private func coin(_ id: String, price: Double? = 1, updated: TimeInterval? = nil, status: CoinStatus = .active) -> Coin {
         Coin(id: id, symbol: id.uppercased(), name: id, rank: nil, logoAssetName: nil, logoURL: nil, status: status,
-             currentPrice: price, priceChange24hPercent: 1, lastUpdated: updated.map(Date.init(timeIntervalSince1970:)))
+             currentPrice: price, priceChangePercent: 1, lastUpdated: updated.map(Date.init(timeIntervalSince1970:)))
     }
 
     @Test func settingsDefaultOffAndDecodeTolerantly() throws {

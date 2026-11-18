@@ -1,6 +1,6 @@
 # Product
 
-Coinscal lets you check crypto prices at a glance without opening an exchange app or website. It lives in the macOS menu bar, shows the current price and 24h change of your watchlist, and notifies you when a price reaches your target. It doesn't trade, track holdings, or analyze markets.
+Coinscal lets you check crypto prices at a glance without opening an exchange app or website. It lives in the macOS menu bar, shows the current price and price change of your watchlist, and notifies you when a price reaches your target. It doesn't trade, track holdings, or analyze markets.
 
 ## Principles
 
@@ -20,12 +20,12 @@ Out of scope: accounts and sync, a Coinscal server, trading, holdings and profit
 - "Show" is "Price" (default) or "Icon". With "Icon" the item always shows the monochrome logo.
 - With a price: `<symbol> <price>`, for example `BTC 65,000`, without a currency symbol. Decimals depend on magnitude, without trailing zeros: none from 100, up to two from 1 to 100, up to four below 1. A positive price that would round to zero uses compact scientific notation.
 - Without a price (starting up or empty watchlist), the item shows the monochrome logo. If a refresh fails, it keeps the last available price.
-- "Color by Price Change" colors the price by the coin's 24h change. With "Show Background" on, the colored badge uses white text on the same price color used for plain text. With price coloring off, the badge uses the menu bar text color for its background and inverts the text.
+- "Color by Price Change" uses the selected price change basis to color the price. With "Show Background" on, the colored badge uses white text on the same price color used for plain text. With price coloring off, the badge uses the menu bar text color for its background and inverts the text.
 - Left click toggles the panel. Right click opens the menu.
 
 ## Panel
 
-320pt wide: a header, the watchlist, and a footer with Settings, "Manage Watchlist", and Quit. The list is sized for 4 to 8 rows and scrolls beyond that, without a visible scroll bar. Each row shows the logo, name, symbol, price in the display currency, and 24h change. Cached prices older than 30 minutes show a warning in the change column. An empty watchlist shows an empty state with "Add Coins", which opens Settings → Watchlist.
+320pt wide: a header, the watchlist, and a footer with Settings, "Manage Watchlist", and Quit. The list is sized for 4 to 8 rows and scrolls beyond that, without a visible scroll bar. Each row shows the logo, name, symbol, price in the display currency, and price change. Quotes older than 30 minutes show a warning icon and their last retrieval time in the change column. The header shows the selected day boundary in a fixed-day mode. An empty watchlist shows an empty state with "Add Coins", which opens Settings → Watchlist.
 
 Opening the panel leaves the frontmost app active, as the system's menu bar extras do. The panel closes on a second click on the menu bar item, a click anywhere else, Esc, switching to another app, and when Settings opens. When a scheduled update check has found a new version, the header shows "Update Available"; clicking it opens the update window.
 
@@ -41,7 +41,7 @@ A window with three panes, General, Watchlist, and About, under a shared title b
   - Launch: "Open at Login" (off by default).
   - Menu Bar: "Show" (Price / Icon), "Coin", "Color by Price Change" with "Color Scheme" (Green Up, Red Down / Red Up, Green Down / Custom), "Show Background". With "Icon", the other options are grayed out.
   - Desktop: "Show on Desktop", "Text Size" (Normal / Large), "Background Opacity", "Adjust Position"; grayed out while the ticker is off.
-  - Prices: "Display Currency", used by the menu bar, panel, widgets, and alerts.
+  - Prices: "Display Currency" and "Price Change Basis". The basis selector offers "Rolling 24 Hours" (default), "Midnight (UTC+0)", and "Midnight (UTC+8)" in that order. The menu bar color, panel, desktop ticker, and widgets follow this setting.
   - Notifications: "Price Alerts", the master switch for alerts.
   - Language: Follow System, English, Simplified Chinese, Traditional Chinese.
 - **Watchlist**
@@ -54,14 +54,14 @@ A window with three panes, General, Watchlist, and About, under a shared title b
 
 | Widget | Sizes | Content |
 |---|---|---|
-| Coin Price | Small | One coin: logo, symbol, name, price, 24h change, update time |
-| Watchlist | Medium (4 rows), Large (8 rows) | Logo, symbol and name, price, and 24h change per row; title and update time |
+| Coin Price | Small | One coin: logo, symbol, name, price, price change, update time |
+| Watchlist | Medium (4 rows), Large (8 rows) | Logo, symbol and name, price, and price change per row; title and update time |
 
-- The 24h change uses color, ▲ / ▼, and a sign, so it stays readable when macOS shows desktop widgets in monochrome.
+- The price change uses color, ▲ / ▼, and a sign, so it stays readable when macOS shows desktop widgets in monochrome.
 - The update time shows the oldest displayed quote. It turns orange with ⚠︎ when a quote is older than 30 minutes. The Watchlist widget also marks the affected rows. Before any price is available the widget says "Open Coinscal to get prices". Coins without a market show "No market data".
 - Edit Widget:
   - Coin Price: Coin ("Follow Menu Bar Coin" by default, or any listed coin), Display Currency ("Follow App" by default), Color by Price Change (on).
-  - Watchlist: Source ("Watchlist" by default, or "Choose Manually" with up to 4 or 8 coins), Sort By (watchlist order, or 24h change high to low or low to high), Display Currency, Color by Price Change.
+  - Watchlist: Source ("Watchlist" by default, or "Choose Manually" with up to 4 or 8 coins), Sort By (watchlist order, or the selected price change high to low or low to high), Display Currency, Color by Price Change.
 - Language and the color scheme follow the app.
 - The widget gallery previews the user's own coins with live prices, falling back to sample prices when offline.
 - Widgets refresh about every 15 to 30 minutes, as the system's budget allows, and fetch prices themselves when the app isn't running. Clicking a widget opens the panel, launching the app first if needed.
@@ -73,6 +73,11 @@ A price list pinned to the desktop, between the wallpaper and the desktop icons,
 - One layout, the large widget's list: up to the first 16 watchlist coins, limited further by the available screen height. Stale quotes are marked in their rows. The list grows downward from its top edge. "Large" text adds 2pt to all text.
 - "Background Opacity" (0–100%, 100% by default) affects only the frosted background. Below 20%, text turns white with a faint shadow, like desktop icon labels, so it stays readable on any wallpaper; only ▲ / ▼ and ⚠︎ keep their colors.
 - By default it sits at the top right of the main display. Turning on "Show on Desktop", or "Adjust Position", brings it to the front with a dashed border and "Drag to move / Done"; it can be dragged to any display. "Done" (or Return) saves the position and restores click-through. If its display is disconnected, it moves to the nearest display until that one returns.
+
+## Price Change
+
+- Rolling 24 hours uses each source's rolling statistics. Fixed-day change compares the latest quote with the same exchange's opening price since the chosen midnight. UTC+8 midnight occurs at 16:00 UTC.
+- When today's opening price is unavailable, the current price remains visible and the change shows `—`. Every price alert uses its own reference price regardless of the display basis.
 
 ## Price Alerts
 
@@ -97,7 +102,7 @@ A price list pinned to the desktop, between the wallpaper and the desktop icons,
 
 ## Interaction and Copy Rules
 
-- Changes to the display currency or language refetch prices within 0.5 seconds. Language changes apply immediately, including open windows.
+- Changes to the display currency, price change basis, or language schedule a price refresh after 0.5 seconds. Language changes apply immediately, including open windows.
 - Drag reordering respects "Reduce motion".
 - Button and menu item labels never end with an ellipsis.
 - Prices and percentages use `.` for decimals and `,` for grouping in every language and region.

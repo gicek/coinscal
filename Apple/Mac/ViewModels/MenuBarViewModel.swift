@@ -59,7 +59,7 @@ final class MenuBarViewModel: ObservableObject {
         statusItem?.length = NSStatusItem.variableLength
         button.layer?.backgroundColor = nil
 
-        let priceColor = settingsVM.priceNSColor(changePercent: displayedCoin.priceChange24hPercent)
+        let priceColor = settingsVM.priceNSColor(changePercent: displayedCoin.change(for: settings.priceChangeBasis, at: Date()))
         let font = NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
         let isDarkMenuBar = button.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
 

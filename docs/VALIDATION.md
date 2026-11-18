@@ -8,10 +8,10 @@ Last run Nov 18, 2026.
 
 | Check | Result |
 |---|---|
-| `make test-mac` | Localization guards (45 files), catalog and release notes validation, 126 unit tests in 15 suites: pass |
-| `make test-site` | Localization guards (7 files), 11 offline checks: pass |
+| `make test-mac` | Localization guards (45 files), catalog and release notes validation, 133 unit tests in 15 suites: pass |
+| `make test-site` | Localization guards (7 files), 12 offline checks: pass |
 | `make test-release` | 4 offline checks: pass |
-| `make mac-check-sources` | All 4 price and 3 exchange rate sources respond; 446 queried symbols priced, plus locally priced USDT; failover passes. Two cross-source price differences were reported as warnings. |
+| `make mac-check-sources` | All 4 price and 3 exchange rate sources respond. Both fixed-day modes return BTC and ETH changes from each price source. All 446 queried symbols are priced, plus locally priced USDT. Failover passes. Two cross-source price differences were reported as warnings. |
 | CI configuration | Linux hygiene, localization, release and website checks. The new macOS job runs Swift tests and checks the generated project. |
 
 ## Verified on a Real Mac
@@ -27,12 +27,14 @@ macOS 27.2.1 with a debug build, unless noted.
 - Desktop ticker: level, click-through, positioning across displays, and persistence (macOS 26).
 - Watchlist: keyboard focus fits inside the reorder handle, which exposes Move Up and Move Down actions to accessibility tools.
 - Website preview: live prices in the desktop and 390 px layouts. Keyboard changes retain focus in the demo settings.
+- General → Prices: the native menu lists Rolling 24 Hours, Midnight (UTC+0), and Midnight (UTC+8) in order. The selected item is checked after switching to UTC+8. The desktop website preview switches to UTC+8 and shows its day-change heading and live BTC and ETH percentages.
 - Update checks request the feed of the in-app language (`appcast.en.xml` in English, `appcast.zh-Hans.xml` after switching to Simplified Chinese).
 - Release: 1.1.0 (build 3) published Nov 18, 2026: notarized zip and DMG pass `spctl`; the archives and `Coinscal.dmg` on `dl.coinscal.app` match the local builds byte for byte; `appcast.xml` lists notes in three languages and each `appcast.<lang>.xml` only its own; GitHub Release `v1.1.0` carries the zip and DMG. The website is deployed with the demo fixes.
 
 ## Pending
 
 **Widgets**
+- With widgets placed, switch the price change basis and compare the next rendered entry with the menu bar panel. At each selected midnight, check that the next entry uses the new day while the desktop ticker and app panel keep showing prices.
 - With a widget placed, the update time keeps advancing through the evening and the next day.
 - Changing the display currency, language, or menu bar coin updates placed widgets soon after.
 - The gallery preview shows the user's coins with live prices, and offline falls back to sample prices.

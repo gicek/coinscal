@@ -7,12 +7,13 @@ const TIMEOUT_MS = 5000;
 const POLL_MS = 10000;
 const STREAM_QUIET_MS = 15000;
 const ONLINE_WINDOW_MS = 30000;
+const DAY_MS = 86_400_000;
 
 const BINANCE = "https://api.binance.com/api/v3";
 const BINANCE_MIRROR = "https://data-api.binance.vision/api/v3";
 const BINANCE_STREAM = "wss://data-stream.binance.vision/stream";
 const OKX = "https://www.okx.com/api/v5/market/ticker";
-const BYBIT = "https://api.bybit.com/v5/market/tickers";
+const BYBIT = "https://api.bybit.com/v5/market";
 
 async function getJSON(url) {
     const controller = new AbortController();
@@ -31,16 +32,62 @@ const number = (value) => {
     return Number.isFinite(n) ? n : null;
 };
 
+export const CHANGE_BASES = ["rolling24h", "utc0", "utc8"];
+
+function dayStart(basis, now) {
+    if (basis === "rolling24h") return null;
+    const offset = basis === "utc8" ? 28_800_000 : 0;
+    return Math.floor((now + offset) / DAY_MS) * DAY_MS - offset;
+}
+
+function changeFromOpen(price, open) {
+    const change = (price - open) / open * 100;
+    return open > 0 && Number.isFinite(change) ? change : null;
+}
+
+// Opening prices stay valid for one trading day. Retry a missing opening at most once a minute.
+async function loadOpens(cache, keys, fetchOpens) {
+    const now = Date.now();
+    const needed = keys.filter((key) => !cache.has(key) || cache.get(key).retryAt <= now);
+    for (const key of needed) cache.set(key, { retryAt: now + 60_000 });
+    if (needed.length) {
+        try {
+            for (const [key, open] of await fetchOpens(needed)) {
+                if (open > 0) cache.set(key, { open });
+            }
+        } catch {
+            // A missing open hides the percentage while the latest price stays available.
+        }
+    }
+}
+
 function binanceSource(base) {
-    return async (symbols) => {
+    return async (symbols, { basis, start, opens }) => {
         const pairs = JSON.stringify(symbols.map((s) => `${s}USDT`));
         const rows = await getJSON(`${base}/ticker/24hr?symbols=${encodeURIComponent(pairs)}`);
         const out = new Map();
         for (const row of rows) {
             const price = number(row.lastPrice);
-            if (price > 0) out.set(row.symbol.replace(/USDT$/, ""), { price, change: number(row.priceChangePercent) });
+            if (price > 0) out.set(row.symbol, { price, change: start === null ? number(row.priceChangePercent) : null });
         }
-        return out;
+        if (start !== null && out.size) {
+            const key = (pair) => `binance/${start}/${pair}`;
+            const pairsByKey = new Map([...out.keys()].map((pair) => [key(pair), pair]));
+            await loadOpens(opens, [...pairsByKey.keys()], async (needed) => {
+                const batch = JSON.stringify(needed.map((id) => pairsByKey.get(id)));
+                const offset = basis === "utc8" ? 8 : 0;
+                const opens = await getJSON(`${base}/ticker/tradingDay?symbols=${encodeURIComponent(batch)}&timeZone=${offset}&type=MINI`);
+                return opens.filter((row) => row.openTime === start && pairsByKey.has(key(row.symbol)))
+                    .map((row) => [key(row.symbol), number(row.openPrice)]);
+            });
+            for (const row of rows) {
+                const quote = out.get(row.symbol);
+                if (quote && (row.closeTime ?? start) >= start) {
+                    quote.change = changeFromOpen(quote.price, opens.get(key(row.symbol))?.open);
+                }
+            }
+        }
+        return new Map([...out].map(([pair, quote]) => [pair.replace(/USDT$/, ""), quote]));
     };
 }
 
@@ -55,23 +102,36 @@ async function eachSymbol(symbols, fetchOne) {
     return out;
 }
 
-async function okx(symbols) {
+async function okx(symbols, { basis, start }) {
     return eachSymbol(symbols, async (symbol) => {
         const row = (await getJSON(`${OKX}?instId=${symbol}-USDT`)).data?.[0];
         const price = number(row?.last);
-        const open = number(row?.open24h);
+        const open = number(start === null ? row?.open24h
+            : number(row?.ts) >= start ? row?.[basis === "utc0" ? "sodUtc0" : "sodUtc8"] : null);
         if (!(price > 0)) return null;
-        return { price, change: open > 0 ? ((price - open) / open) * 100 : null };
+        return { price, change: changeFromOpen(price, open) };
     });
 }
 
-async function bybit(symbols) {
+async function bybit(symbols, { start, opens }) {
     return eachSymbol(symbols, async (symbol) => {
-        const row = (await getJSON(`${BYBIT}?category=spot&symbol=${symbol}USDT`)).result?.list?.[0];
+        const query = `category=spot&symbol=${symbol}USDT`;
+        const ticker = await getJSON(`${BYBIT}/tickers?${query}`);
+        const row = ticker.result?.list?.[0];
         const price = number(row?.lastPrice);
-        const change = number(row?.price24hPcnt);
         if (!(price > 0)) return null;
-        return { price, change: change == null ? null : change * 100 };
+        if (start === null) {
+            const change = number(row?.price24hPcnt);
+            return { price, change: change == null ? null : change * 100 };
+        }
+        if ((ticker.time ?? start) < start) return { price, change: null };
+        const key = `bybit/${start}/${symbol}`;
+        await loadOpens(opens, [key], async () => {
+            const candles = await getJSON(`${BYBIT}/kline?${query}&interval=60&start=${start}&end=${start + 3_599_999}&limit=1`);
+            const candle = candles.result?.list?.find((row) => Number(row[0]) === start);
+            return [[key, number(candle?.[1])]];
+        });
+        return { price, change: changeFromOpen(price, opens.get(key)?.open) };
     });
 }
 
@@ -84,6 +144,8 @@ export class PriceFeed {
         this.onStatus = onStatus;
         this.symbols = [];
         this.quotes = new Map();
+        this.changeBasis = "rolling24h";
+        this.openingPrices = new Map();
         this.completedPoll = false;
         this.sequence = 0;
         this.lastPoll = 0;
@@ -124,7 +186,16 @@ export class PriceFeed {
     }
 
     quote(symbol) {
-        return this.quotes.get(symbol) ?? null;
+        const quote = this.quotes.get(symbol);
+        if (!quote) return null;
+        return quote.changeStart === dayStart(this.changeBasis, Date.now()) ? quote : { ...quote, change: null };
+    }
+
+    setChangeBasis(basis) {
+        if (basis === this.changeBasis) return;
+        this.changeBasis = basis;
+        this.openStream();
+        this.tick(true);
     }
 
     isStale(symbol, now = Date.now()) {
@@ -140,7 +211,7 @@ export class PriceFeed {
         if (!force && now - this.lastPoll < POLL_MS) return;
         const wanted = this.symbols.filter((symbol) => {
             const quote = this.quote(symbol);
-            return !quote?.stream || now - quote.receivedAt >= STREAM_QUIET_MS;
+            return this.changeBasis !== "rolling24h" || !quote?.stream || now - quote.receivedAt >= STREAM_QUIET_MS;
         });
         if (wanted.length) return this.poll(wanted);
     }
@@ -149,17 +220,23 @@ export class PriceFeed {
         this.inFlight = true;
         this.lastPoll = Date.now();
         const sequence = ++this.sequence;
+        const basis = this.changeBasis;
+        const start = dayStart(basis, this.lastPoll);
+        const activeDays = new Set([dayStart("utc0", this.lastPoll), dayStart("utc8", this.lastPoll)]);
+        for (const key of this.openingPrices.keys()) {
+            if (!activeDays.has(Number(key.split("/")[1]))) this.openingPrices.delete(key);
+        }
         let remaining = wanted;
         let changed = false;
         for (const source of SOURCES) {
             if (!remaining.length) break;
             try {
-                const result = await source(remaining);
+                const result = await source(remaining, { basis, start, opens: this.openingPrices });
                 const receivedAt = Date.now();
                 for (const symbol of remaining) {
                     const quote = result.get(symbol);
                     if (!quote || !this.symbols.includes(symbol) || this.quote(symbol)?.sequence > sequence) continue;
-                    this.quotes.set(symbol, { ...quote, receivedAt, sequence, stream: false });
+                    this.quotes.set(symbol, { ...quote, receivedAt, sequence, stream: false, changeStart: start });
                     changed = true;
                 }
                 remaining = remaining.filter((symbol) => this.symbols.includes(symbol) && !result.has(symbol)
@@ -172,6 +249,7 @@ export class PriceFeed {
         this.completedPoll = true;
         if (changed) this.onUpdate();
         this.reportStatus();
+        if (basis !== this.changeBasis) return this.tick(true);
     }
 
     closeStream() {
@@ -185,7 +263,8 @@ export class PriceFeed {
 
     openStream() {
         this.closeStream();
-        if (!this.symbols.length || document.hidden || navigator.onLine === false || typeof WebSocket === "undefined") return;
+        if (this.changeBasis !== "rolling24h" || !this.symbols.length || document.hidden
+            || navigator.onLine === false || typeof WebSocket === "undefined") return;
         const streams = this.symbols.map((s) => `${s.toLowerCase()}usdt@ticker`).join("/");
         const socket = new WebSocket(`${BINANCE_STREAM}?streams=${streams}`);
         this.socket = socket;
@@ -201,7 +280,7 @@ export class PriceFeed {
             const symbol = data.s.replace(/USDT$/, "");
             if (!this.symbols.includes(symbol)) return;
             this.quotes.set(symbol, {
-                price, change: number(data.P), receivedAt: Date.now(), sequence: ++this.sequence, stream: true,
+                price, change: number(data.P), receivedAt: Date.now(), sequence: ++this.sequence, stream: true, changeStart: null,
             });
             this.reconnectDelay = 2000;
             this.onUpdate();

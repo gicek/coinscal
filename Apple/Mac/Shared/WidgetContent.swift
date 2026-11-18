@@ -21,7 +21,7 @@ struct WidgetRow: Identifiable, Equatable, Sendable {
     /// False for coins no price source trades: shown as "No market data".
     let hasMarket: Bool
     var price: Double?
-    var change24hPercent: Double?
+    var changePercent: Double?
     var fetchedAt: Date? = nil
 
     func isStale(at now: Date) -> Bool {
@@ -39,6 +39,7 @@ struct WidgetEntryContent: Equatable, Sendable {
     var colorByChange: Bool
     var upColorHex: String
     var downColorHex: String
+    var changeBasis: PriceChangeBasis = .rolling24h
 
     var hasPrices: Bool { rows.contains { $0.price != nil } }
 
@@ -93,6 +94,8 @@ enum WidgetContent {
         guard required.allSatisfy({ id in
             guard let date = quotes[id]?.fetchedAt else { return false }
             return now.timeIntervalSince(date) < snapshotFreshFor
+                && snapshot.priceChangeBasis.includes(date, at: now)
+                && (snapshot.priceChangeBasis == .rolling24h || quotes[id]?.changePercent != nil)
         }) else { return nil }
         return quotes
     }
@@ -100,10 +103,10 @@ enum WidgetContent {
     /// Sorting by change keeps coins without a change at the end, in their original order.
     static func sorted(_ rows: [WidgetRow], by order: WidgetSortOrder) -> [WidgetRow] {
         guard order != .watchlist else { return rows }
-        let withChange = rows.filter { $0.change24hPercent != nil }
-        let without = rows.filter { $0.change24hPercent == nil }
+        let withChange = rows.filter { $0.changePercent != nil }
+        let without = rows.filter { $0.changePercent == nil }
         let sorted = withChange.enumerated().sorted { a, b in
-            let x = a.element.change24hPercent!, y = b.element.change24hPercent!
+            let x = a.element.changePercent!, y = b.element.changePercent!
             if x == y { return a.offset < b.offset }
             return order == .changeDescending ? x > y : x < y
         }.map(\.element)

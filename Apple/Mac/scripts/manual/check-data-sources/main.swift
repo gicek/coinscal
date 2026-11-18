@@ -60,14 +60,28 @@ for (name, provider) in priceSources {
     case .success(let snapshot):
         let prices = snapshot.prices.filter { $0.key != PriceService.quoteAssetSymbol }
         quotesBySource[name] = prices
-        changesBySource[name] = snapshot.changes24h.count
+        changesBySource[name] = snapshot.priceChanges.count
         let missing = tradable.filter { prices[$0] == nil }
-        print("\(name): OK \(secs(elapsed))  coverage \(prices.count)/\(tradable.count)  24h change \(snapshot.changes24h.count)")
+        print("\(name): OK \(secs(elapsed))  coverage \(prices.count)/\(tradable.count)  24h change \(snapshot.priceChanges.count)")
         print("  missing: \(missing.joined(separator: " "))")
         for core in coreSymbols where prices[core] == nil { problems.append("\(name) has no \(core)") }
     case .failure(let error):
         print("\(name): FAILED \(secs(elapsed)) \(error)")
         problems.append("\(name) failed: \(error)")
+    }
+}
+
+// Both fixed offsets through the actual app providers, without adding a full-catalog opening burst.
+print("\n== Fixed-day changes (BTC and ETH) ==")
+for (name, provider) in priceSources {
+    let service = PriceService(exchangeRateService: FixedRate(), providers: [provider])
+    for basis in [PriceChangeBasis.utc0, .utc8] {
+        let (result, elapsed) = wait(service.fetchQuotes(symbols: coreSymbols, currency: .usd, changeBasis: basis))
+        let snapshot = try? result.get()
+        let changes = coreSymbols.compactMap { symbol in snapshot?.priceChanges[symbol].map { "\(symbol) \($0)%" } }
+        let label = "\(name) \(basis.rawValue)"
+        print("\(label): \(changes.count == coreSymbols.count ? changes.joined(separator: ", ") : "FAILED") \(secs(elapsed))")
+        if changes.count != coreSymbols.count { problems.append("\(label) did not return both day changes") }
     }
 }
 

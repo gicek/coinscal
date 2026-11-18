@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import Coinscal
 
@@ -79,6 +80,27 @@ import Testing
         prices.requests[1].respond(["BTC": 150])
         await drainMainQueue()
         #expect(notifier.calls.isEmpty)
+    }
+
+    @Test func changeBasisSwitchKeepsPricesAndAlertReference() async {
+        prices.requests[0].respond(["BTC": 100], changes: ["BTC": 1])
+        await drainMainQueue()
+
+        settingsVM.settings.priceChangeBasis = .utc8
+        #expect(btc?.currentPrice == 100)
+        #expect(btc?.change(for: .utc8, at: Date()) == nil)
+        vm.reloadAfterSettingsChange()
+        #expect(prices.requests[1].changeBasis == .utc8)
+        prices.requests[1].respond(["BTC": 101], changes: ["BTC": 20])
+        await drainMainQueue()
+        #expect(btc?.change(for: .utc8, at: Date()) == 20)
+        #expect(btc?.referencePrice == 100)
+        #expect(notifier.calls.isEmpty)
+
+        vm.refresh()
+        prices.requests[2].respond(["BTC": 103])
+        await drainMainQueue()
+        #expect(notifier.calls.map(\.coinId) == ["bitcoin"])
     }
 
     @Test func absoluteAlertIgnoresExchangeRateChangesAndRebasesAfterRuleEdit() async {

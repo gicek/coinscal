@@ -14,12 +14,12 @@ import Testing
     ) -> WidgetSnapshot {
         WidgetSnapshot(
             writtenAt: now.addingTimeInterval(-writtenAgo), language: .zhHans, currency: currency, colorByChange: true,
-            upColorHex: Constants.Defaults.upColorHex, downColorHex: Constants.Defaults.downColorHex, displayedCoinId: displayed, watchlist: watchlist, quotes: quotes ?? ["bitcoin": .init(price: 80_000, change24hPercent: 2, fetchedAt: now.addingTimeInterval(-writtenAgo))]
+            upColorHex: Constants.Defaults.upColorHex, downColorHex: Constants.Defaults.downColorHex, displayedCoinId: displayed, watchlist: watchlist, quotes: quotes ?? ["bitcoin": .init(price: 80_000, changePercent: 2, fetchedAt: now.addingTimeInterval(-writtenAgo))]
         )
     }
 
     private func row(_ id: String, change: Double?) -> WidgetRow {
-        WidgetRow(id: id, symbol: id.uppercased(), name: id, logoAssetName: nil, hasMarket: true, price: 1, change24hPercent: change)
+        WidgetRow(id: id, symbol: id.uppercased(), name: id, logoAssetName: nil, hasMarket: true, price: 1, changePercent: change)
     }
 
     // MARK: Coin choice
@@ -68,6 +68,24 @@ import Testing
         #expect(WidgetContent.freshQuotes(snapshot: snapshot(), ids: ["bitcoin", "ethereum"], tradable: ["bitcoin", "ethereum"], currency: .usd, now: now) == nil,
                 "a tradable coin is missing")
         #expect(WidgetContent.freshQuotes(snapshot: nil, ids: ["bitcoin"], tradable: tradable, currency: .usd, now: now) == nil)
+    }
+
+    @Test func fixedDaySnapshotRequiresAChangeFromTheCurrentDay() throws {
+        for basis in [PriceChangeBasis.utc0, .utc8] {
+            let midnight = try #require(basis.dayStart(at: now))
+            let current = midnight.addingTimeInterval(10)
+            var saved = snapshot(quotes: ["bitcoin": .init(price: 80_000, changePercent: 2, fetchedAt: midnight.addingTimeInterval(-1))])
+            #expect(saved.priceChangeBasis == .rolling24h, "legacy snapshot")
+            saved.changeBasis = basis
+            func fresh() -> [String: WidgetSnapshot.Quote]? {
+                WidgetContent.freshQuotes(snapshot: saved, ids: ["bitcoin"], tradable: ["bitcoin"], currency: .usd, now: current)
+            }
+            #expect(fresh() == nil)
+            saved.quotes["bitcoin"]?.fetchedAt = midnight
+            #expect(fresh()?["bitcoin"]?.changePercent == 2)
+            saved.quotes["bitcoin"]?.changePercent = nil
+            #expect(fresh() == nil)
+        }
     }
 
     @Test func writingASnapshotDoesNotRefreshOldQuotes() {
@@ -121,7 +139,7 @@ import Testing
         settings.watchlistCoins = ["bitcoin", "ethereum", "monero"].map { WatchlistCoin(coinId: $0) }
         let coins = [
             Coin(id: "bitcoin", symbol: "BTC", name: "Bitcoin", rank: 1, logoAssetName: nil, logoURL: nil,
-                 currentPrice: 80_000, priceChange24hPercent: 1.5),
+                 currentPrice: 80_000, priceChangePercent: 1.5),
             Coin(id: "ethereum", symbol: "ETH", name: "Ethereum", rank: 2, logoAssetName: nil, logoURL: nil),
             Coin(id: "monero", symbol: "XMR", name: "Monero", rank: nil, logoAssetName: nil, logoURL: nil, status: .delisted, currentPrice: 1),
         ]
@@ -141,6 +159,8 @@ import Testing
             return next
         }
         typealias Plan = WidgetSnapshotWriter.Plan
+        #expect(WidgetSnapshotWriter.plan(previous: base, next: later { $0.changeBasis = .utc8 }, widgetsInstalled: true)
+            == Plan(save: true, reload: true))
         #expect(WidgetSnapshotWriter.plan(previous: nil, next: base, widgetsInstalled: true) == Plan(save: true, reload: false),
                 "first write after launch saves without a reload")
         // Prices alone, even a big move an hour later, never reload.
@@ -172,7 +192,7 @@ import Testing
         )
         var settings = AppSettings()
         let btc = Coin(id: "bitcoin", symbol: "BTC", name: "Bitcoin", rank: 1, logoAssetName: nil, logoURL: nil,
-                       currentPrice: 80_000, priceChange24hPercent: 1)
+                       currentPrice: 80_000, priceChangePercent: 1)
         writer.write(coins: [btc], settings: settings)
         let launchWrite = clock
         #expect(store.load()?.writtenAt == launchWrite, "the first write always saves the settings")

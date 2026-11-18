@@ -16,10 +16,12 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 
 ### Added
 
+- Choose rolling 24-hour change, UTC+0 midnight, or UTC+8 midnight in Settings → General → Prices.
 - "Automatically Install Updates" in Settings → About, off by default.
 
 ### Changed
 
+- Stale quotes in the menu bar panel show the time they were last fetched.
 - The "Update Available" reminder stays after a relaunch until you open the update window or install the update.
 
 ### Development

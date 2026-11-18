@@ -41,7 +41,7 @@ struct CoinRowView: View {
             if let price = coin.currentPrice {
                 Text(PriceFormatter.format(price, currency: settingsVM.settings.baseCurrency, includeCurrencySymbol: false))
                     .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(settingsVM.priceColor(changePercent: coin.priceChange24hPercent))
+                    .foregroundStyle(settingsVM.priceColor(changePercent: priceChange))
             } else {
                 Text(verbatim: "--")
                     .font(.system(size: 13, weight: .semibold, design: .monospaced))
@@ -57,14 +57,28 @@ struct CoinRowView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else if let updatedAt = coin.lastUpdated, now.timeIntervalSince(updatedAt) >= WidgetContent.staleAfter {
-                Label(loc("coin.status.stale"), systemImage: "exclamationmark.triangle")
+                let time = updatedAt.formatted(
+                    Date.FormatStyle(date: .abbreviated, time: .shortened)
+                        .locale(Locale(identifier: settingsVM.settings.language.resourceCode))
+                )
+                Label(time, systemImage: "exclamationmark.triangle")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-            } else if let change = coin.priceChange24hPercent {
+                    .lineLimit(1)
+                    .help(loc("coin.status.stale"))
+                    .accessibilityLabel(Text(verbatim: "\(loc("coin.status.stale")), \(time)"))
+            } else if let change = priceChange {
                 Text(PriceFormatter.formatPercent(change))
                     .font(.caption)
                     .foregroundStyle(settingsVM.priceColor(changePercent: change))
+                    .help(loc(settingsVM.settings.priceChangeBasis.titleKey))
+            } else if coin.currentPrice != nil, settingsVM.settings.priceChangeBasis != .rolling24h {
+                Text(verbatim: "—")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }
+
+    private var priceChange: Double? { coin.change(for: settingsVM.settings.priceChangeBasis, at: now) }
 }

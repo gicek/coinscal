@@ -117,6 +117,7 @@ final class WidgetSnapshotWriter {
 
     static func visibleSettingsChanged(_ a: WidgetSnapshot, _ b: WidgetSnapshot) -> Bool {
         a.language != b.language || a.currency != b.currency || a.colorByChange != b.colorByChange
+            || a.priceChangeBasis != b.priceChangeBasis
             || a.upColorHex != b.upColorHex || a.downColorHex != b.downColorHex
             || a.displayedCoinId != b.displayedCoinId || a.watchlist != b.watchlist
     }
@@ -125,7 +126,9 @@ final class WidgetSnapshotWriter {
         var quotes: [String: WidgetSnapshot.Quote] = [:]
         for coin in coins where coin.status == .active {
             guard let price = coin.currentPrice else { continue }
-            quotes[coin.id] = WidgetSnapshot.Quote(price: price, change24hPercent: coin.priceChange24hPercent, fetchedAt: coin.lastUpdated)
+            quotes[coin.id] = WidgetSnapshot.Quote(
+                price: price, changePercent: coin.change(for: settings.priceChangeBasis, at: date), fetchedAt: coin.lastUpdated
+            )
         }
         return WidgetSnapshot(
             writtenAt: date,
@@ -136,7 +139,8 @@ final class WidgetSnapshotWriter {
             downColorHex: settings.resolvedDownColorHex,
             displayedCoinId: settings.displayedCoinId,
             watchlist: settings.watchlistCoins.map(\.coinId),
-            quotes: quotes
+            quotes: quotes,
+            changeBasis: settings.priceChangeBasis
         )
     }
 }

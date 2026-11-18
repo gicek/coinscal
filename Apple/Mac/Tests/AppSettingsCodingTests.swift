@@ -11,6 +11,7 @@ import Testing
     @Test func missingFieldsFallBackIndividually() throws {
         let settings = try decode(#"{"baseCurrency":"CNY","addedCoins":[{"coinId":"solana"}]}"#)
         #expect(settings.baseCurrency == .cny)
+        #expect(settings.priceChangeBasis == .rolling24h)
         #expect(settings.watchlistCoins.map(\.coinId) == ["solana"])
         #expect(settings.watchlistCoins[0].alertKind == .change)
         #expect(settings.watchlistCoins[0].notificationThreshold == Constants.Defaults.defaultNotificationThreshold)
@@ -21,10 +22,11 @@ import Testing
     /// Regression: an unknown enum value (data written by a newer version) only affects that field.
     @Test func unknownEnumValuesFallBack() throws {
         let settings = try decode("""
-        {"baseCurrency":"XYZ","language":"fr","colorScheme":"rainbow",
+        {"baseCurrency":"XYZ","language":"fr","colorScheme":"rainbow","priceChangeBasis":"future",
          "addedCoins":[{"coinId":"bitcoin","alertKind":"someday"},42,{"coinId":"ethereum","alertKind":"above","notificationThreshold":5000}]}
         """)
         #expect(settings.baseCurrency == .usd)
+        #expect(settings.priceChangeBasis == .rolling24h)
         #expect(settings.language == .system)
         #expect(settings.colorScheme == .greenUpRedDown)
         #expect(settings.watchlistCoins.map(\.coinId) == ["bitcoin", "ethereum"], "a broken entry is dropped on its own")
@@ -65,6 +67,7 @@ import Testing
     @Test func roundTripUsesLegacyWatchlistKey() throws {
         var settings = AppSettings()
         settings.baseCurrency = .jpy
+        settings.priceChangeBasis = .utc8
         settings.displayedCoinId = "ethereum"
         settings.watchlistCoins = [WatchlistCoin(coinId: "ethereum", alertKind: .below, notificationThreshold: 3000)]
         let data = try JSONEncoder().encode(settings)
@@ -75,6 +78,7 @@ import Testing
 
         let decoded = try JSONDecoder().decode(AppSettings.self, from: data)
         #expect(decoded.baseCurrency == .jpy)
+        #expect(decoded.priceChangeBasis == .utc8)
         #expect(decoded.displayedCoinId == "ethereum")
         #expect(decoded.watchlistCoins.first?.alertKind == .below)
         #expect(decoded.watchlistCoins.first?.notificationThreshold == 3000)

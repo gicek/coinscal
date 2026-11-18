@@ -1,6 +1,144 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "general.display.priceChangeBasis" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Price Change Basis"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "涨跌幅基准"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "漲跌幅基準"
+          }
+        }
+      }
+    },
+    "priceChange.rolling24h" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rolling 24 Hours"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滚动 24 小时"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滾動 24 小時"
+          }
+        }
+      }
+    },
+    "priceChange.utc0" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Midnight (UTC+0)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "零点（UTC+0）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "午夜（UTC+0）"
+          }
+        }
+      }
+    },
+    "priceChange.utc8" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Midnight (UTC+8)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "零点（UTC+8）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "午夜（UTC+8）"
+          }
+        }
+      }
+    },
+    "priceChange.dayUTC0" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day Change (UTC+0)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日涨跌（UTC+0）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日漲跌（UTC+0）"
+          }
+        }
+      }
+    },
+    "priceChange.dayUTC8" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day Change (UTC+8)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日涨跌（UTC+8）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日漲跌（UTC+8）"
+          }
+        }
+      }
+    },
     "coin.status.stale" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1968,19 +2106,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Price and 24h change of one coin."
+            "value" : "Price and price change of one coin."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "一个币种的现价与 24h 涨跌。"
+            "value" : "一个币种的现价与涨跌幅。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "一個幣種的現價與 24h 漲跌。"
+            "value" : "一個幣種的現價與漲跌幅。"
           }
         }
       }
@@ -2037,19 +2175,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prices and 24h change of your watchlist."
+            "value" : "Prices and price changes for your watchlist."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自选币种的现价与 24h 涨跌。"
+            "value" : "自选币种的现价与涨跌幅。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自選幣種的現價與 24h 漲跌。"
+            "value" : "自選幣種的現價與漲跌幅。"
           }
         }
       }
@@ -2336,19 +2474,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "24h Change, High to Low"
+            "value" : "Price Change, High to Low"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "24h 涨幅从高到低"
+            "value" : "涨跌幅从高到低"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "24h 漲幅由高到低"
+            "value" : "漲跌幅由高到低"
           }
         }
       }
@@ -2359,19 +2497,19 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "24h Change, Low to High"
+            "value" : "Price Change, Low to High"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "24h 涨幅从低到高"
+            "value" : "涨跌幅从低到高"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "24h 漲幅由低到高"
+            "value" : "漲跌幅由低到高"
           }
         }
       }

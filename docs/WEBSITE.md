@@ -24,7 +24,7 @@
 A Mac menu bar with the Coinscal panel hanging from it.
 
 - **Menu bar**: the Coinscal item (rendered with the app's rules from the demo settings; click to toggle the panel), a language menu, a Wi-Fi icon that shows whether live prices are flowing, an appearance switch that can return to following the system, and a clock.
-- **Panel**: a copy of the app's panel at the same point sizes, opening with Bitcoin and Ethereum. The gear opens demo settings (display currency, menu bar coin, Price / Icon, coloring, background, color scheme); "Manage Watchlist" adds or removes the app's ten recommended coins; the power button hides the panel. A changed price glows briefly. Settings are saved in local storage (`coinscal.demo`) and read back field by field.
+- **Panel**: a copy of the app's panel at the same point sizes, opening with Bitcoin and Ethereum. The gear opens demo settings (display currency, price change basis, menu bar coin, Price / Icon, coloring, background, color scheme). "Manage Watchlist" adds or removes the app's ten recommended coins. The power button hides the panel. A changed price glows briefly. Settings are saved in local storage (`coinscal.demo`) and read back field by field.
 - The menu bar background is on by default on the website, unlike the app, so the price stands out; "Custom" colors are app-only.
 
 Below the hero: four feature cards, a privacy section, the download section, and a footer with GitHub, Releases, Issues, Privacy, and the ExchangeRate-API credit.
@@ -33,7 +33,7 @@ Below the hero: four feature cards, a privacy section, the download section, and
 
 The demo calls the app's public APIs from the browser:
 
-- Prices: a Binance WebSocket (`data-stream.binance.vision`, `<symbol>usdt@ticker`). For coins without a WebSocket quote in the last 15 seconds, REST rounds run at most every 10 seconds in the app's order (Binance, Binance mirror, OKX, Bybit), filling missing coins from the next source. OKX and Bybit are asked one coin at a time. Requests time out after 5 seconds, and rounds never overlap. New coins, coming back online, and returning to the tab try a round at once. The stream pauses in hidden tabs. A delayed REST response cannot replace a newer stream quote. After 30 seconds without a quote for a coin, its row shows a stale-price label.
+- Prices: rolling 24-hour mode uses a Binance WebSocket (`data-stream.binance.vision`, `<symbol>usdt@ticker`). REST fills coins without a WebSocket quote in the last 15 seconds. Fixed-day modes use REST and the same opening price endpoints as the app. Opens fetched separately are cached for the current day, and a missing open leaves the price visible with a dash in place of the change. REST rounds run at most every 10 seconds in the app's order (Binance, Binance mirror, OKX, Bybit), filling missing coins from the next source. OKX and Bybit are asked one coin at a time. Requests time out after 5 seconds, and rounds never overlap. New coins, returning online, returning to the tab, and changing the basis trigger a refresh. The stream pauses in hidden tabs. A delayed REST response cannot replace a newer stream quote. After 30 seconds without a quote for a coin, its row shows a warning and the last retrieval time.
 - Exchange rates: open.er-api.com, then jsDelivr currency-api, cached for an hour.
 - Formatting matches `PriceFormatter`, which `make test-site` checks.
 

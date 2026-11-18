@@ -3,7 +3,8 @@
 // "Manage Watchlist" open small web-only versions of the app's settings inside the panel.
 import { COINS, CURRENCIES, UP_COLOR, DOWN_COLOR, coinById } from "./coins.js";
 import { formatPercent, formatPrice } from "./format.js";
-import { t } from "./i18n.js";
+import { language, t } from "./i18n.js";
+import { CHANGE_BASES } from "./prices.js";
 
 const ROW_HEIGHT = 52;
 const MIN_ROWS = 4;
@@ -13,6 +14,7 @@ const STORAGE_KEY = "coinscal.demo";
 export const DEFAULT_SETTINGS = {
     coins: ["bitcoin", "ethereum"],
     currency: "USD",
+    changeBasis: "rolling24h",
     menubarCoin: "bitcoin",
     menubarContent: "price",
     colorEnabled: true,
@@ -29,6 +31,7 @@ export function loadSettings() {
     // Field by field, like AppSettings decoding: a bad field falls back to its default.
     if (Array.isArray(saved.coins)) s.coins = [...new Set(saved.coins.filter((id) => coinById(id)))];
     if (CURRENCIES.some(([code]) => code === saved.currency)) s.currency = saved.currency;
+    if (CHANGE_BASES.includes(saved.changeBasis)) s.changeBasis = saved.changeBasis;
     if (coinById(saved.menubarCoin)) s.menubarCoin = saved.menubarCoin;
     if (["price", "icon"].includes(saved.menubarContent)) s.menubarContent = saved.menubarContent;
     if (typeof saved.colorEnabled === "boolean") s.colorEnabled = saved.colorEnabled;
@@ -95,6 +98,7 @@ export class Panel {
         this.lastPrices = new Map();
         this.body = root.querySelector("[data-panel-body]");
         this.title = root.querySelector("[data-panel-title]");
+        this.changeBasisLabel = root.querySelector("[data-panel-change-basis]");
         this.back = root.querySelector("[data-panel-back]");
         this.spinner = root.querySelector("[data-panel-spinner]");
         this.notice = root.querySelector("[data-panel-notice]");
@@ -138,7 +142,7 @@ export class Panel {
 
     bodyHeight() {
         const rows = Math.min(Math.max(this.settings.coins.length, MIN_ROWS), MAX_ROWS);
-        if (this.view === "settings") return Math.max(rows, 5) * ROW_HEIGHT;
+        if (this.view === "settings") return Math.max(rows, 6) * ROW_HEIGHT;
         if (this.view === "watchlist") return MAX_ROWS * ROW_HEIGHT;
         return rows * ROW_HEIGHT;
     }
@@ -148,6 +152,10 @@ export class Panel {
         this.root.dataset.view = view;
         this.back.hidden = view === "list";
         this.title.textContent = view === "settings" ? t("panel.settings") : view === "watchlist" ? t("panel.watchlist") : "Coinscal";
+        this.changeBasisLabel.hidden = view !== "list" || this.settings.changeBasis === "rolling24h";
+        if (!this.changeBasisLabel.hidden) {
+            this.changeBasisLabel.textContent = t(this.settings.changeBasis === "utc0" ? "panel.dayUTC0" : "panel.dayUTC8");
+        }
         for (const button of this.footer.querySelectorAll("[data-action]")) {
             button.setAttribute("aria-pressed", String(button.dataset.action === view));
         }
@@ -203,6 +211,8 @@ export class Panel {
         const rate = this.rates.rate(this.settings.currency);
         const priceEl = row.querySelector(".pn-price");
         const changeEl = row.querySelector(".pn-change");
+        changeEl.removeAttribute("aria-label");
+        changeEl.removeAttribute("title");
         if (quote && rate) {
             const price = quote.price * rate;
             const color = priceColor(this.settings, quote.change);
@@ -220,7 +230,16 @@ export class Panel {
             priceEl.style.color = color ?? "";
             priceEl.classList.remove("is-missing");
             const stale = this.feed.isStale(coin.symbol);
-            changeEl.textContent = stale ? t("panel.stale") : quote.change == null ? "" : formatPercent(quote.change);
+            const hasDayBasis = this.settings.changeBasis !== "rolling24h";
+            if (stale) {
+                const time = new Intl.DateTimeFormat(language(), { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+                    .format(quote.receivedAt);
+                changeEl.textContent = `⚠ ${time}`;
+                changeEl.title = t("panel.stale");
+                changeEl.setAttribute("aria-label", `${changeEl.title}, ${time}`);
+            } else {
+                changeEl.textContent = quote.change == null ? (hasDayBasis ? "—" : "") : formatPercent(quote.change);
+            }
             changeEl.style.color = stale ? "" : color ?? "";
         } else {
             priceEl.textContent = "--";
@@ -263,6 +282,9 @@ export class Panel {
 
         form.append(
             row("panel.currency", select(CURRENCIES.map(([code, symbol]) => [code, `${code} (${symbol})`]), s.currency, (currency) => this.update({ currency }))),
+            row("panel.priceChangeBasis", select([
+                ["rolling24h", t("panel.rolling24h")], ["utc0", t("panel.midnightUTC0")], ["utc8", t("panel.midnightUTC8")],
+            ], s.changeBasis, (changeBasis) => this.update({ changeBasis }))),
             row(
                 "panel.menubarCoin",
                 select(

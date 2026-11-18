@@ -114,10 +114,12 @@ enum DesktopOverlayLayout {
     /// Watchlist order up to the row limit.
     static func content(coins: [Coin], settings: AppSettings, limit: Int = rowLimit) -> WidgetEntryContent {
         let shown = coins.prefix(limit)
+        let date = Date()
         let rows = shown.map { coin in
             WidgetRow(
                 id: coin.id, symbol: coin.symbol, name: coin.name, logoAssetName: coin.logoAssetName,
-                hasMarket: coin.status == .active, price: coin.currentPrice, change24hPercent: coin.priceChange24hPercent, fetchedAt: coin.lastUpdated
+                hasMarket: coin.status == .active, price: coin.currentPrice,
+                changePercent: coin.change(for: settings.priceChangeBasis, at: date), fetchedAt: coin.lastUpdated
             )
         }
         return WidgetEntryContent(
@@ -127,7 +129,8 @@ enum DesktopOverlayLayout {
             language: settings.language,
             colorByChange: settings.priceColorEnabled,
             upColorHex: settings.resolvedUpColorHex,
-            downColorHex: settings.resolvedDownColorHex
+            downColorHex: settings.resolvedDownColorHex,
+            changeBasis: settings.priceChangeBasis
         )
     }
 }

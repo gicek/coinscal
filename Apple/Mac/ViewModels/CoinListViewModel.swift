@@ -56,14 +56,23 @@ final class CoinListViewModel: ObservableObject {
     /// Timer tick: skipped while the previous poll is still running.
     /// Cancelling and restarting on every tick would interrupt failover when sources time out (5 s each), so later sources would never be reached.
     func refresh() {
+        let date = Date()
+        if coins.contains(where: { $0.priceChangePercent != nil && !$0.priceChangeBasis.includes($0.lastUpdated, at: date) }) {
+            coins = coins.map { coin in
+                var coin = coin
+                if !coin.priceChangeBasis.includes(coin.lastUpdated, at: date) { coin.priceChangePercent = nil }
+                return coin
+            }
+        }
         guard !isLoading else { return }
         // Coins without a market are left out (otherwise Binance rejects the whole batch every poll).
         let symbols = coins.filter { $0.status == .active }.map { $0.symbol }
         guard !symbols.isEmpty else { return }
         let currency = settingsViewModel.settings.baseCurrency
+        let changeBasis = settingsViewModel.settings.priceChangeBasis
 
         isLoading = true
-        fetchCancellable = priceService.fetchQuotes(symbols: symbols, currency: currency)
+        fetchCancellable = priceService.fetchQuotes(symbols: symbols, currency: currency, changeBasis: changeBasis)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] _ in
                 self?.isLoading = false
@@ -72,7 +81,7 @@ final class CoinListViewModel: ObservableObject {
                 guard let self else { return }
                 // The display currency changed while this request was in flight: these prices are in the old currency, drop them.
                 guard currency == self.settingsViewModel.settings.baseCurrency else { return }
-                self.updateCoins(snapshot: snapshot, currency: currency)
+                self.updateCoins(snapshot: snapshot, currency: currency, changeBasis: changeBasis)
             })
     }
 
@@ -82,7 +91,7 @@ final class CoinListViewModel: ObservableObject {
         isLoading = false
     }
 
-    private func updateCoins(snapshot: PriceSnapshot, currency: BaseCurrency) {
+    private func updateCoins(snapshot: PriceSnapshot, currency: BaseCurrency, changeBasis: PriceChangeBasis) {
         let settings = settingsViewModel.settings
         let sameCurrency = priceDataCurrency == currency
         priceDataCurrency = currency
@@ -92,12 +101,13 @@ final class CoinListViewModel: ObservableObject {
             ? Dictionary(settings.watchlistCoins.map { ($0.coinId, $0) }, uniquingKeysWith: { first, _ in first })
             : [:]
         let updatedAt = Date()
+        let validChangeWindow = changeBasis.dayStart(at: updatedAt) == snapshot.changeDayStart
         var next = coins
         for i in next.indices {
             let id = next[i].id
             if !sameCurrency {
                 next[i].currentPrice = nil
-                next[i].priceChange24hPercent = nil
+                next[i].priceChangePercent = nil
                 next[i].lastUpdated = nil
             }
             if !sameCurrency || rules[id] != alertRules[id] {
@@ -106,7 +116,8 @@ final class CoinListViewModel: ObservableObject {
             let symbol = next[i].symbol
             guard let price = snapshot.prices[symbol] else { continue }
             next[i].currentPrice = price
-            next[i].priceChange24hPercent = snapshot.changes24h[symbol]
+            next[i].priceChangePercent = validChangeWindow ? snapshot.priceChanges[symbol] : nil
+            next[i].priceChangeBasis = changeBasis
             next[i].lastUpdated = updatedAt
             guard let rule = rules[id], let priceUSD = snapshot.pricesUSD[symbol] else { continue }
 
@@ -160,9 +171,10 @@ final class CoinListViewModel: ObservableObject {
                 logoURL: meta.logoURL,
                 status: meta.status,
                 currentPrice: live ? old?.currentPrice : nil,
-                priceChange24hPercent: live ? old?.priceChange24hPercent : nil,
+                priceChangePercent: live ? old?.priceChangePercent : nil,
                 referencePrice: live ? old?.referencePrice : nil,
-                lastUpdated: live ? old?.lastUpdated : nil
+                lastUpdated: live ? old?.lastUpdated : nil,
+                priceChangeBasis: old?.priceChangeBasis ?? .rolling24h
             )
         }
 

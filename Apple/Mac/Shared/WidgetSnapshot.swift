@@ -6,8 +6,13 @@ struct WidgetSnapshot: Codable, Equatable, Sendable {
     struct Quote: Codable, Equatable, Sendable {
         /// In `WidgetSnapshot.currency`.
         var price: Double
-        var change24hPercent: Double?
+        var changePercent: Double?
         var fetchedAt: Date? = nil
+
+        enum CodingKeys: String, CodingKey {
+            case price, fetchedAt
+            case changePercent = "change24hPercent"
+        }
     }
 
     var writtenAt: Date
@@ -22,6 +27,9 @@ struct WidgetSnapshot: Codable, Equatable, Sendable {
     var watchlist: [String]
     /// Coin id → latest quote; coins without a market are absent.
     var quotes: [String: Quote]
+    /// Older snapshots only contain rolling changes.
+    var changeBasis: PriceChangeBasis? = nil
+    var priceChangeBasis: PriceChangeBasis { changeBasis ?? .rolling24h }
 }
 
 /// Reads and writes the snapshot file. A nil directory (no App Group, e.g. an unsigned build) makes both no-ops;
