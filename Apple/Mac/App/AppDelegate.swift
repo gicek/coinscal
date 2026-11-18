@@ -238,16 +238,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(NSMenuItem.separator())
         menu.addItem(makeItem(title: loc("menu.setting"), action: #selector(openSettings), key: ""))
-        menu.addItem(makeItem(title: loc("menu.about"),   action: #selector(openAbout),    key: ""))
         let updateItem = makeItem(title: loc("menu.checkForUpdates"), action: #selector(checkForUpdates), key: "")
         updateItem.isEnabled = updateController.canCheckForUpdates
         menu.addItem(updateItem)
         menu.addItem(NSMenuItem.separator())
         menu.addItem(makeItem(title: loc("menu.quit"),     action: #selector(handleQuit),   key: "q"))
+        hideItemImages(in: menu)
 
         statusItem.menu = menu
         statusItem.button?.performClick(nil)
         statusItem.menu = nil
+    }
+
+    /// Text-only menu. macOS 27 adds a system symbol to standard items such as "Settings" on its own, even with
+    /// `NSMenuEnableActionImages` off (see `CoinscalApp`); hide images on every item, submenus included.
+    private func hideItemImages(in menu: NSMenu) {
+        guard #available(macOS 27, *) else { return }
+        for item in menu.items where !item.isSeparatorItem {
+            item.preferredImageVisibility = .hidden
+            if let submenu = item.submenu { hideItemImages(in: submenu) }
+        }
     }
 
     private func makeItem(title: String, action: Selector, key: String) -> NSMenuItem {
@@ -270,10 +280,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func openWatchlist() {
         openSettingsWindow(tab: .watchlist)
-    }
-
-    @objc func openAbout() {
-        openSettingsWindow(tab: .about)
     }
 
     @objc private func checkForUpdates() {

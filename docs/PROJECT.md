@@ -24,7 +24,7 @@ macOS 14 or later, Apple silicon (arm64).
 ### Scope
 
 - The menu bar shows the current price of one selected coin. It can be colored by 24h change and have a background color. It can also show only the app icon.
-- Left-click popover: current price and 24h change for the watchlist, with a bottom bar to open Settings, manage the watchlist, or quit. Right-click menu: menu bar coin, Settings, About, Quit.
+- Left-click popover: current price and 24h change for the watchlist, with a bottom bar to open Settings, manage the watchlist, or quit. Right-click menu: menu bar coin, Settings, Check for Updates, Quit.
 - Watchlist management: search the coin catalog (about 450 tradable coins from the top 1000 by market cap, see [COIN_CATALOG](COIN_CATALOG.md)) or add from recommended coins; delete; drag to reorder. When a project migrates to a successor coin, the watchlist switches to the successor automatically.
 - Price alerts: each coin has its own "above / below a price" or "change of N% from a reference price" condition, and sends a system notification when triggered. There is a global switch.
 - Quote currencies: USD, CNY, KRW, HKD, JPY, TWD, SGD, MYR, AUD, CAD, EUR, GBP.

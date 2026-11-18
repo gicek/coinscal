@@ -11,6 +11,15 @@
 
 ## Records
 
+### 2026-11-18: Right-click menu
+
+The right-click menu drops "About Coinscal" and hides item images on macOS 27.
+
+- Verified: `make test-mac` passes (localization guards report no orphan or missing keys after removing `menu.about`). On macOS 27.2.1 with a debug build, the right-click menu shows "Menu Bar Coin", "Settings", "Check for Updates", and "Quit Coinscal" as text only, with no gear in front of "Settings".
+- Pending:
+  1. The "Menu Bar Coin" submenu shows no icons on macOS 27.
+  2. On macOS 14 and macOS 26, the menu still shows no icons.
+
 ### 2026-11-18: Menu bar panel
 
 The menu bar popover is now an app-managed `NSPanel`, so clicking the status item closes it again on macOS 27 ([MENU_BAR_PANEL](MENU_BAR_PANEL.md)).

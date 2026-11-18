@@ -4,6 +4,15 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-11-18
 
+### Removed: About in the right-click menu
+The right-click menu no longer has "About Coinscal"; Settings → About still shows the same page. The menu is now: menu bar coin, Settings, Check for Updates, Quit. The unused `menu.about` string was removed in all three languages.
+
+### Fixed: Icon in front of "Settings" in the right-click menu on macOS 27
+- Symptom: on macOS 27 the right-click menu showed a gear icon in front of "Settings", though no menu item should show an icon.
+- Root cause: macOS 27 adds a system symbol to standard items such as "Settings" even with `NSMenuEnableActionImages` off, which was enough on macOS 26.
+- Fix: every item in the right-click menu, submenus included, sets `preferredImageVisibility = .hidden` on macOS 27 and later.
+- Tests: checked on macOS 27.2.1: the menu shows text only (see VALIDATION).
+
 ### Fixed: Clicking the menu bar price didn't close the popover on macOS 27
 - Symptom: with the popover shown, clicking the status item made it disappear and immediately reappear, so it could only be closed by clicking elsewhere.
 - Root cause: on macOS 27, pressing the status item takes key status from the popover and reaches global mouse monitors as an outside click, both on mouse-down. The `.transient` popover (and the outside-click monitor) closed it then, and the status item action, which runs on mouse-up, saw it closed and opened it again.
