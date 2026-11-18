@@ -13,8 +13,17 @@ struct CoinscalApp: App {
     }
 
     var body: some Scene {
+        // Required scene, never shown: the app menu's Settings item opens the AppKit settings window instead.
         Settings {
             EmptyView()
+        }
+        .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button(loc("menu.setting")) {
+                    appDelegate.openSettings()
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
         }
     }
 }

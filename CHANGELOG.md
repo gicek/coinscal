@@ -6,6 +6,7 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 
 ### Fixed
 
+- The app menu's "Settings" item (⌘,) opens the Settings window instead of an empty window.
 - Menu bar price badges use white text on the same rise and fall colors used for price text.
 - Absolute price alerts preserve entered decimals and ignore exchange-rate-only changes.
 - Older quotes are marked per coin in the panel, widgets, and desktop ticker.

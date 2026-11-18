@@ -91,6 +91,7 @@ CoinscalWidget (extension) → WidgetDataLoader → App Group snapshot, or its o
 
 ## Settings Window
 
+- The SwiftUI `Settings` scene in `CoinscalApp` exists only because an `App` needs a scene; its `.appSettings` command is replaced so the app menu's "Settings" item (⌘,) opens the AppKit window through `AppDelegate.openSettings()` instead of an empty SwiftUI window.
 - The default size is applied with `setContentSize` after `contentViewController` is set (the hosting controller resizes the window to its fitting size) and before `setFrameAutosaveName` restores a saved frame. `windowWillResize` clamps the size, since the hosting controller overrides `maxSize`.
 - `sceneBridgingOptions = [.title, .toolbars]` turns the pane's `navigationTitle` into the window title. The window starts with an empty `.unified` `NSToolbar`. Toolbar items live at the `SettingsWindow` level and exist on every pane, hidden where unused (the Watchlist "+" is transparent, disabled, and hidden from accessibility elsewhere): a pane without toolbar items makes SwiftUI remove the whole toolbar, and the title bar and sidebar shift.
 - Panes set no background color, so the window material shows through.
