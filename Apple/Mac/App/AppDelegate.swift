@@ -122,7 +122,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Widgets open `coinscal://popover` when clicked (docs/WIDGET.md).
     func application(_ application: NSApplication, open urls: [URL]) {
-        guard !Self.isRunningUnitTests, urls.contains(where: { $0.scheme == "coinscal" }) else { return }
+        guard !Self.isRunningUnitTests, urls.contains(where: { $0.scheme == WidgetStyle.urlScheme }) else { return }
         guard menuBarPanel != nil else {
             opensPanelAfterLaunch = true
             return

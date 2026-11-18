@@ -57,7 +57,7 @@ Update this document and the roadmap before adding any of these.
 |---|---|
 | Product name | Coinscal |
 | Platform | macOS menu bar app (`LSUIElement`) |
-| Bundle ID | `com.gicek.coinscal` |
+| Bundle ID | `com.gicek.coinscal` (debug builds: `com.gicek.coinscal.debug`, "Coinscal Debug") |
 | Minimum OS | macOS 14: the app uses macOS 14 SwiftUI APIs (two-parameter `onChange`, `withAnimation` completion, `.windowBackground`). The "development start year − 4" rule would give macOS 13; staying on macOS 14 was confirmed 2026-10-16 |
 | Distribution | Direct download of a zip or DMG from `dl.coinscal.app` and GitHub Releases, Developer ID signed and notarized by Apple (2026-10-15). The DMG opens to a window that shows dragging the app into Applications. Only `make mac-release-notarized` output is distributed publicly |
 | In-app updates | Sparkle 2 (2026-10-16): checks `dl.coinscal.app` once a day, shows release notes in all three languages, and installs only after the user agrees. Design in [UPDATES](UPDATES.md) |

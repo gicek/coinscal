@@ -62,6 +62,7 @@ The first milestone (1.x) is a standalone menu bar price tool: the current price
 - Widget extension target: `CoinscalWidget` (source in `Apple/MacWidget`; source shared with the main app is in `Apple/Mac/Shared`, and other shared files are listed one by one in `project.yml`), bundle ID `com.gicek.coinscal.widget`, App Group `$(TeamIdentifierPrefix)com.gicek.coinscal`.
 - Website: `Site/` (messages in `Site/messages/`, tests in `Site/test/`, changelog in `Site/docs/CHANGELOG.md`).
 - Bundle ID: `com.gicek.coinscal` (tests `com.gicek.coinscal.tests`). The UserDefaults domain follows the bundle ID; changing the ID loses all user settings.
+- Debug builds are a separate app, "Coinscal Debug": `com.gicek.coinscal.debug`, widget `com.gicek.coinscal.debug.widget`, App Group `$(TeamIdentifierPrefix)com.gicek.coinscal.debug`, URL scheme `coinscal-debug`. These come from `COINSCAL_APP_ID`, `COINSCAL_DISPLAY_NAME`, and `COINSCAL_URL_SCHEME` per configuration in `project.yml`; never hardcode the IDs or the scheme in code, entitlements, or Info.plist. Release values are the ones above.
 - The product name is `Coinscal` everywhere (app bundle name, display name, process name, Swift module name).
 
 If the official bundle ID needs a different organization prefix, change all targets and all docs together, and provide a settings migration.

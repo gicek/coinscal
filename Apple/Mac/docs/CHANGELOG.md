@@ -4,6 +4,9 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-11-18
 
+### Changed: Debug builds are a separate "Coinscal Debug" app
+Debug builds use their own bundle IDs (`com.gicek.coinscal.debug`, widget `com.gicek.coinscal.debug.widget`), App Group, display name "Coinscal Debug", and URL scheme `coinscal-debug`, set per configuration in `project.yml` (`COINSCAL_APP_ID`, `COINSCAL_DISPLAY_NAME`, `COINSCAL_URL_SCHEME`). Before, they shared everything with the release, so a debug build quit when the installed app ran, and the system picked one of several identical widget extensions at random. Now both run side by side and the widget gallery lists both. Release builds are unchanged. `make test-mac` unregisters its test host app afterwards so it doesn't add a second "Coinscal Debug" widget.
+
 ### Changed: The widget gallery previews real prices
 Before adding a widget, the gallery used to show fixed sample prices and coins (BTC $80,585, XRP, DOGE, and so on). It now shows the menu bar coin and the watchlist with real prices in the app's currency and colors: from the app's snapshot while fresh, otherwise from one request limited to 5 seconds, and the samples only when no price can be had.
 

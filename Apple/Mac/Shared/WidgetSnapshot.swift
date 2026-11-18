@@ -27,7 +27,7 @@ struct WidgetSnapshot: Codable, Equatable, Sendable {
 /// tests pass a temporary directory instead of the real container.
 struct WidgetSnapshotStore: Sendable {
     static let fileName = "widget-snapshot.json"
-    /// Info.plist key holding the App Group id (`$(TeamIdentifierPrefix)com.gicek.coinscal`), set in both targets.
+    /// Info.plist key holding the App Group id (`$(TeamIdentifierPrefix)com.gicek.coinscal`, `….debug` in debug builds), set in both targets.
     static let appGroupInfoKey = "CoinscalAppGroup"
 
     let directory: URL?

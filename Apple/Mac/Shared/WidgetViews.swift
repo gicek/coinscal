@@ -4,7 +4,11 @@ import WidgetKit
 /// Widget layouts (docs/WIDGET.md, "Visual Rules"). Shared with the app so tests and previews can render them.
 /// Change is always shown with an arrow and a sign: desktop widgets lose color in the vibrant (unfocused) mode.
 enum WidgetStyle {
-    static let popoverURL = URL(string: "coinscal://popover")!
+    /// `coinscal://popover` in release builds; debug builds use their own scheme (`CoinscalURLScheme` in Info.plist).
+    static let popoverURL = URL(string: "\(urlScheme)://popover")!
+    static var urlScheme: String {
+        Bundle.main.object(forInfoDictionaryKey: "CoinscalURLScheme") as? String ?? "coinscal"
+    }
 }
 
 /// Small widget: one coin.

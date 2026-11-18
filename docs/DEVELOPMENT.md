@@ -92,5 +92,5 @@ Change `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` only in `Apple/project.
 ## Common Pitfalls
 
 - Run both release commands in a logged-in GUI session (for the DMG layout). The first run triggers an automation permission prompt to allow controlling Finder. If a volume named Coinscal is already mounted, the script refuses to continue; eject it first.
-- A Coinscal instance already running on this Mac has the same Bundle ID as a new build, so the instance launched later exits immediately (single-instance protection). Quit the release version before debugging.
+- Debug builds are "Coinscal Debug" (`com.gicek.coinscal.debug`, see AGENTS), so they run next to an installed Coinscal and the widget gallery lists both apps. The debug build has its own settings (defaults on first launch), App Group, login item, notification permission, and URL scheme `coinscal-debug`. Two debug builds still exclude each other (single-instance protection). `make test-mac` unregisters its test host app from Launch Services afterwards, so only the widget in `Build/macOS/Debug` is offered for "Coinscal Debug".
 - Unit tests run with the app as the host. When `AppDelegate` detects `XCTestConfigurationFilePath`, it does no setup. The many `com.apple.linkd.autoShortcut` connection errors in the test log are system noise from the sandboxed test host and can be ignored.

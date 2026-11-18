@@ -11,6 +11,14 @@
 
 ## Records
 
+### 2026-11-18: Separate debug app
+
+Debug builds are "Coinscal Debug" with their own IDs, App Group, and URL scheme.
+
+- Verified: Release build settings keep `com.gicek.coinscal` and `com.gicek.coinscal.widget`. The debug build's Info.plist and signed entitlements carry `com.gicek.coinscal.debug`, `com.gicek.coinscal.debug.widget`, App Group `8XB77FYLQ6.com.gicek.coinscal.debug`, and scheme `coinscal-debug`. The installed 1.0.1 and the debug build run at the same time. After `make test-mac`, only `Build/macOS/Debug` is registered for `com.gicek.coinscal.debug.widget`. `make test` passes.
+- Pending:
+  1. The widget gallery lists "Coinscal" and "Coinscal Debug"; a "Coinscal Debug" widget previews and shows the debug build's data, and clicking it opens the debug build's panel.
+
 ### 2026-11-18: Widget reloads
 
 The app no longer reloads the widgets every 5 minutes or on price moves, writes prices only while a widget is placed, and the widget's own request times out after 15 seconds ([WIDGET](WIDGET.md)).

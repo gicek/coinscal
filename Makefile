@@ -31,6 +31,9 @@ XCODEBUILD_FLAGS ?= -quiet
 XCODEBUILD_TEST_FLAGS ?=
 MAC_SCHEME := $(PRODUCT)Mac
 MAC_BUILD_ROOT := $(BUILD_ROOT)/macOS
+# The test host app is registered with Launch Services when it runs; `test-mac` unregisters it afterwards so its
+# widget extension doesn't compete with the one in the debug build (both are com.gicek.coinscal.debug.widget).
+LSREGISTER := /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 MAC_APP := $(MAC_BUILD_ROOT)/$(CONFIGURATION)/$(PRODUCT).app
 MAC_DIST := $(MAC_BUILD_ROOT)/Dist
 MAC_RELEASE_APP := $(MAC_BUILD_ROOT)/Release/$(PRODUCT).app
@@ -135,7 +138,10 @@ test-mac: project
 	xcodebuild $(XCODEBUILD_TEST_FLAGS) -project "$(APPLE_PROJECT)" -scheme "$(MAC_SCHEME)" \
 	    -configuration "$(CONFIGURATION)" -destination 'platform=macOS,arch=arm64' \
 	    -derivedDataPath "$(MAC_BUILD_ROOT)/Tests/DerivedData" \
-	    CONFIGURATION_BUILD_DIR="$(MAC_BUILD_ROOT)/Tests/$(CONFIGURATION)" test
+	    CONFIGURATION_BUILD_DIR="$(MAC_BUILD_ROOT)/Tests/$(CONFIGURATION)" test; \
+	status=$$?; \
+	$(LSREGISTER) -u "$(MAC_BUILD_ROOT)/Tests/$(CONFIGURATION)/$(PRODUCT).app" 2>/dev/null || true; \
+	exit $$status
 
 test-site:
 	python3 scripts/i18n-guard.py --langs "$(LANGS)" --min-files 7 --platform web --root Site

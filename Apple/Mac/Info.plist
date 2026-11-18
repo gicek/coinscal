@@ -18,6 +18,8 @@
 	</array>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundleDisplayName</key>
+	<string>$(COINSCAL_DISPLAY_NAME)</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
@@ -28,15 +30,17 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.gicek.coinscal</string>
+			<string>$(COINSCAL_APP_ID)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>coinscal</string>
+				<string>$(COINSCAL_URL_SCHEME)</string>
 			</array>
 		</dict>
 	</array>
 	<key>CoinscalAppGroup</key>
-	<string>$(TeamIdentifierPrefix)com.gicek.coinscal</string>
+	<string>$(TeamIdentifierPrefix)$(COINSCAL_APP_ID)</string>
+	<key>CoinscalURLScheme</key>
+	<string>$(COINSCAL_URL_SCHEME)</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>LSUIElement</key>

@@ -665,7 +665,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.gicek.coinscal;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(COINSCAL_APP_ID)";
 				PRODUCT_NAME = Coinscal;
 				SDKROOT = macosx;
 			};
@@ -705,6 +705,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
+				COINSCAL_APP_ID = com.gicek.coinscal;
+				COINSCAL_DISPLAY_NAME = Coinscal;
+				COINSCAL_URL_SCHEME = coinscal;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -771,6 +774,9 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
+				COINSCAL_APP_ID = com.gicek.coinscal.debug;
+				COINSCAL_DISPLAY_NAME = "Coinscal Debug";
+				COINSCAL_URL_SCHEME = "coinscal-debug";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -818,7 +824,7 @@
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MacWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.gicek.coinscal.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(COINSCAL_APP_ID).widget";
 				PRODUCT_NAME = CoinscalWidget;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -874,7 +880,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.gicek.coinscal;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(COINSCAL_APP_ID)";
 				PRODUCT_NAME = Coinscal;
 				SDKROOT = macosx;
 			};
@@ -889,7 +895,7 @@
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = MacWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.gicek.coinscal.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(COINSCAL_APP_ID).widget";
 				PRODUCT_NAME = CoinscalWidget;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;

@@ -30,7 +30,16 @@ settings:
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
   configs:
+    # Debug builds are a separate app ("Coinscal Debug"): own bundle IDs, App Group, settings, URL scheme, and widgets,
+    # so they run next to an installed release and the widget gallery shows both.
+    Debug:
+      COINSCAL_APP_ID: com.gicek.coinscal.debug
+      COINSCAL_DISPLAY_NAME: Coinscal Debug
+      COINSCAL_URL_SCHEME: coinscal-debug
     Release:
+      COINSCAL_APP_ID: com.gicek.coinscal
+      COINSCAL_DISPLAY_NAME: Coinscal
+      COINSCAL_URL_SCHEME: coinscal
       # Strip on build as well; Debug keeps symbols for lldb.
       DEPLOYMENT_POSTPROCESSING: YES
 
@@ -47,7 +56,7 @@ targets:
     settings:
       base:
         PRODUCT_NAME: Coinscal
-        PRODUCT_BUNDLE_IDENTIFIER: com.gicek.coinscal
+        PRODUCT_BUNDLE_IDENTIFIER: $(COINSCAL_APP_ID)
         ARCHS: arm64
         INFOPLIST_FILE: Mac/Info.plist
         CODE_SIGN_ENTITLEMENTS: Mac/Coinscal.entitlements
@@ -84,7 +93,7 @@ targets:
     settings:
       base:
         PRODUCT_NAME: CoinscalWidget
-        PRODUCT_BUNDLE_IDENTIFIER: com.gicek.coinscal.widget
+        PRODUCT_BUNDLE_IDENTIFIER: $(COINSCAL_APP_ID).widget
         ARCHS: arm64
         INFOPLIST_FILE: MacWidget/Info.plist
         CODE_SIGN_ENTITLEMENTS: MacWidget/CoinscalWidget.entitlements
