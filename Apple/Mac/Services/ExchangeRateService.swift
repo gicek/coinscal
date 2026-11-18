@@ -17,9 +17,9 @@ final class ExchangeRateService: ExchangeRateServicing {
     private let cacheStore: ExchangeRateCacheStore
     /// Cache and request coalescing are main-thread only (polling and callbacks run on the main thread).
     private var cachedRates: [String: Double] = [:]
-    private var cacheTimestamp: Date?
-    /// Concurrent subscribers share the request in flight.
-    private var inFlight: AnyPublisher<[String: Double], Error>?
+    private var rateDates: [String: Date] = [:]
+    /// Concurrent subscribers for the same currency share the request in flight.
+    private var inFlight: [BaseCurrency: AnyPublisher<[String: Double], Error>] = [:]
     /// Provider index → when its rate limit is expected to be over.
     private var rateLimitedUntil: [Int: Date] = [:]
 
@@ -38,16 +38,21 @@ final class ExchangeRateService: ExchangeRateServicing {
         loadStoredRates()
     }
 
-    /// Takes the stored table when it is newer than the one in memory (the other process may have refreshed it).
+    /// A partial table must not overwrite another provider's rates or renew their cache age.
     private func loadStoredRates() {
-        guard let stored = cacheStore.load(), stored.fetchedAt > (cacheTimestamp ?? .distantPast) else { return }
-        cachedRates = stored.rates
-        cacheTimestamp = stored.fetchedAt
+        guard let stored = cacheStore.load() else { return }
+        for (code, rate) in stored.rates where rate.isFinite && rate > 0 {
+            let date = stored.rateDates?[code] ?? stored.fetchedAt
+            if date > (rateDates[code] ?? .distantPast) {
+                cachedRates[code] = rate
+                rateDates[code] = date
+            }
+        }
     }
 
-    private var isCacheFresh: Bool {
-        guard let cacheTimestamp else { return false }
-        return now().timeIntervalSince(cacheTimestamp) < Constants.API.exchangeRateCacheTTL
+    private func isCacheFresh(for code: String) -> Bool {
+        guard let date = rateDates[code] else { return false }
+        return now().timeIntervalSince(date) < Constants.API.exchangeRateCacheTTL
     }
 
     static let defaultProviders: [ExchangeRateProvider] = [
@@ -61,13 +66,14 @@ final class ExchangeRateService: ExchangeRateServicing {
             return Just(1.0).setFailureType(to: Error.self).eraseToAnyPublisher()
         }
 
-        if !isCacheFresh { loadStoredRates() }
-        if isCacheFresh, let rate = cachedRates[currency.rawValue] {
+        let code = currency.rawValue
+        if !isCacheFresh(for: code) { loadStoredRates() }
+        if isCacheFresh(for: code), let rate = cachedRates[code] {
             return Just(rate).setFailureType(to: Error.self).eraseToAnyPublisher()
         }
 
-        let stale = cachedRates[currency.rawValue]
-        return fetchRateTable()
+        let stale = cachedRates[code]
+        return fetchRateTable(for: currency)
             .tryMap { rates -> Double in
                 guard let rate = rates[currency.rawValue] else { throw URLError(.cannotParseResponse) }
                 return rate
@@ -82,43 +88,46 @@ final class ExchangeRateService: ExchangeRateServicing {
             .eraseToAnyPublisher()
     }
 
-    private func fetchRateTable() -> AnyPublisher<[String: Double], Error> {
-        if let inFlight {
+    private func fetchRateTable(for currency: BaseCurrency) -> AnyPublisher<[String: Double], Error> {
+        if let inFlight = inFlight[currency] {
             return inFlight
         }
-        let publisher = fetchRates(attempt: 0)
+        let publisher = fetchRates(attempt: 0, requiredCode: currency.rawValue)
             .receive(on: DispatchQueue.main)
             .handleEvents(
                 receiveOutput: { [weak self] rates in
                     guard let self else { return }
                     let fetchedAt = self.now()
-                    self.cachedRates = rates
-                    self.cacheTimestamp = fetchedAt
-                    self.cacheStore.save(ExchangeRateCacheStore.Entry(rates: rates, fetchedAt: fetchedAt))
+                    self.loadStoredRates()
+                    for (code, rate) in rates {
+                        self.cachedRates[code] = rate
+                        self.rateDates[code] = fetchedAt
+                    }
+                    self.cacheStore.save(.init(rates: self.cachedRates, fetchedAt: fetchedAt, rateDates: self.rateDates))
                 },
                 receiveCompletion: { [weak self] _ in
-                    self?.inFlight = nil
+                    self?.inFlight[currency] = nil
                 },
                 // When every subscriber cancels (polling restarted), share disconnects upstream without completing;
                 // clear it here too, or later requests would keep reusing the dead publisher.
                 receiveCancel: { [weak self] in
-                    self?.inFlight = nil
+                    self?.inFlight[currency] = nil
                 }
             )
             .share()
             .eraseToAnyPublisher()
-        inFlight = publisher
+        inFlight[currency] = publisher
         return publisher
     }
 
-    private func fetchRates(attempt: Int) -> AnyPublisher<[String: Double], Error> {
+    private func fetchRates(attempt: Int, requiredCode: String) -> AnyPublisher<[String: Double], Error> {
         guard attempt < providers.count else {
             return Fail(error: URLError(.cannotLoadFromNetwork)).eraseToAnyPublisher()
         }
         let provider = providers[attempt]
 
         guard now() >= rateLimitedUntil[attempt] ?? .distantPast, let url = URL(string: provider.urlString) else {
-            return fetchRates(attempt: attempt + 1)
+            return fetchRates(attempt: attempt + 1, requiredCode: requiredCode)
         }
         let request = URLRequest.liveData(url)
 
@@ -133,15 +142,15 @@ final class ExchangeRateService: ExchangeRateServicing {
                     self.rateLimitedUntil[attempt] = self.now().addingTimeInterval(pause)
                 }
                 guard (200..<300).contains(http.statusCode) else { throw URLError(.badServerResponse) }
-                let rates = try provider.parse(data)
-                guard !rates.isEmpty else { throw URLError(.cannotParseResponse) }
+                let rates = try provider.parse(data).filter { $0.value.isFinite && $0.value > 0 }
+                guard rates[requiredCode] != nil else { throw URLError(.cannotParseResponse) }
                 return rates
             }
             .catch { [weak self] _ -> AnyPublisher<[String: Double], Error> in
                 guard let self else {
                     return Fail(error: URLError(.cancelled)).eraseToAnyPublisher()
                 }
-                return self.fetchRates(attempt: attempt + 1)
+                return self.fetchRates(attempt: attempt + 1, requiredCode: requiredCode)
             }
             .eraseToAnyPublisher()
     }
@@ -157,6 +166,7 @@ struct ExchangeRateCacheStore: Sendable {
     struct Entry: Codable, Equatable {
         var rates: [String: Double]
         var fetchedAt: Date
+        var rateDates: [String: Date]? = nil
     }
 
     let directory: URL?

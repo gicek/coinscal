@@ -10,6 +10,7 @@ struct TickerQuote: Equatable {
 /// Result of one poll; prices are already converted to the display currency with `usdToTargetRate`.
 struct PriceSnapshot {
     let prices: [String: Double]
+    let pricesUSD: [String: Double]
     let changes24h: [String: Double]
     let usdToTargetRate: Double
 }
@@ -87,7 +88,8 @@ final class PriceService: PriceServicing {
             : fetchTickers(symbols: tradable, order: order, attempt: 0)
                 .flatMap { [weak self] primary -> AnyPublisher<[String: TickerQuote], Error> in
                     guard let self else { return Just(primary.quotes).setFailureType(to: Error.self).eraseToAnyPublisher() }
-                    return self.fillMissing(primary.quotes, symbols: tradable, primaryIndex: primary.index)
+                    let alreadyTried = Set(order.prefix { $0 != primary.index })
+                    return self.fillMissing(primary.quotes, symbols: tradable, primaryIndex: primary.index, alreadyTried: alreadyTried)
                 }
                 .eraseToAnyPublisher()
 
@@ -106,7 +108,9 @@ final class PriceService: PriceServicing {
                         changes[symbol] = change
                     }
                 }
-                return PriceSnapshot(prices: prices, changes24h: changes, usdToTargetRate: rate)
+                return PriceSnapshot(
+                    prices: prices, pricesUSD: quotes.mapValues(\.priceUsd), changes24h: changes, usdToTargetRate: rate
+                )
             }
             .eraseToAnyPublisher()
     }
@@ -158,11 +162,13 @@ final class PriceService: PriceServicing {
     private func fillMissing(
         _ quotes: [String: TickerQuote],
         symbols: [String],
-        primaryIndex: Int
+        primaryIndex: Int,
+        alreadyTried: Set<Int>
     ) -> AnyPublisher<[String: TickerQuote], Error> {
-        // One source per exchange, skipping the primary's exchange (a mirror lists the same pairs).
-        var seenListings: Set<String> = [providers[primaryIndex].listing]
-        let candidates = providers.indices.filter { seenListings.insert(providers[$0].listing).inserted }
+        // The primary's listing already answered. Elsewhere, a mirror can still help after a transport failure.
+        let candidates = providers.indices.filter {
+            !alreadyTried.contains($0) && providers[$0].listing != providers[primaryIndex].listing
+        }
         return fill(quotes, missing: symbols.filter { quotes[$0] == nil }, candidates: candidates[...])
     }
 
@@ -340,8 +346,8 @@ struct BinanceTickerProvider: TickerProvider {
         var result: [String: TickerQuote] = [:]
         for item in items where item.symbol.hasSuffix("USDT") && item.closeTime >= freshAfter {
             let symbol = String(item.symbol.dropLast(4))
-            guard wanted.contains(symbol), let price = Double(item.lastPrice) else { continue }
-            result[symbol] = TickerQuote(priceUsd: price, change24hPercent: Double(item.priceChangePercent))
+            guard wanted.contains(symbol), let price = Double(item.lastPrice), price.isFinite, price > 0 else { continue }
+            result[symbol] = TickerQuote(priceUsd: price, change24hPercent: Double(item.priceChangePercent).flatMap { $0.isFinite ? $0 : nil })
         }
         return result
     }
@@ -378,9 +384,11 @@ struct OKXTickerProvider: TickerProvider {
         var result: [String: TickerQuote] = [:]
         for item in response.data where item.instId.hasSuffix("-USDT") {
             let symbol = String(item.instId.dropLast(5))
-            guard wanted.contains(symbol), let price = Double(item.last) else { continue }
+            guard wanted.contains(symbol), let price = Double(item.last), price.isFinite, price > 0 else { continue }
             let change: Double? = Double(item.open24h).flatMap { open in
-                open > 0 ? (price - open) / open * 100 : nil
+                guard open.isFinite, open > 0 else { return nil }
+                let percent = (price - open) / open * 100
+                return percent.isFinite ? percent : nil
             }
             result[symbol] = TickerQuote(priceUsd: price, change24hPercent: change)
         }
@@ -417,8 +425,12 @@ struct BybitTickerProvider: TickerProvider {
         var result: [String: TickerQuote] = [:]
         for item in response.result.list where item.symbol.hasSuffix("USDT") {
             let symbol = String(item.symbol.dropLast(4))
-            guard wanted.contains(symbol), let price = Double(item.lastPrice) else { continue }
-            result[symbol] = TickerQuote(priceUsd: price, change24hPercent: Double(item.price24hPcnt).map { $0 * 100 })
+            guard wanted.contains(symbol), let price = Double(item.lastPrice), price.isFinite, price > 0 else { continue }
+            let change = Double(item.price24hPcnt).flatMap { ratio -> Double? in
+                let percent = ratio * 100
+                return percent.isFinite ? percent : nil
+            }
+            result[symbol] = TickerQuote(priceUsd: price, change24hPercent: change)
         }
         return result
     }

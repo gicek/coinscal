@@ -80,7 +80,7 @@ final class FakePriceService: PriceServicing {
         let subject: PassthroughSubject<PriceSnapshot, Error>
 
         func respond(_ prices: [String: Double], rate: Double = 1) {
-            subject.send(PriceSnapshot(prices: prices, changes24h: [:], usdToTargetRate: rate))
+            subject.send(PriceSnapshot(prices: prices, pricesUSD: prices.mapValues { $0 / rate }, changes24h: [:], usdToTargetRate: rate))
             subject.send(completion: .finished)
         }
     }

@@ -23,6 +23,7 @@ import Testing
 
         let snapshot = try await firstValue(service.fetchQuotes(symbols: ["btc"], currency: .cny))
         #expect(snapshot.prices["BTC"] == 700)
+        #expect(snapshot.pricesUSD["BTC"] == 100)
         #expect(snapshot.changes24h["BTC"] == 1)
         #expect(snapshot.usdToTargetRate == 7)
     }
@@ -70,6 +71,20 @@ import Testing
         #expect(abs((snapshot.changes24h["OKB"] ?? 0) - 20) < 1e-9)
         #expect(!client.requestedURLs.contains { self.isBinanceVision($0) })
         #expect(!client.requestedURLs.contains { self.isBybit($0) }, "nothing left to fill after OKX")
+    }
+
+    @Test func fillsFromARecoveredMirrorWhenTheMainHostStillTimesOut() async throws {
+        let client = StubHTTPClient()
+        client.on(isBinance, reply: .failure(.timedOut))
+        client.on(isBinanceVision, reply: .failure(.timedOut))
+        client.on(isOKX, reply: .status(200, okxOKB))
+        let service = PriceService(client: client, exchangeRateService: FixedExchangeRateService())
+        _ = try await firstValue(service.fetchQuotes(symbols: ["OKB"], currency: .usd))
+
+        client.on(isBinanceVision, reply: .status(200, binanceBTC))
+        let snapshot = try await firstValue(service.fetchQuotes(symbols: ["BTC", "OKB"], currency: .usd))
+        #expect(snapshot.prices == ["BTC": 100, "OKB": 120])
+        #expect(client.requestedURLs.suffix(3).map(\.host) == ["www.okx.com", "api.binance.com", "data-api.binance.vision"])
     }
 
     /// A symbol no exchange lists is not requested again on every poll, only after the TTL.
@@ -244,6 +259,16 @@ import Testing
         client.on({ _ in true }, reply: .failure(.notConnectedToInternet))
         now = now.addingTimeInterval(Constants.API.exchangeRateCacheTTL + 1)
         #expect(try await firstValue(service.fetchUSDExchangeRate(to: .cny)) == 7.2)
+    }
+
+    @Test func triesAnotherTableWhenTheRequestedCurrencyIsMissing() async throws {
+        let client = StubHTTPClient()
+        client.on(isErApi, reply: .status(200, erApiCNY))
+        client.on(isJsDelivr, reply: .status(200, json(#"{"usd":{"eur":0.92}}"#)))
+        let service = ExchangeRateService(client: client)
+        #expect(try await firstValue(service.fetchUSDExchangeRate(to: .eur)) == 0.92)
+        #expect(try await firstValue(service.fetchUSDExchangeRate(to: .eur)) == 0.92)
+        #expect(client.requestedURLs.count == 2)
     }
 
     /// ExchangeRate-API blocks an IP for 20 minutes after a 429; it is skipped meanwhile and the next source answers.

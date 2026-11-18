@@ -14,7 +14,7 @@ Coinscal calls public, key-free APIs directly from the Mac. All limits below are
 | 4 | Bybit `/v5/market/tickers?category=spot` | All spot pairs, filtered locally; `price24hPcnt` is a ratio |
 
 - Only USDT pairs are used. A source that returns any watchlist coin becomes the primary source for the round.
-- **Fill-in**: coins the primary source lacks are requested from sources on other exchanges (mirrors of the same exchange are skipped). A failed fill-in request keeps the primary result.
+- **Fill-in**: coins the primary source lacks are requested from sources on other exchanges. A mirror can be tried after a request failure and is skipped once its exchange has given a definitive listing answer or is rate-limited. A failed fill-in request keeps the primary result.
 - **Missing pairs**: Binance fails a whole batch with HTTP 400 (-1121) if one pair doesn't exist; the service then requests the full list on the same host and filters it. Once an exchange's answer shows it doesn't list a coin, that coin is left out of its requests for 30 minutes (`PriceService.unavailableTTL`), so one unlisted coin doesn't make every Binance round a full-list request.
 - **Halted pairs**: Binance still returns halted pairs with their last price; tickers whose `closeTime` is more than an hour old are dropped.
 - **Rate limits**: HTTP 429, 418, or 403, and OKX code 50011 (also sent as HTTP 200), pause that exchange, mirror included, until its `Retry-After`; without one, for 1 minute, or 10 minutes after a 403 (Bybit's documented wait). Continuing after a Binance 429 leads to an IP ban.
@@ -22,7 +22,7 @@ Coinscal calls public, key-free APIs directly from the Mac. All limits below are
 
 ## Exchange Rates
 
-`ExchangeRateService` fetches a USD-based table from open.er-api.com, then the jsDelivr copy of currency-api, then its Cloudflare Pages copy. The table is cached for one hour in memory and in the App Group container (`exchange-rates.json`), shared by the app and the widget extension. USD needs no request. A source that answers HTTP 429 is skipped for its `Retry-After`, or 20 minutes. If every source fails, the cached table is used even when expired. Concurrent callers share one request.
+`ExchangeRateService` fetches a USD-based table from open.er-api.com, then the jsDelivr copy of currency-api, then its Cloudflare Pages copy. The table is cached for one hour in memory and in the App Group container (`exchange-rates.json`), shared by the app and the widget extension. USD needs no request. A source that answers HTTP 429 is skipped for its `Retry-After`, or 20 minutes. If every source fails, the cached table is used even when expired. A table must contain a valid rate for the requested currency. Partial tables preserve rates and their original cache ages for currencies they omit. Concurrent callers for the same currency share one request.
 
 ExchangeRate-API's terms ask apps that show its rates to link "Rates By Exchange Rate API" to `https://www.exchangerate-api.com`. The About pane and the website footer carry that link in every language.
 
