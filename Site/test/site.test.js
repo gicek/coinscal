@@ -99,9 +99,12 @@ test("demo settings fall back field by field", () => {
 
 test("price colors and the menu bar coin follow the app's rules", () => {
     const s = { ...DEFAULT_SETTINGS };
-    assert.equal(priceColor(s, 1), "#2CBD84");
-    assert.equal(priceColor(s, -1), "#F6465D");
-    assert.equal(priceColor({ ...s, scheme: "redUpGreenDown" }, 1), "#F6465D");
+    const appColors = readFileSync(new URL("../../Apple/Mac/App/Constants.swift", import.meta.url), "utf8");
+    const up = appColors.match(/upColorHex = "(#[A-F0-9]{6})"/)[1];
+    const down = appColors.match(/downColorHex = "(#[A-F0-9]{6})"/)[1];
+    assert.equal(priceColor(s, 1), up);
+    assert.equal(priceColor(s, -1), down);
+    assert.equal(priceColor({ ...s, scheme: "redUpGreenDown" }, 1), down);
     assert.equal(priceColor({ ...s, colorEnabled: false }, 1), null);
     assert.equal(priceColor(s, null), null);
     assert.equal(menubarCoin(s).symbol, "BTC");

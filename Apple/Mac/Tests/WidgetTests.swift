@@ -14,7 +14,7 @@ import Testing
     ) -> WidgetSnapshot {
         WidgetSnapshot(
             writtenAt: now.addingTimeInterval(-writtenAgo), language: .zhHans, currency: currency, colorByChange: true,
-            upColorHex: "#2CBD84", downColorHex: "#F6465D", displayedCoinId: displayed, watchlist: watchlist, quotes: quotes ?? ["bitcoin": .init(price: 80_000, change24hPercent: 2, fetchedAt: now.addingTimeInterval(-writtenAgo))]
+            upColorHex: Constants.Defaults.upColorHex, downColorHex: Constants.Defaults.downColorHex, displayedCoinId: displayed, watchlist: watchlist, quotes: quotes ?? ["bitcoin": .init(price: 80_000, change24hPercent: 2, fetchedAt: now.addingTimeInterval(-writtenAgo))]
         )
     }
 

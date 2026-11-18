@@ -45,27 +45,6 @@ final class MenuBarViewModel: ObservableObject {
         return coin
     }
 
-    /// Keep white text readable by darkening light fills in linear sRGB.
-    static func priceBadgeBackground(_ color: NSColor) -> NSColor {
-        guard let rgb = color.usingColorSpace(.sRGB) else { return .black }
-        func linear(_ component: CGFloat) -> CGFloat {
-            component <= 0.04045 ? component / 12.92 : pow((component + 0.055) / 1.055, 2.4)
-        }
-        let red = linear(rgb.redComponent)
-        let green = linear(rgb.greenComponent)
-        let blue = linear(rgb.blueComponent)
-        let luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
-        let maximumLuminance: CGFloat = 0.18
-        guard luminance > maximumLuminance else { return color }
-
-        let scale = maximumLuminance / luminance
-        func encode(_ component: CGFloat) -> CGFloat {
-            let value = component * scale
-            return value <= 0.0031308 ? 12.92 * value : 1.055 * pow(value, 1 / 2.4) - 0.055
-        }
-        return NSColor(srgbRed: encode(red), green: encode(green), blue: encode(blue), alpha: 1)
-    }
-
     private func updateStatusItem(coins: [Coin], settings: AppSettings, settingsVM: SettingsViewModel) {
         guard let displayedCoin = Self.priceCoin(coins: coins, settings: settings),
               let price = displayedCoin.currentPrice else {
@@ -93,11 +72,8 @@ final class MenuBarViewModel: ObservableObject {
             button.title = title
             button.setAccessibilityLabel(nil)
             return
-        case (true, true):
-            style = .init(textColor: .white, background: Self.priceBadgeBackground(priceColor))
-        case (true, false):
-            // Text = price color, no background.
-            style = .init(textColor: priceColor, background: nil)
+        case (true, _):
+            style = .coloredPrice(priceColor, showBackground: settings.showMenuBarBackground)
         case (false, true):
             // Background = menu bar text color (white on a dark bar, black on a light one), text = inverted.
             style = .init(textColor: isDarkMenuBar ? .black : .white, background: isDarkMenuBar ? .white : .black)
@@ -138,6 +114,10 @@ enum MenuBarTitleImage {
     struct Style {
         var textColor: NSColor
         var background: NSColor?
+
+        static func coloredPrice(_ color: NSColor, showBackground: Bool) -> Self {
+            showBackground ? Self(textColor: .white, background: color) : Self(textColor: color, background: nil)
+        }
     }
 
     /// Space between the text and the edges of the background.

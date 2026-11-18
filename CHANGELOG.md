@@ -6,7 +6,7 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 
 ### Fixed
 
-- Colored menu bar price badges use white text with a darker fill for contrast.
+- Menu bar price badges use white text on the same rise and fall colors used for price text.
 - Absolute price alerts preserve entered decimals and ignore exchange-rate-only changes.
 - Older quotes are marked per coin in the panel, widgets, and desktop ticker.
 - The desktop ticker limits its height to the available screen space.
