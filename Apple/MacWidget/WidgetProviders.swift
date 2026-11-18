@@ -16,7 +16,7 @@ enum WidgetDataLoader {
 
     static func content(
         ids: [String], currencyChoice: BaseCurrency?, colorByChange: Bool, sort: WidgetSortOrder,
-        snapshot: WidgetSnapshot?
+        snapshot: WidgetSnapshot?, fetchTimeout: TimeInterval = WidgetContent.fetchTimeout
     ) async -> WidgetEntryContent {
         let now = Date()
         let currency = WidgetContent.currency(choice: currencyChoice, snapshot: snapshot)
@@ -30,7 +30,7 @@ enum WidgetDataLoader {
         ) {
             quotes = fresh
             updatedAt = snapshot?.writtenAt
-        } else if let fetched = await fetch(tradable, currency: currency) {
+        } else if let fetched = await fetch(tradable, currency: currency, timeout: fetchTimeout) {
             quotes = fetched
             updatedAt = now
         } else if let snapshot, snapshot.currency == currency {
@@ -58,8 +58,10 @@ enum WidgetDataLoader {
         )
     }
 
-    /// nil when every source failed or the request took longer than `WidgetContent.fetchTimeout`.
-    private static func fetch(_ coins: [CoinMetadata], currency: BaseCurrency) async -> [String: WidgetSnapshot.Quote]? {
+    /// nil when every source failed or the request took longer than `timeout`.
+    private static func fetch(
+        _ coins: [CoinMetadata], currency: BaseCurrency, timeout: TimeInterval
+    ) async -> [String: WidgetSnapshot.Quote]? {
         guard !coins.isEmpty else { return [:] }
         var cancellable: AnyCancellable?
         let result: PriceSnapshot? = await withCheckedContinuation { continuation in
@@ -67,7 +69,7 @@ enum WidgetDataLoader {
             cancellable = priceService.fetchQuotes(symbols: coins.map(\.symbol), currency: currency)
                 .receive(on: DispatchQueue.main)
                 // Finishes without a value on timeout, which resumes with nil below.
-                .timeout(.seconds(WidgetContent.fetchTimeout), scheduler: DispatchQueue.main)
+                .timeout(.seconds(timeout), scheduler: DispatchQueue.main)
                 .sink(receiveCompletion: { _ in
                     if !resumed { resumed = true; continuation.resume(returning: nil) }
                 }, receiveValue: { value in
@@ -84,7 +86,18 @@ enum WidgetDataLoader {
         return quotes.isEmpty ? nil : quotes
     }
 
-    /// Gallery preview and placeholder: fixed sample prices, no network.
+    /// Gallery preview: the user's coins and settings with real prices (the app's snapshot while fresh, otherwise one
+    /// request limited to `WidgetContent.previewFetchTimeout`); the fixed samples when no price could be had.
+    static func preview(ids: [String], sampleIDs: [String]) async -> WidgetEntryContent {
+        let snapshot = WidgetSnapshotStore.appGroup.load()
+        let content = await content(
+            ids: ids, currencyChoice: nil, colorByChange: snapshot?.colorByChange ?? AppSettings().priceColorEnabled,
+            sort: .watchlist, snapshot: snapshot, fetchTimeout: WidgetContent.previewFetchTimeout
+        )
+        return content.hasPrices ? content : sample(ids: sampleIDs)
+    }
+
+    /// Placeholder, and the preview's fallback: fixed sample prices, no network.
     static func sample(ids: [String]) -> WidgetEntryContent {
         let samples: [String: (Double, Double)] = [
             "bitcoin": (80_585, 2.31), "ethereum": (3_142.18, -1.27), "solana": (152.40, 4.86),
@@ -118,7 +131,8 @@ struct CoinPriceProvider: AppIntentTimelineProvider {
 
     func snapshot(for configuration: CoinPriceConfigurationIntent, in context: Context) async -> CoinscalWidgetEntry {
         if context.isPreview {
-            return CoinscalWidgetEntry(date: Date(), content: await WidgetDataLoader.sample(ids: ["bitcoin"]))
+            let id = WidgetContent.priceCoinID(choice: nil, snapshot: WidgetSnapshotStore.appGroup.load())
+            return CoinscalWidgetEntry(date: Date(), content: await WidgetDataLoader.preview(ids: [id], sampleIDs: ["bitcoin"]))
         }
         return await entry(for: configuration)
     }
@@ -147,8 +161,12 @@ struct WatchlistProvider: AppIntentTimelineProvider {
 
     func snapshot(for configuration: WatchlistConfigurationIntent, in context: Context) async -> CoinscalWidgetEntry {
         if context.isPreview {
-            let ids = Array(WidgetDataLoader.sampleListIDs.prefix(Self.limit(context.family)))
-            return CoinscalWidgetEntry(date: Date(), content: await WidgetDataLoader.sample(ids: ids))
+            let limit = Self.limit(context.family)
+            let ids = WidgetContent.listCoinIDs(
+                source: .watchlist, manual: [], snapshot: WidgetSnapshotStore.appGroup.load(), limit: limit
+            )
+            let sampleIDs = Array(WidgetDataLoader.sampleListIDs.prefix(limit))
+            return CoinscalWidgetEntry(date: Date(), content: await WidgetDataLoader.preview(ids: ids, sampleIDs: sampleIDs))
         }
         return await entry(for: configuration, family: context.family)
     }

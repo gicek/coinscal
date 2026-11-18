@@ -4,6 +4,9 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-11-18
 
+### Changed: The widget gallery previews real prices
+Before adding a widget, the gallery used to show fixed sample prices and coins (BTC $80,585, XRP, DOGE, and so on). It now shows the menu bar coin and the watchlist with real prices in the app's currency and colors: from the app's snapshot while fresh, otherwise from one request limited to 5 seconds, and the samples only when no price can be had.
+
 ### Fixed: Widgets stopped updating in the evening
 - Symptom: desktop and Notification Center widgets often stopped updating around 8 p.m. and didn't recover that day.
 - Root cause: besides each widget's own 15-minute timeline, the app asked WidgetKit to reload every widget every 5 minutes and on any price move over 1%, about 290 requests a day (counted in the system log). Requests from an app that isn't in front count against each widget's daily reload budget (dozens a day); once it ran out, the system refused every reload, the widgets' own included. The widget's own price request also had no overall deadline, so a slow failover could outlast the system's limit for building a timeline.

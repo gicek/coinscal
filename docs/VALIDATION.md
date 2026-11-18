@@ -19,7 +19,7 @@ The app no longer reloads the widgets every 5 minutes or on price moves, writes 
 - Pending:
   1. With a widget placed, its update time keeps advancing past 8 p.m. and through the next day.
   2. Changing the quote currency, language, or menu bar coin in the app updates a placed widget soon after.
-  3. With no widget placed, adding one from the gallery shows current prices and the user's watchlist right away.
+  3. With no widget placed, the gallery preview shows the menu bar coin and the watchlist with current prices, and the added widget shows them right away; offline, the preview falls back to the sample prices.
 
 ### 2026-11-18: Right-click menu
 

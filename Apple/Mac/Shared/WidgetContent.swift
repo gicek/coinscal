@@ -56,6 +56,8 @@ enum WidgetContent {
     /// Longest a widget waits for its own price request (failover, fill-in, and exchange rates together) before it
     /// shows the last snapshot instead; the system ends a timeline request that takes too long.
     static let fetchTimeout: TimeInterval = 15
+    /// Shorter limit for the gallery preview, which the system shows while the user browses widgets.
+    static let previewFetchTimeout: TimeInterval = 5
     static let mediumRowLimit = 4
     static let largeRowLimit = 8
 
