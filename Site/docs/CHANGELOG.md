@@ -2,6 +2,11 @@
 
 Features added, changed, fixed, and removed, newest first. Third-level headings start with Added / Changed / Fixed / Removed; fixes describe the symptom, root cause, fix, and tests.
 
+## 2026-11-18
+
+### Changed: Demo panel corners match the app
+The hero's menu bar panel uses a 16px corner radius (was 12px), matching the app's menu bar panel, which now draws the system popover material with 16pt corners itself.
+
 ## 2026-10-16
 
 ### Added: ExchangeRate-API attribution link

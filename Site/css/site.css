@@ -659,7 +659,7 @@ button.menubar-extra:hover,
     position: relative;
     overflow: hidden;
     width: 320px;
-    border-radius: 12px;
+    border-radius: 16px;
     background: light-dark(rgba(248, 247, 255, 0.72), rgba(36, 31, 72, 0.72));
     -webkit-backdrop-filter: blur(28px) saturate(1.7);
     backdrop-filter: blur(28px) saturate(1.7);
