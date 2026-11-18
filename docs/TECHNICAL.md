@@ -4,7 +4,7 @@
 
 ## Technology Choices
 
-- **Swift 6 + SwiftUI, with AppKit hosting the menu bar**: AppKit drives `NSStatusItem`, `NSPopover`, and the Settings `NSWindow`; their content is SwiftUI. The menu bar title needs an `NSAttributedString` for coloring.
+- **Swift 6 + SwiftUI, with AppKit hosting the menu bar**: AppKit drives `NSStatusItem`, the menu bar `NSPanel` ([MENU_BAR_PANEL](MENU_BAR_PANEL.md)), and the Settings `NSWindow`; their content is SwiftUI. The menu bar title needs an `NSAttributedString` for coloring.
 - **One third-party dependency**: Sparkle for in-app updates, the standard updater for directly distributed Mac apps. Everything else uses system frameworks (Foundation, Combine, SwiftUI, AppKit, UserNotifications, ServiceManagement, OSLog).
 - **No backend**: prices and exchange rates come directly from public APIs that need no key, with multi-source failover.
 - **Combine drives the data flow**: this is the current state. New code uses async/await; see ROADMAP for the migration.
@@ -71,7 +71,7 @@ CoinscalWidget (Widget Extension) ── WidgetDataLoader ── snapshot, or fe
 - App side, `WidgetSnapshotWriter`: writes `widget-snapshot.json` on every coin or settings change (debounced 1 second). It requests `reloadAllTimelines` when ≥ 5 minutes have passed since the last request, any price moved > 1%, or a widget-visible setting changed.
 - Extension side: uses the snapshot directly when it is less than 15 minutes old, has the same currency, and covers the needed coins. Otherwise it fetches prices with its own `PriceService` (keeping failover state while the process lives); on failure it uses the old snapshot and shows it as stale. The next timeline reload is scheduled 15 minutes later.
 - Strings follow the app language stored in the snapshot (`LocalizationManager.string(for:language:)`). The system renders text in the edit panel and the widget gallery in the system language. `WidgetTests.widgetKeysAreTranslated` scans the extension and `Shared/` sources for `widget.*` keys and ensures all three languages are present (the localization guard only checks `Text("…")`).
-- Clicking a widget opens `coinscal://popover`. On a cold launch the URL arrives before the popover is wired up, so the popover opens after wiring; it retries for 2 seconds until the status item is on screen. A popover opened this way belongs to an app that was not activated (macOS 14 cooperative activation), so `.transient` won't close it when you click the desktop. While the popover is shown, a global mouse monitor is installed (mouse events need no Accessibility permission); a click outside the app closes the popover, and the monitor is removed on close.
+- Clicking a widget opens `coinscal://popover`. On a cold launch the URL arrives before the menu bar panel is wired up, so the panel opens after wiring; `MenuBarPanelController.show()` returns false until the status item is on screen, and it retries for 2 seconds. A panel opened this way belongs to an app that was not activated (macOS 14 cooperative activation); it still becomes key (non-activating panel), takes clicks (first mouse accepted), and closes on outside clicks and on losing key status like a panel opened from the status item.
 
 ### Settings Persistence
 
@@ -150,8 +150,8 @@ open.er-api.com → jsDelivr currency-api → currency-api.pages.dev. The whole 
 
 ## macOS Platform Notes
 
-- `LSUIElement = YES`: no Dock icon. Call `NSApp.activate` before showing the popover or the Settings window, otherwise click events are routed incorrectly.
-- The popover's anchor arrow is hidden through the private KVC key `shouldHideAnchor`.
+- `LSUIElement = YES`: no Dock icon. Call `NSApp.activate` before showing the menu bar panel or the Settings window, otherwise click events are routed incorrectly. macOS 14+ may refuse the activation, so the panel must work without it.
+- Menu bar panel (`MenuBarPanelController`, details in [MENU_BAR_PANEL](MENU_BAR_PANEL.md)): a borderless, non-activating `NSPanel` at `.popUpMenu` level, not an `NSPopover`. On macOS 27, pressing the status item takes key status from the shown window and reaches global mouse monitors as an outside click, both on mouse-down, before the status item action runs on mouse-up; a `.transient` popover closes at that point and the action reopened it. The panel stays up through that press (presses inside the status item window are ignored by the dismissal checks) and the action closes it. Other clicks outside it (global and local mouse-down monitors), Esc (`cancelOperation`), and losing key status close it. The content is a `MenuBarPanelHostingView`, whose `acceptsFirstMouse` returns true: while Coinscal isn't the active app, a plain `NSHostingView` treats the first click as activation only. It sits in an `NSVisualEffectView` with the `.popover` material, clipped to `Constants.Popover.cornerRadius` (16pt) by a stretchable mask image; a SwiftUI material in a transparent window is too thin and lets what is behind the panel show through.
 - `NSMenuEnableActionImages = false`: prevents macOS 26 from automatically adding icons to menu items (such as a gear in front of "Settings"). AppKit reads it before `applicationDidFinishLaunching`, so `CoinscalApp.init` writes it to the app domain; set any later, the first launch after a fresh install still shows the icons.
 - The Settings window size is clamped as a fallback in `windowWillResize`: `NSHostingController` layout overrides `maxSize` at runtime.
 - Setting the window's `contentViewController` resizes it to the SwiftUI view's fitting size (the 600pt minimum width), discarding the initial `contentRect`. `openSettingsWindow` therefore calls `setContentSize` with the default size afterward, before `setFrameAutosaveName` restores any saved frame.
@@ -169,6 +169,7 @@ open.er-api.com → jsDelivr currency-api → currency-api.pages.dev. The whole 
 - Pure logic: `AlertEvaluator`, `PriceFormatter`, `AppSettings` encoding and decoding, parsing for each data source.
 - Services: `PriceService` / `ExchangeRateService` get a `StubHTTPClient` injected (the data source list can be injected too), covering failover, the Binance whole-batch 400 fallback and halt filtering, cross-exchange backfill and the "exchange doesn't have it" cache, USDT, exchange rate caching and stale fallback, and in-flight cancellation.
 - Desktop ticker: `DesktopOverlayTests` covers settings fault tolerance and the migration of old positions, the height for the row count (checked against the rendered list) and the 16-coin limit, default position and clamping to the screen, multi-display selection and fallback, adjust on open, top-edge anchoring, content selection, and window level.
+- Menu bar panel: `MenuBarPanelLayoutTests` covers placement (centered under the status item, kept inside the screen's visible frame, never above the menu bar, secondary displays).
 - Widget: `WidgetTests` covers coin selection, currency, snapshot freshness, sorting, staleness, snapshot I/O (temporary directory), reload throttling, and string keys.
 - Catalog: `CoinCatalogTests` validates the bundled snapshot and each rejection case; `CoinCatalogTests` also covers automatically replacing old coins with their successors, and `WatchlistViewModelTests` covers the scope of search and of the browse list in the add panel.
 - State machine: `CoinListViewModel` gets `FakePriceService` and `SpyNotifier` injected, covering polling not interrupting in-flight requests, discarding old results and avoiding false alerts on currency change, and above / below alerting only on crossings.
@@ -177,7 +178,7 @@ open.er-api.com → jsDelivr currency-api → currency-api.pages.dev. The whole 
 - Real network: `Apple/Mac/scripts/manual/check-data-sources.sh` (`make mac-check-sources`).
 - Website: `Site/test/site.test.js` (`make test-site`) checks formatting parity with `PriceFormatter`, message keys, the CSP hashes, demo coin logos, and demo settings fallback. The website's price feed mirrors the app's source order but is a separate JavaScript implementation; when the app's sources change, update `Site/js/prices.js`, the CSP in `Site/_headers`, and [WEBSITE](WEBSITE.md) together.
 - Wait for main-thread delivery with `drainMainQueue()`; tests don't `sleep`.
-- Needs manual verification: menu bar appearance, drag-to-reorder feel, system notification delivery, login item, real data source reachability, installing an update end to end (see VALIDATION).
+- Needs manual verification: menu bar appearance, opening and closing the menu bar panel, drag-to-reorder feel, system notification delivery, login item, real data source reachability, installing an update end to end (see VALIDATION).
 
 ## Open Source and Dependencies
 

@@ -12,7 +12,7 @@ private struct ReloadSettingsSnapshot: Equatable {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
-    private var popover: NSPopover!
+    private var menuBarPanel: MenuBarPanelController!
     private var settingsWindow: NSWindow?
 
     let settingsVM = SettingsViewModel()
@@ -28,10 +28,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var logoStore = CoinLogoStore(client: URLSession.shared)
     /// Always present for the views; Sparkle is attached only outside the unit-test host (docs/UPDATES.md).
     let updateController = UpdateController()
-    /// A widget click launched the app: the URL arrives before the popover exists, so it is shown after setup.
-    private var opensPopoverAfterLaunch = false
-    /// Closes the popover on clicks in other apps or the desktop while it is shown (see `popoverDidShow`).
-    private var outsideClickMonitor: Any?
+    /// A widget click launched the app: the URL arrives before the panel exists, so it is shown after setup.
+    private var opensPanelAfterLaunch = false
     private var cancellables = Set<AnyCancellable>()
 
     /// When launched as the unit-test host, set nothing up: no network polling, no notification permission,
@@ -51,7 +49,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         updateController.attach(SparkleUpdaterBackend(controller: updateController))
         setupStatusItem()
-        setupPopover()
+        setupMenuBarPanel()
         widgetSnapshotWriter.bind(coinListVM: coinListVM, settingsVM: settingsVM)
         desktopOverlay.bind(coinListVM: coinListVM, settingsVM: settingsVM)
         // Download logos of watchlist coins that ship without one, at launch and whenever the watchlist changes.
@@ -66,9 +64,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationCenter.default.publisher(for: .coinscalAdjustDesktopOverlay)
             .sink { [weak self] _ in self?.desktopOverlay.beginAdjusting() }
             .store(in: &cancellables)
-        if opensPopoverAfterLaunch {
-            opensPopoverAfterLaunch = false
-            showPopoverFromURL(retries: 10)
+        if opensPanelAfterLaunch {
+            opensPanelAfterLaunch = false
+            showPanelFromURL(retries: 10)
         }
         NotificationService.shared.requestPermission()
 
@@ -105,7 +103,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             .store(in: &cancellables)
 
-        // Buttons inside the SwiftUI popover navigate via NotificationCenter.
+        // Buttons inside the menu bar panel navigate via NotificationCenter.
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleNavigationNotification(_:)),
@@ -125,19 +123,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Widgets open `coinscal://popover` when clicked (docs/WIDGET.md).
     func application(_ application: NSApplication, open urls: [URL]) {
         guard !Self.isRunningUnitTests, urls.contains(where: { $0.scheme == "coinscal" }) else { return }
-        guard popover != nil else {
-            opensPopoverAfterLaunch = true
+        guard menuBarPanel != nil else {
+            opensPanelAfterLaunch = true
             return
         }
-        showPopoverFromURL()
+        showPanelFromURL()
     }
 
-    /// Right after launch the status item is not on screen yet and `show` silently does nothing; retry briefly.
-    private func showPopoverFromURL(retries: Int = 0) {
-        if !popover.isShown { togglePopover() }
-        guard !popover.isShown, retries > 0 else { return }
+    /// Right after launch the status item is not on screen yet and `show()` returns false; retry briefly.
+    private func showPanelFromURL(retries: Int = 0) {
+        guard !menuBarPanel.show(), retries > 0 else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
-            self?.showPopoverFromURL(retries: retries - 1)
+            self?.showPanelFromURL(retries: retries - 1)
         }
     }
 
@@ -170,62 +167,44 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func handleStatusItemClick() {
         guard let event = NSApp.currentEvent else { return }
         if event.type == .rightMouseUp {
+            menuBarPanel.close()
             showContextMenu()
         } else {
-            togglePopover()
+            menuBarPanel.toggle()
         }
     }
 
-    // MARK: - Popover
+    // MARK: - Menu Bar Panel
 
-    private func setupPopover() {
-        popover = NSPopover()
-        popover.behavior = .transient
-        popover.delegate = self
-        // Show the popover right away; the default spring animation feels sluggish from the menu bar.
-        popover.animates = false
-        // Hide the anchor arrow between the popover and the status item (private KVC, common practice for menu bar apps).
-        popover.setValue(true, forKey: "shouldHideAnchor")
-        let popoverView = CoinPopoverView()
+    private func setupMenuBarPanel() {
+        let panelView = CoinPopoverView()
             .environmentObject(coinListVM)
             .environmentObject(settingsVM)
             .environmentObject(updateController)
             .environment(\.coinLogoStore, logoStore)
-        let hosting = NSHostingController(rootView: popoverView)
-        hosting.view.wantsLayer = true
-        hosting.view.layer?.isOpaque = false
-        hosting.view.layer?.backgroundColor = NSColor.clear.cgColor
-        popover.contentViewController = hosting
-        syncPopoverSize(coinCount: coinListVM.coins.count)
+        let hostingView = MenuBarPanelHostingView(rootView: panelView)
+        // The panel sets its own size from `Constants.Popover`; don't let the SwiftUI content resize the window.
+        hostingView.sizingOptions = []
+        menuBarPanel = MenuBarPanelController(
+            contentView: hostingView,
+            size: panelSize(coinCount: coinListVM.coins.count),
+            statusItemWindow: { [weak self] in self?.statusItem.button?.window }
+        )
 
-        // Popover height follows the watchlist size: at least 4 rows, at most 8, then it scrolls.
+        // Panel height follows the watchlist size: at least 4 rows, at most 8, then it scrolls.
         coinListVM.$coins
             .map(\.count)
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] count in
-                self?.syncPopoverSize(coinCount: count)
+                guard let self else { return }
+                self.menuBarPanel.setContentSize(self.panelSize(coinCount: count))
             }
             .store(in: &cancellables)
     }
 
-    private func syncPopoverSize(coinCount: Int) {
-        popover.contentSize = NSSize(
-            width: Constants.Popover.width,
-            height: Constants.Popover.height(forCoinCount: coinCount)
-        )
-    }
-
-    private func togglePopover() {
-        if popover.isShown {
-            popover.performClose(nil)
-        } else {
-            guard let button = statusItem.button else { return }
-            // An LSUIElement app must activate explicitly, otherwise clicks inside the popover are not routed.
-            NSApp.activate(ignoringOtherApps: true)
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            popover.contentViewController?.view.window?.makeKey()
-        }
+    private func panelSize(coinCount: Int) -> CGSize {
+        CGSize(width: Constants.Popover.width, height: Constants.Popover.height(forCoinCount: coinCount))
     }
 
     // MARK: - Context Menu
@@ -306,8 +285,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func openSettingsWindow(tab: SettingsTab) {
-        // Close the popover so its transient event monitor does not steal focus.
-        if popover.isShown { popover.performClose(nil) }
+        menuBarPanel.close()
         // An LSUIElement app must activate first for the window to come to the front.
         NSApp.activate(ignoringOtherApps: true)
         settingsVM.settingsWindowTab = tab
@@ -380,29 +358,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-// MARK: - NSPopoverDelegate
-extension AppDelegate: NSPopoverDelegate {
-    /// `.transient` closes on app deactivation, but a popover opened from a widget click belongs to an app that never
-    /// became active (macOS 14 cooperative activation), so clicking the desktop did nothing. A global mouse monitor
-    /// (no permission needed for mouse events) closes it on any click outside the app.
-    func popoverDidShow(_ notification: Notification) {
-        guard outsideClickMonitor == nil else { return }
-        outsideClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]) { [weak self] _ in
-            MainActor.assumeIsolated {
-                guard let self, self.popover.isShown else { return }
-                self.popover.performClose(nil)
-            }
-        }
-    }
-
-    func popoverDidClose(_ notification: Notification) {
-        if let monitor = outsideClickMonitor {
-            NSEvent.removeMonitor(monitor)
-            outsideClickMonitor = nil
-        }
-    }
-}
-
 // MARK: - NSWindowDelegate
 extension AppDelegate: NSWindowDelegate {
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
@@ -426,7 +381,7 @@ enum SettingsTab: String, CaseIterable {
 }
 
 extension Notification.Name {
-    /// Posted by buttons inside the SwiftUI popover to open a settings tab.
+    /// Posted by buttons inside the menu bar panel to open a settings tab.
     /// userInfo: ["tab": SettingsTab.rawValue]
     static let coinscalNavigate = Notification.Name("coinscal.navigate")
     /// Posted by the settings window to drag the desktop overlay into place.

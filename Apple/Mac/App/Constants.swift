@@ -34,6 +34,8 @@ enum Constants {
         static let rowHeight: CGFloat = 52
         static let headerHeight: CGFloat = 38
         static let footerHeight: CGFloat = 52
+        /// Corner radius of the panel's system material, matching the system popover.
+        static let cornerRadius: CGFloat = 16
         /// The list area is sized for at least 4 rows and at most 8; more coins scroll.
         static let minVisibleRows = 4
         static let maxVisibleRows = 8

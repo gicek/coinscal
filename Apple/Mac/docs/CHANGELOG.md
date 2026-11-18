@@ -4,6 +4,12 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-11-18
 
+### Fixed: Clicking the menu bar price didn't close the popover on macOS 27
+- Symptom: with the popover shown, clicking the status item made it disappear and immediately reappear, so it could only be closed by clicking elsewhere.
+- Root cause: on macOS 27, pressing the status item takes key status from the popover and reaches global mouse monitors as an outside click, both on mouse-down. The `.transient` popover (and the outside-click monitor) closed it then, and the status item action, which runs on mouse-up, saw it closed and opened it again.
+- Fix: the menu bar content moved from `NSPopover` to an app-managed, non-activating `NSPanel` (`MenuBarPanelController`, design in docs/MENU_BAR_PANEL.md). The panel stays up through the status item press, so the action closes it. It closes on clicks outside it, Esc, and losing key status; its content accepts the first click while Coinscal isn't the active app. The panel draws the system popover material (`NSVisualEffectView`, `.popover`) clipped to 16pt corners, as the popover did; `CoinPopoverView` no longer draws its own thin material and shadow. Content, size, and placement are unchanged; the private `shouldHideAnchor` key is no longer used.
+- Tests: `MenuBarPanelLayoutTests` (6 placement cases). Toggling and each way of closing were checked on macOS 27.2.1 (see VALIDATION).
+
 ### Fixed: Unit tests didn't build with the macOS 27.2 SDK
 - Symptom: `make test-mac` failed to compile `TestSupport.swift` ("conformance of 'P' to protocol 'Publisher' may be isolated and cannot be passed to @concurrent context").
 - Root cause: `firstValue(_:)` iterated `publisher.values`, which the newer Swift 6 compiler rejects for possibly isolated conformances.

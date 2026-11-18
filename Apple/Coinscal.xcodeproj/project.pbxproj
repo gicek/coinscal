@@ -12,9 +12,11 @@
 		0E7749CEC9A076D15E4E7834 /* MenuBarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7238E223855713E2112736C /* MenuBarViewModel.swift */; };
 		0E7F2C24D3620756FDFF1952 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61F5B4492437D3D3F1DE211 /* SettingsStore.swift */; };
 		0F539C7910C12182EA6E37C0 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFCF80F14161BC664DC3BE6 /* HTTPClient.swift */; };
+		13A5CB0F4800BAFDE4E56B1B /* MenuBarPanelLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 739AAFBE6731B5ABEDA26DAF /* MenuBarPanelLayoutTests.swift */; };
 		15126A999EFC67366B803905 /* UpdateControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E6B53E55706ED81741DD2A5 /* UpdateControllerTests.swift */; };
 		18624C865D26B7474E175193 /* WidgetProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D19B6E36DAFD4A5CD97C17C /* WidgetProviders.swift */; };
 		18F0FC2AB250245A8432B1E6 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C461C59F6F2188556297293E /* SettingsViewModel.swift */; };
+		19C391DAEDF1201EB70B9F74 /* MenuBarPanelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C884C3BC79FBD646A3A155F2 /* MenuBarPanelController.swift */; };
 		1BA517D26003D66B1D26F3DF /* DesktopOverlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BC7B73DD2E7BE30579A8B1E /* DesktopOverlayController.swift */; };
 		1D6E7451E6387D30F908140F /* coins.json in Resources */ = {isa = PBXBuildFile; fileRef = C3723C032BE1902D0A5F193C /* coins.json */; };
 		2C6C5EA02B67435939DEB1D2 /* Coin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 997205431AAAC5F18BC0A1D8 /* Coin.swift */; };
@@ -47,6 +49,7 @@
 		69A8F520F5CEAAF61D480DF3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70978F71BF7D459AD504607 /* AppDelegate.swift */; };
 		6C02D47C5839D5B1038DB8E9 /* DesktopOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D83E7D1AC21D32179D9109 /* DesktopOverlayTests.swift */; };
 		6DF4651D194801ADC077BAFF /* TestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD0DBD13C028E1224882289 /* TestSupport.swift */; };
+		72B86A1B5975851239460720 /* MenuBarPanelLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4DA64906406B26462CB5FC5 /* MenuBarPanelLayout.swift */; };
 		7D22F7059A8D5AC4081D3047 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 250A46DB114B0D19D2ACB3FD /* Assets.xcassets */; };
 		855B1D471DC2206C7EC566B5 /* CoinPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BE53218404D7EBE5721921 /* CoinPopoverView.swift */; };
 		858C44AE4A42A2B8E2DD9075 /* WidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51C874DE186A6787C21BB67 /* WidgetContent.swift */; };
@@ -148,6 +151,7 @@
 		66EB518BF0D8AC06B3A3BEEF /* WatchlistReorderSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistReorderSupport.swift; sourceTree = "<group>"; };
 		6DC88EA843E4B88EE5BD7634 /* WidgetSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSnapshot.swift; sourceTree = "<group>"; };
 		701FB4F02C3D8AE63F097ECD /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		739AAFBE6731B5ABEDA26DAF /* MenuBarPanelLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPanelLayoutTests.swift; sourceTree = "<group>"; };
 		78F503CDD7896F6AABEC80D4 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		7D523E57133652B649B6CC50 /* AlertEvaluatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertEvaluatorTests.swift; sourceTree = "<group>"; };
 		87E697D51629B2F2E8CCB6B0 /* TickerProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickerProviderTests.swift; sourceTree = "<group>"; };
@@ -171,6 +175,8 @@
 		C461C59F6F2188556297293E /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		C61F5B4492437D3D3F1DE211 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
 		C729FD1F790CE4C8173708C4 /* WatchlistViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistViewModelTests.swift; sourceTree = "<group>"; };
+		C884C3BC79FBD646A3A155F2 /* MenuBarPanelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPanelController.swift; sourceTree = "<group>"; };
+		D4DA64906406B26462CB5FC5 /* MenuBarPanelLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPanelLayout.swift; sourceTree = "<group>"; };
 		D51C874DE186A6787C21BB67 /* WidgetContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetContent.swift; sourceTree = "<group>"; };
 		D6975F76715F88CDA6683942 /* CoinscalWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CoinscalWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6BE53218404D7EBE5721921 /* CoinPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinPopoverView.swift; sourceTree = "<group>"; };
@@ -255,6 +261,8 @@
 			children = (
 				D6BE53218404D7EBE5721921 /* CoinPopoverView.swift */,
 				64E5DC3ED2EFF3947468FF3D /* CoinRowView.swift */,
+				C884C3BC79FBD646A3A155F2 /* MenuBarPanelController.swift */,
+				D4DA64906406B26462CB5FC5 /* MenuBarPanelLayout.swift */,
 			);
 			path = MenuBar;
 			sourceTree = "<group>";
@@ -294,6 +302,7 @@
 				4B76D31912A2AA98A9D641ED /* CoinListViewModelTests.swift */,
 				178591929C838FFC0A7F8E84 /* CoinLogoStoreTests.swift */,
 				60D83E7D1AC21D32179D9109 /* DesktopOverlayTests.swift */,
+				739AAFBE6731B5ABEDA26DAF /* MenuBarPanelLayoutTests.swift */,
 				489D418A338C9D27DA670117 /* MenuBarViewModelTests.swift */,
 				F1CD616D7206711932A726D2 /* PriceFormatterTests.swift */,
 				536A1769D0E8A30BEACAF869 /* PriceServiceTests.swift */,
@@ -501,8 +510,8 @@
 			projectRoot = "";
 			targets = (
 				488F4CF6432C49CC40BC049C /* CoinscalMac */,
-				091DEAD3994CBBFA7B5C7374 /* CoinscalMacTests */,
 				60A6516360CA06FD3D89BD04 /* CoinscalWidget */,
+				091DEAD3994CBBFA7B5C7374 /* CoinscalMacTests */,
 			);
 		};
 /* End PBXProject section */
@@ -584,6 +593,8 @@
 				5A17724586DD38AD7B8D2F00 /* HTTPClient.swift in Sources */,
 				98ED97C540A73129D1E66039 /* LaunchAtLoginService.swift in Sources */,
 				B8AAA5835A75FC6C27A9A550 /* LocalizationManager.swift in Sources */,
+				19C391DAEDF1201EB70B9F74 /* MenuBarPanelController.swift in Sources */,
+				72B86A1B5975851239460720 /* MenuBarPanelLayout.swift in Sources */,
 				0E7749CEC9A076D15E4E7834 /* MenuBarViewModel.swift in Sources */,
 				3DDD7D5D189CBA2471D1867E /* NotificationService.swift in Sources */,
 				654B9C45A9F625DB173AADC4 /* PriceFormatter.swift in Sources */,
@@ -613,6 +624,7 @@
 				CC9C5B6B6197C6719A7A10A7 /* CoinListViewModelTests.swift in Sources */,
 				496A0FD0D54437CD3949EA51 /* CoinLogoStoreTests.swift in Sources */,
 				6C02D47C5839D5B1038DB8E9 /* DesktopOverlayTests.swift in Sources */,
+				13A5CB0F4800BAFDE4E56B1B /* MenuBarPanelLayoutTests.swift in Sources */,
 				67F4A0B4BC8F85BBE3BCE2FF /* MenuBarViewModelTests.swift in Sources */,
 				4A55FFA96E3843AD0110EEB1 /* PriceFormatterTests.swift in Sources */,
 				C2D0B9DCC77638A525D33C12 /* PriceServiceTests.swift in Sources */,

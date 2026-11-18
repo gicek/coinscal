@@ -2,14 +2,25 @@
 
 > The single record of what is verified and what is still pending. Entries are newest first; each says what changed, what was verified, and what remains to be tested. For features, see the [README](../README.md); for scope, see the [Project Definition](PROJECT.md); for change history, see the changelogs.
 
-## Automated Checks (last run 2026-10-16)
+## Automated Checks (last run 2026-11-18)
 
 - `make test`: PASS.
-  - App: localization guards scan 42 files with 0 issues; the bundled coin catalog passes Python validation; 97 unit tests in 13 suites pass (`** TEST SUCCEEDED **`). Coverage: alert evaluation, price formatting, settings encoding/decoding and fault tolerance, menu bar price / icon logic, widget coin selection / freshness / sorting / reload throttling / string keys, desktop ticker position and level, data source parsing, failover and cross-exchange fill-in, exchange rate caching and fallback, polling and currency switching, catalog validation, successor replacement, on-demand logo download and cache cleanup.
-  - Website: localization guards scan 7 scripts with 0 issues; 7 offline checks pass (formatting matches `PriceFormatter`, every page key exists, the CSP hash matches each inline script, every demo coin has a logo, demo settings fall back field by field, price colors and the menu bar coin follow the app's rules).
+  - App: localization guards scan 45 files with 0 issues; the bundled coin catalog passes Python validation; 117 unit tests in 15 suites pass (`** TEST SUCCEEDED **`). Coverage: alert evaluation, price formatting, settings encoding/decoding and fault tolerance, menu bar price / icon logic, menu bar panel placement, widget coin selection / freshness / sorting / reload throttling / string keys, desktop ticker position and level, data source parsing, failover and cross-exchange fill-in, exchange rate caching and fallback, polling and currency switching, catalog validation, successor replacement, on-demand logo download and cache cleanup.
+  - Website: localization guards scan 7 scripts with 0 issues; 9 offline checks pass (formatting matches `PriceFormatter`, every page key exists, the CSP hash matches each inline script, outbound links are HTTPS, every demo coin has a logo, demo coins match the app's recommended coins, release notes cover every language, demo settings fall back field by field, price colors and the menu bar coin follow the app's rules).
 - `make mac-check-sources` (real network, manual): PASS. All four price sources and three exchange rate sources respond. All 450 catalog symbols get a price (USDT is priced locally); 374 symbols quoted by two or more sources agree within 2%, except two warnings within the 20% limit (ZIL 14.9%, AI 5.6%; illiquid pairs). With the Binance hosts unreachable, round 1 fails over in 10.3 s and round 2 starts from the working source in 0.1 s. All three exchange rate sources cover the 12 currencies, and failover from the first source works.
 
 ## Records
+
+### 2026-11-18: Menu bar panel
+
+The menu bar popover is now an app-managed `NSPanel`, so clicking the status item closes it again on macOS 27 ([MENU_BAR_PANEL](MENU_BAR_PANEL.md)).
+
+- Verified: `make test` passes. With real trackpad clicks on macOS 27.2.1, repeated status item clicks open and close the panel every time (confirmed by the maintainer). With a debug build (synthetic mouse events and Accessibility): status item clicks open and close the panel four times in a row; a click in another app, Esc, a right click on the status item (the context menu appears), switching to Finder, and a click in the Settings window each close it; `coinscal://popover` opens it and an outside click closes it; pressing "Manage Watchlist" opens Settings on the Watchlist pane and closes the panel. The panel sits centered under the status item on a secondary display. In light mode, in front of a window full of text, the background stays an even frosted gray, the price colors read clearly, and the corners, edge line, and shadow match the old popover.
+- Pending:
+  1. With a real mouse or trackpad: the panel's Settings, "Manage Watchlist", Quit, "Add Coins", and "Update Available" buttons work on the first click, both from the status item and from a widget click.
+  2. Dark mode on macOS 27, and both modes on macOS 14: the panel's material, corners, and shadow look like the old popover.
+  3. VoiceOver reads the panel and its rows.
+  4. Opening the panel over a full-screen app and on a display without a menu bar.
 
 ### 2026-10-16: 1.0.1 release
 
