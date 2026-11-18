@@ -1,0 +1,6 @@
+- Choose how price change is measured: rolling 24 hours, or since midnight UTC+0 or UTC+8.
+- Settings are reorganized into General, Display, Watchlist, and About, and "Price Alerts" moves to the watchlist. Coinscal tells you when macOS has its notifications turned off.
+- Choose whether the menu bar price shows the coin symbol, and turn on "Automatically Install Updates" in Settings → General.
+- Older quotes are marked per coin, very small prices stay visible, and price alerts keep the decimals you enter.
+- Opening the menu bar panel leaves the app you're using active, and ⌘, opens Settings.
+- An updated coin list.

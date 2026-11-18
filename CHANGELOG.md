@@ -2,7 +2,7 @@
 
 Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VERSION` in `Apple/project.yml`.
 
-## Unreleased
+## 1.2.0 — 2026-11-18
 
 ### Fixed
 
@@ -30,6 +30,7 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 - Reduce the horizontal padding on menu bar price badges.
 - Stale quotes in the menu bar panel show the time they were last fetched.
 - The "Update Available" reminder stays after a relaunch until you open the update window or install the update.
+- The coin catalog is refreshed: 446 searchable coins.
 
 ### Development
 
