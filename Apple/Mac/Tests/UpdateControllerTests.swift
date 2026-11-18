@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import Coinscal
 
@@ -53,5 +54,12 @@ struct UpdateControllerTests {
         #expect(controller.updateAvailable)
         controller.updateReminderHandled()
         #expect(!controller.updateAvailable)
+    }
+
+    @Test func feedFollowsTheAppLanguage() {
+        let base = URL(string: "https://dl.coinscal.app/appcast.xml")!
+        #expect(UpdateFeed.url(base: base, languageCode: "en").absoluteString == "https://dl.coinscal.app/appcast.en.xml")
+        #expect(UpdateFeed.url(base: base, languageCode: "zh-Hant").absoluteString == "https://dl.coinscal.app/appcast.zh-Hant.xml")
+        #expect(AppLanguage.zhHans.resourceCode == "zh-Hans", "the feed name uses the resource code")
     }
 }

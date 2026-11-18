@@ -59,11 +59,22 @@ final class UpdateController: ObservableObject {
     }
 }
 
-/// Sparkle's standard updater with gentle reminders for scheduled checks. Feed URL, public key, and check interval
-/// come from Info.plist. Sparkle's standard user driver calls its delegate on the main thread, hence the
-/// `@preconcurrency` conformance (checked at runtime).
+/// The appcast for one UI language. Sparkle picks among localized release notes by the system language, so the app
+/// asks for a feed that carries only the notes in its own language: `appcast.xml` becomes `appcast.<code>.xml`.
+/// `appcast.xml` keeps every language for builds without this lookup.
+enum UpdateFeed {
+    static func url(base: URL, languageCode: String) -> URL {
+        let name = base.deletingPathExtension().lastPathComponent
+        return base.deletingLastPathComponent().appendingPathComponent("\(name).\(languageCode).\(base.pathExtension)")
+    }
+}
+
+/// Sparkle's standard updater with gentle reminders for scheduled checks. Public key and check interval come from
+/// Info.plist; the feed follows the in-app language (`UpdateFeed`). Sparkle calls its delegates on the main thread;
+/// `SPUUpdaterDelegate` is main-actor isolated, and the user driver delegate needs a `@preconcurrency` conformance.
 @MainActor
-final class SparkleUpdaterBackend: NSObject, UpdaterBackend, @preconcurrency SPUStandardUserDriverDelegate {
+final class SparkleUpdaterBackend: NSObject, UpdaterBackend, SPUUpdaterDelegate,
+    @preconcurrency SPUStandardUserDriverDelegate {
     private weak var controller: UpdateController?
     private var updaterController: SPUStandardUpdaterController!
     private var observation: NSKeyValueObservation?
@@ -73,7 +84,7 @@ final class SparkleUpdaterBackend: NSObject, UpdaterBackend, @preconcurrency SPU
         super.init()
         updaterController = SPUStandardUpdaterController(
             startingUpdater: true,
-            updaterDelegate: nil,
+            updaterDelegate: self,
             userDriverDelegate: self
         )
         observation = updaterController.updater.observe(\.canCheckForUpdates) { [weak self] _, _ in
@@ -90,6 +101,15 @@ final class SparkleUpdaterBackend: NSObject, UpdaterBackend, @preconcurrency SPU
 
     func checkForUpdates() {
         updaterController.checkForUpdates(nil)
+    }
+
+    // MARK: SPUUpdaterDelegate
+
+    /// Read before every check, so a language change applies to the next one.
+    func feedURLString(for updater: SPUUpdater) -> String? {
+        guard let base = (Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") as? String).flatMap(URL.init(string:))
+        else { return nil }
+        return UpdateFeed.url(base: base, languageCode: LocalizationManager.shared.language.resourceCode).absoluteString
     }
 
     // MARK: SPUStandardUserDriverDelegate

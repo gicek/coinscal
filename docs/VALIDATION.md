@@ -8,7 +8,7 @@ Last run Nov 18, 2026.
 
 | Check | Result |
 |---|---|
-| `make test-mac` | Localization guards (45 files), catalog validation, 117 unit tests in 15 suites: pass |
+| `make test-mac` | Localization guards (45 files), catalog validation, 118 unit tests in 15 suites: pass |
 | `make test-site` | Localization guards (7 files), 9 offline checks: pass |
 | `make mac-check-sources` (Oct 16, 2026) | All 4 price and 3 exchange rate sources respond; all 450 catalog symbols priced; failover with Binance unreachable takes one round |
 | CI | Repository hygiene, localization guards, website checks |
@@ -23,6 +23,7 @@ macOS 27.2.1 with a debug build, unless noted.
 - Menu bar price stays sharp on an inactive display, with and without a background.
 - The app no longer requests periodic widget reloads (none in 6 minutes, down from one every 5 minutes); "Coinscal" and "Coinscal Debug" widgets coexist.
 - Desktop ticker: level, click-through, positioning across displays, and persistence (macOS 26).
+- Update checks request the feed of the in-app language (`appcast.en.xml` in English, `appcast.zh-Hans.xml` after switching to Simplified Chinese).
 - Release: notarized zip and DMG pass `spctl`; 1.0 and 1.0.1 published; downloads match the local builds; the website serves the latest DMG.
 
 ## Pending
@@ -48,6 +49,7 @@ macOS 27.2.1 with a debug build, unless noted.
 
 **Updates and release**
 - An update from 1.0 to 1.0.1 end to end: release notes in the system language, relaunch, settings and widgets intact.
+- After the next release publishes the per-language feeds: release notes appear in the in-app language, including after switching languages.
 - A scheduled check shows "Update Available" without opening a window; a tampered archive is rejected; offline checks stay silent.
 - First launch from the DMG on another Mac is not blocked by Gatekeeper.
 

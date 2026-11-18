@@ -14,6 +14,7 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 
 ### Changed
 
+- Release notes for updates follow the in-app language instead of the system language.
 - The widget gallery previews your own coins with live prices instead of sample data.
 - The app writes widget data only while a widget is placed.
 - The right-click menu no longer has "About Coinscal"; it remains in Settings.

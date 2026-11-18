@@ -119,6 +119,7 @@ CoinscalWidget (extension) → WidgetDataLoader → App Group snapshot, or its o
 ## Updates
 
 - `UpdateController` holds the update state shown in the UI and talks to an `UpdaterBackend`: `SparkleUpdaterBackend` wraps `SPUStandardUpdaterController`; tests use `FakeUpdaterBackend`, and the unit-test host attaches none.
+- The feed follows the in-app language: the updater delegate (`feedURLString(for:)`) turns `SUFeedURL` into `appcast.<code>.xml` (`UpdateFeed`, read before every check), a feed whose only release notes link is in that language. Sparkle would otherwise choose among localized links by the system language. `appcast.xml` keeps all three for older builds.
 - Info.plist: `SUFeedURL` `https://dl.coinscal.app/appcast.xml`, `SUPublicEDKey`, `SUEnableAutomaticChecks`, `SUScheduledCheckInterval` 86400, `SUEnableInstallerLauncherService`. Automatic installation is off and no system profile is sent.
 - Sparkle verifies each archive's EdDSA signature and requires the same Team ID. The sandbox allows Sparkle's installer through the mach-lookup exceptions `$(PRODUCT_BUNDLE_IDENTIFIER)-spks` / `-spki`; the downloader service stays off because the app has `network.client`.
 - Gentle reminders: a scheduled check shows Sparkle's window only when Coinscal is frontmost; otherwise `updateAvailable` drives the panel header until Sparkle reports that the user saw it or the session ended.

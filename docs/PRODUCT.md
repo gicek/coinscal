@@ -86,7 +86,7 @@ A price list pinned to the desktop, between the wallpaper and the desktop icons,
 - Coinscal checks for updates once a day. A scheduled check opens no window unless Coinscal is in front; it shows "Update Available" in the panel header instead.
 - "Check for Updates" opens the update window at once, with release notes and "Install Update", or a note that Coinscal is up to date. A failed scheduled check stays silent; a manual one shows the error.
 - Nothing installs without the user's consent. Installing replaces the app and relaunches it, keeping settings, watchlist, widgets, and the login item.
-- The update window and release notes follow the system language, not the in-app setting.
+- Release notes follow the in-app language. The update window itself comes from Sparkle and follows the system language.
 
 ## Coin Availability
 

@@ -46,18 +46,19 @@ The DMG (`scripts/dmg/make-dmg.sh`) has a rendered background (`render-backgroun
 
 1. Checks that the notarized zip and DMG exist and are stapled, the build number is higher than the live appcast's, and the release notes are complete.
 2. Signs the zip with Sparkle's EdDSA key from the login Keychain and renders `appcast.xml` and the notes pages into `Build/macOS/Publish/<version>/`. `DRY_RUN=1` stops here.
-3. Uploads the archives, `Coinscal.dmg`, the notes, and finally `appcast.xml`, so the feed never points to a missing file.
+3. Uploads the archives, `Coinscal.dmg`, the notes, and finally the feeds (`appcast.<lang>.xml`, then `appcast.xml`), so a feed never points to a missing file.
 4. Creates the GitHub Release `v<version>` with the zip and DMG.
 
 | Object on `dl.coinscal.app` | Content | Cache |
 |---|---|---|
-| `appcast.xml` | Sparkle feed with the latest release | 5 minutes |
+| `appcast.<lang>.xml` | Feed for one in-app language, with only that language's release notes; read by current builds | 5 minutes |
+| `appcast.xml` | Feed with release notes in every language; read by 1.0 and 1.0.1 | 5 minutes |
 | `Coinscal-<version>.zip` | Notarized app; what Sparkle downloads | Immutable |
 | `Coinscal-<version>.dmg` | Notarized DMG | Immutable |
 | `Coinscal.dmg` | Copy of the latest DMG, linked from the website | 5 minutes |
 | `notes/<version>.<lang>.html` | Release notes per language | Immutable |
 
-The appcast item carries `sparkle:version` (the build number), `sparkle:shortVersionString`, `sparkle:minimumSystemVersion` 14.0, the zip with its EdDSA signature and length, and one release notes link per language.
+The appcast item carries `sparkle:version` (the build number), `sparkle:shortVersionString`, `sparkle:minimumSystemVersion` 14.0, the zip with its EdDSA signature and length, and the release notes link: one per language in `appcast.xml`, only its own in `appcast.<lang>.xml`.
 
 ## Keys and Secrets
 

@@ -52,8 +52,11 @@ final class LocalizationManager {
     static let shared = LocalizationManager()
 
     private var bundle: Bundle = .main
+    /// The in-app language setting; `.system` resolves through `AppLanguage.resolved`.
+    private(set) var language: AppLanguage = .system
 
     func setLanguage(_ language: AppLanguage) {
+        self.language = language
         bundle = Self.bundle(for: language)
     }
 

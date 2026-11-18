@@ -130,17 +130,24 @@ li + li {{ margin-top: 4px; }}
 """
 
 
-def render_appcast(version: str, build: int, min_system: str, base_url: str, zip_name: str, length: str, signature: str) -> str:
-    notes = "\n".join(
-        f"      <sparkle:releaseNotesLink{'' if lang == 'en' else f' xml:lang={quoteattr(lang)}'}>"
-        f"{escape(f'{base_url}/notes/{version}.{lang}.html')}</sparkle:releaseNotesLink>"
-        for lang in LANGS
-    )
+def render_appcast(version: str, build: int, min_system: str, base_url: str, zip_name: str, length: str, signature: str,
+                   lang: str | None = None) -> str:
+    """The feed with release notes in every language (Sparkle picks by system language), or, with `lang`, the feed
+    for one in-app language (`appcast.<lang>.xml`) that carries only that language's notes."""
+    if lang:
+        notes = f"      <sparkle:releaseNotesLink>{escape(f'{base_url}/notes/{version}.{lang}.html')}</sparkle:releaseNotesLink>"
+    else:
+        notes = "\n".join(
+            f"      <sparkle:releaseNotesLink{'' if code == 'en' else f' xml:lang={quoteattr(code)}'}>"
+            f"{escape(f'{base_url}/notes/{version}.{code}.html')}</sparkle:releaseNotesLink>"
+            for code in LANGS
+        )
+    feed = f"appcast.{lang}.xml" if lang else "appcast.xml"
     return f"""<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
   <channel>
     <title>Coinscal</title>
-    <link>{escape(base_url)}/appcast.xml</link>
+    <link>{escape(f'{base_url}/{feed}')}</link>
     <item>
       <title>{escape(version)}</title>
       <pubDate>{email.utils.formatdate(usegmt=True)}</pubDate>
@@ -190,11 +197,17 @@ def main() -> None:
         page = work / "notes" / f"{a.version}.{lang}.html"
         page.write_text(render_notes(a.version, lang, items), encoding="utf-8")
         uploads.append((f"notes/{page.name}", page, "text/html; charset=utf-8", IMMUTABLE))
+    feed_args = (a.version, a.build, a.min_system, base_url, zip_path.name, length, signature)
+    # One feed per in-app language (what current builds read), then the all-language feed for older builds.
+    # Feeds go last, so they never point at a file that isn't uploaded yet.
+    for lang in LANGS:
+        feed = work / f"appcast.{lang}.xml"
+        feed.write_text(render_appcast(*feed_args, lang=lang), encoding="utf-8")
+        uploads.append((feed.name, feed, "application/xml; charset=utf-8", SHORT))
     appcast = work / "appcast.xml"
-    appcast.write_text(render_appcast(a.version, a.build, a.min_system, base_url, zip_path.name, length, signature), encoding="utf-8")
-    # Last, so the feed never points at a file that isn't uploaded yet.
+    appcast.write_text(render_appcast(*feed_args), encoding="utf-8")
     uploads.append(("appcast.xml", appcast, "application/xml; charset=utf-8", SHORT))
-    print(f"==> Rendered {appcast}")
+    print(f"==> Rendered {appcast} and the per-language feeds")
 
     if a.dry_run:
         print("Dry run: nothing uploaded.")
@@ -212,7 +225,7 @@ def main() -> None:
             if subprocess.run(cmd, text=True).returncode == 0:
                 break
             if attempt == 3:
-                fail(f"uploading {key} failed 3 times; appcast.xml is uploaded last, so the live feed is unchanged")
+                fail(f"uploading {key} failed 3 times; the feeds are uploaded last, so the live feeds are unchanged")
             print(f"    retrying {key} ({attempt}/2)")
 
     notes_md = work / "github-notes.md"

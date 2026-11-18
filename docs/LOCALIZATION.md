@@ -11,7 +11,7 @@
 | Simplified Chinese | `zh-Hans` | Its own name (`lang.endonym.zh-Hans`) |
 | Traditional Chinese | `zh-Hant` | Its own name (`lang.endonym.zh-Hant`) |
 
-Following the system uses the first preferred system language: Chinese tags resolve to Simplified or Traditional Chinese (`zh-TW`, `zh-HK`, and `zh-MO` to Traditional), anything else to English. Switching applies immediately. Sparkle's update window and the release notes follow the system language, not the in-app choice.
+Following the system uses the first preferred system language: Chinese tags resolve to Simplified or Traditional Chinese (`zh-TW`, `zh-HK`, and `zh-MO` to Traditional), anything else to English. Switching applies immediately. Release notes for updates follow the in-app language; Sparkle's update window follows the system language.
 
 ## Writing Strings
 
