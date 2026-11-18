@@ -15,9 +15,9 @@ final class MenuBarPanel: NSPanel {
     }
 }
 
-/// Hosting view for the panel content that acts on the first click. Coinscal is often not the active app while
-/// the panel is shown (macOS 14+ may refuse `NSApp.activate`, and a widget click never activates it); a plain
-/// `NSHostingView` then treats the click as activation only and the buttons ignore it.
+/// Hosting view for the panel content that acts on the first click. Coinscal isn't the active app while the panel
+/// is shown (the panel doesn't activate it); a plain `NSHostingView` would treat the click as activation only and
+/// the buttons would ignore it.
 final class MenuBarPanelHostingView<Content: View>: NSHostingView<Content> {
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 }
@@ -36,6 +36,7 @@ final class MenuBarPanelController {
     private var globalMonitor: Any?
     private var localMonitor: Any?
     private var resignKeyObserver: NSObjectProtocol?
+    private var appActivationObserver: NSObjectProtocol?
 
     var isShown: Bool { panel.isVisible }
 
@@ -75,8 +76,8 @@ final class MenuBarPanelController {
             MenuBarPanelLayout.frame(size: panel.frame.size, statusItemFrame: anchor.frame, visibleFrame: screen.visibleFrame),
             display: false
         )
-        // An LSUIElement app must activate explicitly, otherwise clicks inside the panel are not routed reliably.
-        NSApp.activate(ignoringOtherApps: true)
+        // A non-activating panel becomes key without activating Coinscal, so the frontmost app stays active, as with
+        // the system's own menu bar extras. The hosting view accepts the first click (`MenuBarPanelHostingView`).
         panel.makeKeyAndOrderFront(nil)
         // The shadow is computed from the drawn content; recompute it once the rounded material is on screen.
         panel.invalidateShadow()
@@ -155,8 +156,7 @@ final class MenuBarPanelController {
             }
             return event
         }
-        // Another app or window became key (Cmd-Tab, Mission Control, a click the monitors don't see).
-        // This also covers a panel opened from a widget, when Coinscal never became active.
+        // Another window became key (Mission Control, a click the monitors don't see).
         // Clicking the status item also takes key status; that click's toggle closes the panel instead.
         resignKeyObserver = NotificationCenter.default.addObserver(
             forName: NSWindow.didResignKeyNotification,
@@ -168,15 +168,29 @@ final class MenuBarPanelController {
                 self.close()
             }
         }
+        // Another app became active (Cmd-Tab, a Dock click, a window of another app). Coinscal stays inactive while
+        // the panel is shown, so app deactivation can't signal this.
+        appActivationObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            // Coinscal itself activates when Settings opens or a widget launches it.
+            guard app?.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return }
+            MainActor.assumeIsolated { self?.close() }
+        }
     }
 
     private func removeDismissal() {
         if let globalMonitor { NSEvent.removeMonitor(globalMonitor) }
         if let localMonitor { NSEvent.removeMonitor(localMonitor) }
         if let resignKeyObserver { NotificationCenter.default.removeObserver(resignKeyObserver) }
+        if let appActivationObserver { NSWorkspace.shared.notificationCenter.removeObserver(appActivationObserver) }
         globalMonitor = nil
         localMonitor = nil
         resignKeyObserver = nil
+        appActivationObserver = nil
     }
 
     private var isMouseInStatusItem: Bool {

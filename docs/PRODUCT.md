@@ -27,7 +27,7 @@ Out of scope: accounts and sync, a Coinscal server, trading, holdings and profit
 
 320pt wide: a header, the watchlist, and a footer with Settings, "Manage Watchlist", and Quit. The list is sized for 4 to 8 rows and scrolls beyond that, without a visible scroll bar. Each row shows the logo, name, symbol, price in the display currency, and 24h change. An empty watchlist shows an empty state with "Add Coins", which opens Settings → Watchlist.
 
-The panel closes on a second click on the menu bar item, a click anywhere else, Esc, switching to another app, and when Settings opens. When a scheduled update check has found a new version, the header shows "Update Available"; clicking it opens the update window.
+Opening the panel leaves the frontmost app active, as the system's menu bar extras do. The panel closes on a second click on the menu bar item, a click anywhere else, Esc, switching to another app, and when Settings opens. When a scheduled update check has found a new version, the header shows "Update Available"; clicking it opens the update window.
 
 ## Right-Click Menu
 

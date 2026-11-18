@@ -298,7 +298,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         if let window = settingsWindow {
             // Do not replace contentViewController: a new NSHostingController makes the window resize to its content.
-            window.makeKeyAndOrderFront(nil)
+            bringToFront(window)
             return
         }
         let settingsView = SettingsWindow()
@@ -331,8 +331,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Self.clampSettingsWindowFrame(window)
         window.isReleasedWhenClosed = false
         window.delegate = self
-        window.makeKeyAndOrderFront(nil)
+        bringToFront(window)
         settingsWindow = window
+    }
+
+    /// Coinscal is usually not the active app here (the menu bar panel doesn't activate it), and macOS may decline
+    /// the activation request; ordering the window front regardless keeps it from opening behind the active app.
+    private func bringToFront(_ window: NSWindow) {
+        window.makeKeyAndOrderFront(nil)
+        window.orderFrontRegardless()
     }
 
     /// Settings-style window: full-size content under a unified toolbar showing the pane title;

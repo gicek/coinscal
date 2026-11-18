@@ -84,8 +84,8 @@ CoinscalWidget (extension) → WidgetDataLoader → App Group snapshot, or its o
 `MenuBarPanelController` shows `CoinPopoverView` in an app-managed `NSPanel` rather than an `NSPopover`. On macOS 27, pressing the status item takes key status from a popover and reaches global mouse monitors on mouse-down; a transient popover closes there, and the status item action on mouse-up reopened it.
 
 - `MenuBarPanel` is borderless and non-activating, can become key, sits at `.popUpMenu` level, doesn't hide on deactivation, and shows and hides without animation.
-- `toggle()` decides from the panel's own visibility. Dismissal monitors exist only while it is shown: a global mouse-down monitor (other apps), a local one (other Coinscal windows), Esc (`cancelOperation`), and resigning key. Presses inside the status item window are ignored by all of them; that click's toggle closes the panel.
-- The content is a `MenuBarPanelHostingView` whose `acceptsFirstMouse` is true, because the app is often not active while the panel is shown (macOS 14+ may refuse `NSApp.activate`, and widget clicks never activate it). It sits in an `NSVisualEffectView` with the `.popover` material, masked to 16pt corners; a SwiftUI material in a transparent window is too thin.
+- `toggle()` decides from the panel's own visibility. Dismissal monitors exist only while it is shown: a global mouse-down monitor (other apps), a local one (other Coinscal windows), Esc (`cancelOperation`), resigning key, and another app activating (`NSWorkspace.didActivateApplicationNotification`, ignoring Coinscal itself). Presses inside the status item window are ignored by all of them; that click's toggle closes the panel.
+- Showing the panel doesn't activate Coinscal: the non-activating panel becomes key on its own, so the frontmost app keeps its active state, like the system's menu bar extras. The content is therefore a `MenuBarPanelHostingView` whose `acceptsFirstMouse` is true; a plain hosting view treats the first click in an inactive app as activation only. It sits in an `NSVisualEffectView` with the `.popover` material, masked to 16pt corners; a SwiftUI material in a transparent window is too thin.
 - `MenuBarPanelLayout.frame` centers the panel 6pt below the status item, at least 8pt from the left and right edges of the visible frame and never above it.
 
 ## Settings Window
@@ -132,7 +132,7 @@ CoinscalWidget (extension) → WidgetDataLoader → App Group snapshot, or its o
 
 ## Platform Notes
 
-- `LSUIElement`: no Dock icon. The app activates itself before showing the panel or Settings, but must work when macOS refuses.
+- `LSUIElement`: no Dock icon. Opening Settings asks to activate the app and also orders the window front regardless, since macOS may decline the request when Coinscal isn't active.
 - The sandbox grants only `network.client` (plus the App Group and Sparkle's mach-lookup exceptions). Every source uses HTTPS; there are no ATS exceptions.
 - Price and exchange rate requests use `URLSession.liveData` (no URL cache) with `reloadIgnoringLocalCacheData`.
 - Launch at login uses `SMAppService.mainApp`.

@@ -4,6 +4,10 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 
 ## Unreleased
 
+### Fixed
+
+- Opening the menu bar panel no longer takes the active state from the frontmost app.
+
 ### Added
 
 - "Automatically Install Updates" in Settings → About, off by default.

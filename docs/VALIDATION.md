@@ -19,6 +19,7 @@ macOS 27.2.1 with a debug build, unless noted.
 
 - Menu bar price, panel, right-click menu, and all Settings panes; settings survive an upgrade; instant language switching; no alerts on currency changes; notifications; login item; delisted and renamed coins (macOS 26, 1.0).
 - Panel: toggles reliably from the status item with a trackpad; closes on outside clicks, Esc, right click, app switching, and Settings; opens from `coinscal://popover`; looks like the system popover in light mode.
+- Opening the panel leaves the frontmost app active (Finder stayed frontmost); the panel closes on another app activating, a second click, Esc, and an outside click; a widget URL still opens it; Settings opened from the panel appears in front of the active app.
 - Right-click menu shows text only.
 - Menu bar price stays sharp on an inactive display, with and without a background.
 - The app no longer requests periodic widget reloads (none in 6 minutes, down from one every 5 minutes); "Coinscal" and "Coinscal Debug" widgets coexist.
@@ -39,6 +40,7 @@ macOS 27.2.1 with a debug build, unless noted.
 - The panel's look in dark mode, and on macOS 14.
 - VoiceOver reads the panel and its rows.
 - The panel over a full-screen app and on a display without a menu bar.
+- With a real click on the panel's gear, Settings comes to the front and becomes active.
 - The colored price without a background on an active display; the background with coloring off on light and dark menu bars; a non-Retina display.
 - The right-click menu shows no icons on macOS 14 and 26.
 
