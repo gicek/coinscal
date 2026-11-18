@@ -152,7 +152,7 @@ function renderItem() {
     item.dataset.mode = settings.background ? (color ? "fill" : "inverse") : color ? "tint" : "plain";
     if (color) item.style.setProperty("--item-color", color);
     else item.style.removeProperty("--item-color");
-    itemLabel.textContent = `${coin.symbol} ${price}`;
+    itemLabel.textContent = settings.showCoinSymbol ? `${coin.symbol} ${price}` : price;
     item.setAttribute("aria-label", t("menubar.itemPrice", { symbol: coin.symbol, price }));
 }
 

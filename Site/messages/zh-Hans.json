@@ -49,6 +49,7 @@
     "contentPrice": "价格",
     "contentIcon": "图标",
     "textColor": "按涨跌着色",
+    "coinSymbol": "显示币种符号",
     "textBackground": "显示背景色",
     "colorScheme": "颜色方案",
     "greenUpRedDown": "绿涨红跌",

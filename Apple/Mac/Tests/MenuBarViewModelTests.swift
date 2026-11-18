@@ -20,6 +20,11 @@ import Testing
         #expect(MenuBarViewModel.priceCoin(coins: coins, settings: settings(.price, displayed: "ethereum"))?.id == "ethereum")
     }
 
+    @Test func priceTitleCanOmitCoinSymbol() {
+        #expect(MenuBarViewModel.priceTitle(symbol: "BTC", formattedPrice: "64,888", showSymbol: AppSettings().showMenuBarCoinSymbol) == "BTC 64,888")
+        #expect(MenuBarViewModel.priceTitle(symbol: "BTC", formattedPrice: "64,888", showSymbol: false) == "64,888")
+    }
+
     @Test func iconModeShowsLogoEvenWithPrice() {
         let coins = [coin("bitcoin", price: 65_000)]
         #expect(MenuBarViewModel.priceCoin(coins: coins, settings: settings(.icon)) == nil)

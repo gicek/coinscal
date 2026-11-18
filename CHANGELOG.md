@@ -16,11 +16,14 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 
 ### Added
 
+- Choose whether the menu bar price includes the coin symbol. The symbol is shown by default.
 - Choose rolling 24-hour change, UTC+0 midnight, or UTC+8 midnight in Settings → General → Prices.
 - "Automatically Install Updates" in Settings → About, off by default.
 
 ### Changed
 
+- Group the menu bar options by what they control and show the color scheme in a drop-down menu.
+- Reduce the horizontal padding on menu bar price badges.
 - Stale quotes in the menu bar panel show the time they were last fetched.
 - The "Update Available" reminder stays after a relaunch until you open the update window or install the update.
 

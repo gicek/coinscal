@@ -20,10 +20,7 @@ struct GeneralSettingsView: View {
                 HStack {
                     Text(loc("general.display.menubarContent"))
                     Spacer()
-                    Picker("", selection: Binding(
-                        get: { settingsVM.settings.menuBarContent },
-                        set: { settingsVM.settings.menuBarContent = $0 }
-                    )) {
+                    Picker(loc("general.display.menubarContent"), selection: $settingsVM.settings.menuBarContent) {
                         ForEach(MenuBarContent.allCases) { content in
                             Text(content.displayName).tag(content)
                         }
@@ -31,80 +28,60 @@ struct GeneralSettingsView: View {
                     .labelsHidden()
                     .pickerStyle(.segmented)
                     .frame(width: 220, alignment: .trailing)
-                    // Like radioGroup, the underlying NSSegmentedControl may keep stale titles when tags stay the same.
+                    // Recreate NSSegmentedControl so its labels follow the app language.
                     .id(settingsVM.settings.language)
                 }
 
-                // Price-text options stay visible but disabled in icon mode, so the form does not jump.
-                HStack(alignment: .firstTextBaseline) {
-                    Text(loc("general.display.menubarCoin"))
-                    Spacer()
-                    if settingsVM.settings.watchlistCoins.isEmpty {
-                        Text(loc("general.display.menubarCoin.hint"))
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.trailing)
+                // Keep dependent controls in place when switching the menu bar mode.
+                Group {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(loc("general.display.menubarCoin"))
+                        Spacer()
+                        if settingsVM.settings.watchlistCoins.isEmpty {
+                            Text(loc("general.display.menubarCoin.hint"))
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 220, alignment: .trailing)
+                        } else {
+                            Picker(loc("general.display.menubarCoin"), selection: $settingsVM.settings.displayedCoinId) {
+                                ForEach(settingsVM.settings.watchlistCoins) { added in
+                                    Text(menuBarCoinLabel(for: added)).tag(added.coinId)
+                                }
+                            }
+                            .labelsHidden()
+                            .pickerStyle(.menu)
                             .frame(width: 220, alignment: .trailing)
-                    } else {
-                        Picker("", selection: Binding(
-                            get: { settingsVM.settings.displayedCoinId },
-                            set: { settingsVM.settings.displayedCoinId = $0 }
-                        )) {
-                            ForEach(settingsVM.settings.watchlistCoins) { added in
-                                Text(menuBarCoinLabel(for: added)).tag(added.coinId)
+                        }
+                    }
+
+                    Toggle(loc("general.display.coinSymbol"), isOn: $settingsVM.settings.showMenuBarCoinSymbol)
+                    Toggle(loc("general.display.textBackground"), isOn: $settingsVM.settings.showMenuBarBackground)
+                    Toggle(loc("general.display.textColor"), isOn: $settingsVM.settings.priceColorEnabled)
+
+                    Group {
+                        HStack {
+                            Text(loc("general.display.colorScheme"))
+                            Spacer()
+                            Picker(loc("general.display.colorScheme"), selection: $settingsVM.settings.colorScheme) {
+                                ForEach(PriceColorScheme.allCases) { scheme in
+                                    Text(scheme.displayName).tag(scheme)
+                                }
+                            }
+                            .labelsHidden()
+                            .pickerStyle(.menu)
+                            .frame(width: 220, alignment: .trailing)
+                            .id(settingsVM.settings.language)
+                        }
+
+                        if settingsVM.settings.colorScheme == .custom {
+                            HStack(spacing: 16) {
+                                ColorPickerRow(label: loc("general.priceColor.upColor"), hexColor: $settingsVM.settings.customUpColorHex)
+                                ColorPickerRow(label: loc("general.priceColor.downColor"), hexColor: $settingsVM.settings.customDownColorHex)
                             }
                         }
-                        .labelsHidden()
-                        .pickerStyle(.menu)
-                        .frame(width: 220, alignment: .trailing)
                     }
+                    .disabled(!settingsVM.settings.priceColorEnabled)
                 }
-                .disabled(showsIconOnly)
-
-                Toggle(loc("general.display.textColor"), isOn: Binding(
-                    get: { settingsVM.settings.priceColorEnabled },
-                    set: { settingsVM.settings.priceColorEnabled = $0 }
-                ))
-                .disabled(showsIconOnly)
-
-                if settingsVM.settings.priceColorEnabled {
-                    Picker(loc("general.display.colorScheme"), selection: Binding(
-                        get: { settingsVM.settings.colorScheme },
-                        set: { settingsVM.settings.colorScheme = $0 }
-                    )) {
-                        ForEach(PriceColorScheme.allCases) { scheme in
-                            Text(scheme.displayName).tag(scheme)
-                        }
-                    }
-                    .pickerStyle(.radioGroup)
-                    // radioGroup's underlying NSMatrix does not refresh titles while tags stay the same; rebuild per language.
-                    .id(settingsVM.settings.language)
-                    .disabled(showsIconOnly)
-
-                    if settingsVM.settings.colorScheme == .custom {
-                        HStack(spacing: 16) {
-                            ColorPickerRow(
-                                label: loc("general.priceColor.upColor"),
-                                hexColor: Binding(
-                                    get: { settingsVM.settings.customUpColorHex },
-                                    set: { settingsVM.settings.customUpColorHex = $0 }
-                                )
-                            )
-                            ColorPickerRow(
-                                label: loc("general.priceColor.downColor"),
-                                hexColor: Binding(
-                                    get: { settingsVM.settings.customDownColorHex },
-                                    set: { settingsVM.settings.customDownColorHex = $0 }
-                                )
-                            )
-                        }
-                        .disabled(showsIconOnly)
-                    }
-                }
-
-                Toggle(loc("general.display.textBackground"), isOn: Binding(
-                    get: { settingsVM.settings.showMenuBarBackground },
-                    set: { settingsVM.settings.showMenuBarBackground = $0 }
-                ))
                 .disabled(showsIconOnly)
             }
 

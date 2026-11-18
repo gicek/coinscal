@@ -76,7 +76,7 @@ CoinscalWidget (extension) → WidgetDataLoader → App Group snapshot, or its o
 
 ## Menu Bar
 
-- `MenuBarViewModel` renders the status item. A colored price or one with a background is a single non-template image (`MenuBarTitleImage`: button height, 13pt padding, 4pt corners), which macOS fades evenly on an inactive display; an attributed title over a layer background renders blurred there. The default style stays a plain title tinted by the system.
+- `MenuBarViewModel` renders the status item. A colored price or one with a background is a single non-template image (`MenuBarTitleImage`: button height, 8pt horizontal padding on each side of a background, 4pt corners), which macOS fades evenly on an inactive display; an attributed title over a layer background renders blurred there. The default style stays a plain title tinted by the system.
 - The logo's presence is checked by identity (`button.image !== menuBarLogo`): after `image = nil`, `NSStatusBarButton` may report a 1×1 placeholder image.
 - The right-click menu is built on every open (so it follows the language) and hides item images: `NSMenuEnableActionImages` is set to false in `CoinscalApp.init`, before AppKit reads it, and on macOS 27 every item also sets `preferredImageVisibility = .hidden`.
 

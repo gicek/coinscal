@@ -12,6 +12,7 @@ import Testing
         let settings = try decode(#"{"baseCurrency":"CNY","addedCoins":[{"coinId":"solana"}]}"#)
         #expect(settings.baseCurrency == .cny)
         #expect(settings.priceChangeBasis == .rolling24h)
+        #expect(settings.showMenuBarCoinSymbol)
         #expect(settings.watchlistCoins.map(\.coinId) == ["solana"])
         #expect(settings.watchlistCoins[0].alertKind == .change)
         #expect(settings.watchlistCoins[0].notificationThreshold == Constants.Defaults.defaultNotificationThreshold)
@@ -68,6 +69,7 @@ import Testing
         var settings = AppSettings()
         settings.baseCurrency = .jpy
         settings.priceChangeBasis = .utc8
+        settings.showMenuBarCoinSymbol = false
         settings.displayedCoinId = "ethereum"
         settings.watchlistCoins = [WatchlistCoin(coinId: "ethereum", alertKind: .below, notificationThreshold: 3000)]
         let data = try JSONEncoder().encode(settings)
@@ -79,6 +81,7 @@ import Testing
         let decoded = try JSONDecoder().decode(AppSettings.self, from: data)
         #expect(decoded.baseCurrency == .jpy)
         #expect(decoded.priceChangeBasis == .utc8)
+        #expect(!decoded.showMenuBarCoinSymbol)
         #expect(decoded.displayedCoinId == "ethereum")
         #expect(decoded.watchlistCoins.first?.alertKind == .below)
         #expect(decoded.watchlistCoins.first?.notificationThreshold == 3000)

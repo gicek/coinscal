@@ -14,6 +14,7 @@ struct AppSettings: Codable {
     var pollingInterval: TimeInterval = Constants.Defaults.pollingInterval
     var showMenuBarBackground: Bool = false
     var menuBarContent: MenuBarContent = .price
+    var showMenuBarCoinSymbol: Bool = true
     /// Desktop overlay (docs/ARCHITECTURE.md, "Desktop Ticker"): a click-through price panel on the desktop.
     var desktopOverlayEnabled: Bool = false
     /// Opacity of the frosted background (0...1); the text stays opaque.
@@ -34,7 +35,7 @@ struct AppSettings: Codable {
         case launchAtLogin, language, baseCurrency, priceChangeBasis, priceColorEnabled, colorScheme
         case customUpColorHex, customDownColorHex
         case priceChangeNotificationEnabled, pollingInterval
-        case showMenuBarBackground, menuBarContent, displayedCoinId
+        case showMenuBarBackground, menuBarContent, showMenuBarCoinSymbol, displayedCoinId
         case desktopOverlayEnabled, desktopOverlayBackgroundOpacity, desktopOverlayTextSize, desktopOverlayTopLeft
         case watchlistCoins = "addedCoins"
     }
@@ -66,6 +67,7 @@ struct AppSettings: Codable {
         pollingInterval = value(.pollingInterval, d.pollingInterval)
         showMenuBarBackground = value(.showMenuBarBackground, d.showMenuBarBackground)
         menuBarContent = value(.menuBarContent, d.menuBarContent)
+        showMenuBarCoinSymbol = value(.showMenuBarCoinSymbol, d.showMenuBarCoinSymbol)
         desktopOverlayEnabled = value(.desktopOverlayEnabled, d.desktopOverlayEnabled)
         desktopOverlayBackgroundOpacity = min(max(value(.desktopOverlayBackgroundOpacity, d.desktopOverlayBackgroundOpacity), 0), 1)
         desktopOverlayTextSize = value(.desktopOverlayTextSize, d.desktopOverlayTextSize)

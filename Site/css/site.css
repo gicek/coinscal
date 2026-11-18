@@ -937,6 +937,10 @@ button.menubar-extra:hover,
     border-bottom: 0;
 }
 
+.pn-setting:has(:disabled) {
+    opacity: 0.5;
+}
+
 .pn-setting-label {
     min-width: 0;
     white-space: nowrap;

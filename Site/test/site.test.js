@@ -84,12 +84,13 @@ test("demo settings fall back field by field", () => {
     globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, v) };
     try {
         assert.deepEqual(loadSettings(), DEFAULT_SETTINGS);
-        store.set("coinscal.demo", JSON.stringify({ coins: ["solana", "nope", "solana"], currency: "XYZ", colorEnabled: false, scheme: 3 }));
+        store.set("coinscal.demo", JSON.stringify({ coins: ["solana", "nope", "solana"], currency: "XYZ", colorEnabled: false, showCoinSymbol: false, scheme: 3 }));
         const s = loadSettings();
         assert.deepEqual(s.coins, ["solana"]);
         assert.equal(s.currency, "USD");
         assert.equal(s.changeBasis, "rolling24h");
         assert.equal(s.colorEnabled, false);
+        assert.equal(s.showCoinSymbol, false);
         assert.equal(s.scheme, "greenUpRedDown");
         store.set("coinscal.demo", "{not json");
         assert.deepEqual(loadSettings(), DEFAULT_SETTINGS);

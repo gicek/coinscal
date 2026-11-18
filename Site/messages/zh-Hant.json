@@ -49,6 +49,7 @@
     "contentPrice": "價格",
     "contentIcon": "圖示",
     "textColor": "依漲跌著色",
+    "coinSymbol": "顯示幣種符號",
     "textBackground": "顯示背景色",
     "colorScheme": "顏色方案",
     "greenUpRedDown": "綠漲紅跌",

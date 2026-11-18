@@ -49,6 +49,7 @@
     "contentPrice": "Price",
     "contentIcon": "Icon",
     "textColor": "Color by Price Change",
+    "coinSymbol": "Show Coin Symbol",
     "textBackground": "Show Background",
     "colorScheme": "Color Scheme",
     "greenUpRedDown": "Green Up, Red Down",

@@ -45,6 +45,10 @@ final class MenuBarViewModel: ObservableObject {
         return coin
     }
 
+    static func priceTitle(symbol: String, formattedPrice: String, showSymbol: Bool) -> String {
+        showSymbol ? "\(symbol) \(formattedPrice)" : formattedPrice
+    }
+
     private func updateStatusItem(coins: [Coin], settings: AppSettings, settingsVM: SettingsViewModel) {
         guard let displayedCoin = Self.priceCoin(coins: coins, settings: settings),
               let price = displayedCoin.currentPrice else {
@@ -53,7 +57,8 @@ final class MenuBarViewModel: ObservableObject {
         }
 
         let priceText = PriceFormatter.formatShort(price)
-        let title = "\(displayedCoin.symbol) \(priceText)"
+        let title = Self.priceTitle(symbol: displayedCoin.symbol, formattedPrice: priceText, showSymbol: settings.showMenuBarCoinSymbol)
+        let accessibleTitle = "\(displayedCoin.symbol) \(priceText)"
 
         guard let button = statusItem?.button else { return }
         statusItem?.length = NSStatusItem.variableLength
@@ -70,7 +75,7 @@ final class MenuBarViewModel: ObservableObject {
             button.image = nil
             button.attributedTitle = NSAttributedString()
             button.title = title
-            button.setAccessibilityLabel(nil)
+            button.setAccessibilityLabel(settings.showMenuBarCoinSymbol ? nil : accessibleTitle)
             return
         case (true, _):
             style = .coloredPrice(priceColor, showBackground: settings.showMenuBarBackground)
@@ -86,7 +91,7 @@ final class MenuBarViewModel: ObservableObject {
         button.image = MenuBarTitleImage.make(text: title, font: font, style: style, height: height)
         button.imagePosition = .imageOnly
         button.imageScaling = .scaleNone
-        button.setAccessibilityLabel(title)
+        button.setAccessibilityLabel(accessibleTitle)
     }
 
     /// Puts the logo on the button unless that exact image is already there (a placeholder does not count).
@@ -121,7 +126,7 @@ enum MenuBarTitleImage {
     }
 
     /// Space between the text and the edges of the background.
-    static let horizontalPadding: CGFloat = 13
+    static let horizontalPadding: CGFloat = 8
     static let cornerRadius: CGFloat = 4
 
     static func size(text: String, font: NSFont, style: Style, height: CGFloat) -> NSSize {

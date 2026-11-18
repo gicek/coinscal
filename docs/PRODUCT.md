@@ -18,7 +18,7 @@ Out of scope: accounts and sync, a Coinscal server, trading, holdings and profit
 ## Menu Bar Item
 
 - "Show" is "Price" (default) or "Icon". With "Icon" the item always shows the monochrome logo.
-- With a price: `<symbol> <price>`, for example `BTC 65,000`, without a currency symbol. Decimals depend on magnitude, without trailing zeros: none from 100, up to two from 1 to 100, up to four below 1. A positive price that would round to zero uses compact scientific notation.
+- With a price: `<symbol> <price>` by default, for example `BTC 65,000`. Turning off "Show Coin Symbol" displays only the number. The menu bar omits the currency symbol. Decimals depend on magnitude, without trailing zeros: none from 100, up to two from 1 to 100, up to four below 1. A positive price that would round to zero uses compact scientific notation.
 - Without a price (starting up or empty watchlist), the item shows the monochrome logo. If a refresh fails, it keeps the last available price.
 - "Color by Price Change" uses the selected price change basis to color the price. With "Show Background" on, the colored badge uses white text on the same price color used for plain text. With price coloring off, the badge uses the menu bar text color for its background and inverts the text.
 - Left click toggles the panel. Right click opens the menu.
@@ -39,7 +39,7 @@ A window with three panes, General, Watchlist, and About, under a shared title b
 
 - **General**
   - Launch: "Open at Login" (off by default).
-  - Menu Bar: "Show" (Price / Icon), "Coin", "Color by Price Change" with "Color Scheme" (Green Up, Red Down / Red Up, Green Down / Custom), "Show Background". With "Icon", the other options are grayed out.
+  - Menu Bar: "Show" (Price / Icon), "Coin", "Show Coin Symbol", "Show Background", "Color by Price Change", and the "Color Scheme" menu (Green Up, Red Down / Red Up, Green Down / Custom). Icon mode disables the price controls. The color scheme and custom colors are available when price coloring is on. Disabled controls retain their selections.
   - Desktop: "Show on Desktop", "Text Size" (Normal / Large), "Background Opacity", "Adjust Position"; grayed out while the ticker is off.
   - Prices: "Display Currency" and "Price Change Basis". The basis selector offers "Rolling 24 Hours" (default), "Midnight (UTC+0)", and "Midnight (UTC+8)" in that order. The menu bar color, panel, desktop ticker, and widgets follow this setting.
   - Notifications: "Price Alerts", the master switch for alerts.

@@ -8,7 +8,7 @@ Last run Nov 18, 2026.
 
 | Check | Result |
 |---|---|
-| `make test-mac` | Localization guards (45 files), catalog and release notes validation, 133 unit tests in 15 suites: pass |
+| `make test-mac` | Localization guards (45 files), catalog and release notes validation, 134 unit tests in 15 suites: pass |
 | `make test-site` | Localization guards (7 files), 12 offline checks: pass |
 | `make test-release` | 4 offline checks: pass |
 | `make mac-check-sources` | All 4 price and 3 exchange rate sources respond. Both fixed-day modes return BTC and ETH changes from each price source. All 446 queried symbols are priced, plus locally priced USDT. Failover passes. Two cross-source price differences were reported as warnings. |
@@ -28,6 +28,8 @@ macOS 27.2.1 with a debug build, unless noted.
 - Watchlist: keyboard focus fits inside the reorder handle, which exposes Move Up and Move Down actions to accessibility tools.
 - Website preview: live prices in the desktop and 390 px layouts. Keyboard changes retain focus in the demo settings.
 - General → Prices: the native menu lists Rolling 24 Hours, Midnight (UTC+0), and Midnight (UTC+8) in order. The selected item is checked after switching to UTC+8. The desktop website preview switches to UTC+8 and shows its day-change heading and live BTC and ETH percentages.
+- General → Menu Bar: the symbol switch defaults to on. Icon mode disables the price controls, and switching back retains the symbol choice. Turning off price coloring disables the color scheme menu. In the website preview, the symbol switch updates the menu bar price immediately.
+- AppKit badge render: `BTC 64,750` measures 90 × 22 pt with a background and `64,750` measures 61 × 22 pt. The width without a background is 74 pt and 45 pt respectively.
 - Update checks request the feed of the in-app language (`appcast.en.xml` in English, `appcast.zh-Hans.xml` after switching to Simplified Chinese).
 - Release: 1.1.0 (build 3) published Nov 18, 2026: notarized zip and DMG pass `spctl`; the archives and `Coinscal.dmg` on `dl.coinscal.app` match the local builds byte for byte; `appcast.xml` lists notes in three languages and each `appcast.<lang>.xml` only its own; GitHub Release `v1.1.0` carries the zip and DMG. The website is deployed with the demo fixes.
 
@@ -41,6 +43,7 @@ macOS 27.2.1 with a debug build, unless noted.
 - All sizes in light, dark, and monochrome modes.
 
 **Panel and menu bar**
+- Turn "Show Coin Symbol" off in Price mode. Check the native menu bar in plain text and with a colored background. VoiceOver should identify the coin in both price formats.
 - With a real mouse, the panel's buttons ("Settings", "Manage Watchlist", "Quit", "Add Coins", "Update Available") work on the first click, from the status item and from a widget.
 - The panel's look in dark mode, and on macOS 14.
 - VoiceOver reads the panel and its rows.

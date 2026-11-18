@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS = {
     changeBasis: "rolling24h",
     menubarCoin: "bitcoin",
     menubarContent: "price",
+    showCoinSymbol: true,
     colorEnabled: true,
     background: true,
     scheme: "greenUpRedDown",
@@ -34,6 +35,7 @@ export function loadSettings() {
     if (CHANGE_BASES.includes(saved.changeBasis)) s.changeBasis = saved.changeBasis;
     if (coinById(saved.menubarCoin)) s.menubarCoin = saved.menubarCoin;
     if (["price", "icon"].includes(saved.menubarContent)) s.menubarContent = saved.menubarContent;
+    if (typeof saved.showCoinSymbol === "boolean") s.showCoinSymbol = saved.showCoinSymbol;
     if (typeof saved.colorEnabled === "boolean") s.colorEnabled = saved.colorEnabled;
     if (typeof saved.background === "boolean") s.background = saved.background;
     if (["greenUpRedDown", "redUpGreenDown"].includes(saved.scheme)) s.scheme = saved.scheme;
@@ -142,7 +144,7 @@ export class Panel {
 
     bodyHeight() {
         const rows = Math.min(Math.max(this.settings.coins.length, MIN_ROWS), MAX_ROWS);
-        if (this.view === "settings") return Math.max(rows, 6) * ROW_HEIGHT;
+        if (this.view === "settings") return Math.max(rows, 7) * ROW_HEIGHT;
         if (this.view === "watchlist") return MAX_ROWS * ROW_HEIGHT;
         return rows * ROW_HEIGHT;
     }
@@ -254,9 +256,10 @@ export class Panel {
         const s = this.settings;
         const form = el("div", "pn-settings");
 
-        const row = (labelKey, control) => {
+        const row = (labelKey, control, disabled = false) => {
             const line = el("label", "pn-setting");
             control.dataset.setting = labelKey;
+            control.disabled = disabled;
             line.append(el("span", "pn-setting-label", t(labelKey)), control);
             return line;
         };
@@ -280,32 +283,36 @@ export class Panel {
             return node;
         };
 
+        const iconOnly = s.menubarContent === "icon";
         form.append(
             row("panel.currency", select(CURRENCIES.map(([code, symbol]) => [code, `${code} (${symbol})`]), s.currency, (currency) => this.update({ currency }))),
             row("panel.priceChangeBasis", select([
                 ["rolling24h", t("panel.rolling24h")], ["utc0", t("panel.midnightUTC0")], ["utc8", t("panel.midnightUTC8")],
             ], s.changeBasis, (changeBasis) => this.update({ changeBasis }))),
             row(
+                "panel.menubarContent",
+                select([["price", t("panel.contentPrice")], ["icon", t("panel.contentIcon")]], s.menubarContent, (menubarContent) => this.update({ menubarContent }))
+            ),
+            row(
                 "panel.menubarCoin",
                 select(
                     (s.coins.length ? s.coins : [s.menubarCoin]).map((id) => [id, coinById(id).symbol]),
                     menubarCoin({ ...s, menubarContent: "price" })?.id ?? s.menubarCoin,
                     (menubarCoin) => this.update({ menubarCoin })
-                )
+                ),
+                iconOnly || !s.coins.length
             ),
-            row(
-                "panel.menubarContent",
-                select([["price", t("panel.contentPrice")], ["icon", t("panel.contentIcon")]], s.menubarContent, (menubarContent) => this.update({ menubarContent }))
-            ),
-            row("panel.textColor", toggle(s.colorEnabled, (colorEnabled) => this.update({ colorEnabled }))),
-            row("panel.textBackground", toggle(s.background, (background) => this.update({ background }))),
+            row("panel.coinSymbol", toggle(s.showCoinSymbol, (showCoinSymbol) => this.update({ showCoinSymbol })), iconOnly),
+            row("panel.textBackground", toggle(s.background, (background) => this.update({ background })), iconOnly),
+            row("panel.textColor", toggle(s.colorEnabled, (colorEnabled) => this.update({ colorEnabled })), iconOnly),
             row(
                 "panel.colorScheme",
                 select(
                     [["greenUpRedDown", t("panel.greenUpRedDown")], ["redUpGreenDown", t("panel.redUpGreenDown")]],
                     s.scheme,
                     (scheme) => this.update({ scheme })
-                )
+                ),
+                iconOnly || !s.colorEnabled
             )
         );
         return form;

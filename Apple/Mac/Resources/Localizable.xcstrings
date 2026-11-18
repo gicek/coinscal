@@ -878,6 +878,29 @@
         }
       }
     },
+    "general.display.coinSymbol" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Coin Symbol"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示币种符号"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示幣種符號"
+          }
+        }
+      }
+    },
     "general.display.colorScheme" : {
       "extractionState" : "manual",
       "localizations" : {

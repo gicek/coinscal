@@ -24,7 +24,7 @@
 A Mac menu bar with the Coinscal panel hanging from it.
 
 - **Menu bar**: the Coinscal item (rendered with the app's rules from the demo settings; click to toggle the panel), a language menu, a Wi-Fi icon that shows whether live prices are flowing, an appearance switch that can return to following the system, and a clock.
-- **Panel**: a copy of the app's panel at the same point sizes, opening with Bitcoin and Ethereum. The gear opens demo settings (display currency, price change basis, menu bar coin, Price / Icon, coloring, background, color scheme). "Manage Watchlist" adds or removes the app's ten recommended coins. The power button hides the panel. A changed price glows briefly. Settings are saved in local storage (`coinscal.demo`) and read back field by field.
+- **Panel**: a copy of the app's panel at the same point sizes, opening with Bitcoin and Ethereum. The gear opens demo settings for currency, price change basis, and menu bar display. Menu bar settings follow the app's order and include "Show Coin Symbol". "Manage Watchlist" adds or removes the app's ten recommended coins. The power button hides the panel. A changed price glows briefly. Settings are saved in local storage (`coinscal.demo`) and read back field by field.
 - The menu bar background is on by default on the website, unlike the app, so the price stands out; "Custom" colors are app-only.
 
 Below the hero: four feature cards, a privacy section, the download section, and a footer with GitHub, Releases, Issues, Privacy, and the ExchangeRate-API credit.
