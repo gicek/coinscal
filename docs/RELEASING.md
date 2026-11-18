@@ -17,7 +17,7 @@ Release commands need a logged-in GUI session (the DMG layout is written through
 
 ## Steps
 
-1. **Version.** In `Apple/project.yml`, raise `CURRENT_PROJECT_VERSION` for every distributed build and `MARKETING_VERSION` for a new version. They are defined nowhere else.
+1. **Version.** In `Apple/project.yml`, raise `CURRENT_PROJECT_VERSION` and use a new `MARKETING_VERSION` for each public release. Versioned download URLs are immutable.
 2. **Catalog.** Run `make catalog` to refresh the coin catalog, then `make test`.
 3. **Notes.** Write the release notes in `docs/release-notes/<version>/`: `en.md`, `zh-Hans.md`, and `zh-Hant.md`, one `- item` per line, with the same items in every language. `make test-mac` checks every version. Add the release to `CHANGELOG.md`.
 4. **Build.** `make mac-release-notarized` produces `Build/macOS/Dist/Coinscal-<version>.zip` and `.dmg`.
@@ -40,10 +40,12 @@ The DMG (`scripts/dmg/make-dmg.sh`) has a rendered background (`render-backgroun
 
 `make mac-publish CONFIRM=<version>` (`scripts/release/publish.py`):
 
-1. Checks that the notarized zip and DMG exist and are stapled, the build number is higher than the live appcast's, and the release notes are complete.
-2. Signs the zip with Sparkle's EdDSA key from the login Keychain and renders `appcast.xml` and the notes pages into `Build/macOS/Publish/<version>/`. `DRY_RUN=1` stops here.
+1. Checks the notarization tickets, signing Team, packaged version, build number, and minimum macOS in both archives. The contained app must have the same code signing hash in both.
+2. Signs the zip with Sparkle's EdDSA key, checks the build and archive against every live feed, and renders the feeds and release notes into `Build/macOS/Publish/<version>/`. `DRY_RUN=1` stops here.
 3. Uploads the archives, `Coinscal.dmg`, the notes, and finally the feeds (`appcast.<lang>.xml`, then `appcast.xml`), so a feed never points to a missing file.
 4. Creates the GitHub Release `v<version>` with the zip and DMG.
+
+If an upload fails, rerun the same command with the original archives and notes. Once a feed matches the archive signature and build, the command checks the already uploaded DMG, skips completed uploads, and finishes the remaining feeds or GitHub Release. If the GitHub Release already exists with missing assets, add the original archives to it.
 
 | Object on `dl.coinscal.app` | Content | Cache |
 |---|---|---|

@@ -49,7 +49,7 @@ VERSION := $(shell sed -nE 's/^ *MARKETING_VERSION: *"?([^"]+)"?.*/\1/p' Apple/p
 BUILD_NUMBER := $(shell sed -nE 's/^ *CURRENT_PROJECT_VERSION: *"?([^"]+)"?.*/\1/p' Apple/project.yml | head -1)
 MIN_MACOS := $(shell sed -nE 's/^ *macOS: *"?([^"]+)"?.*/\1/p' Apple/project.yml | head -1)
 BUILD_TARGETS += mac
-TEST_TARGETS += test-mac
+TEST_TARGETS += test-mac test-release
 # Sparkle (in-app updates, docs/RELEASING.md): command-line tools from the pinned release; the signing key lives in the
 # login Keychain under this account (Sparkle's default, shown in Keychain Access as "Private key for signing Sparkle updates")
 SPARKLE_VERSION := 2.10.0
@@ -83,6 +83,7 @@ help:
 	@echo "  make mac-release           Release: Developer ID-signed zip and DMG in Build/macOS/Dist/ (no notarization or upload; needs a GUI session)"
 	@echo "  make mac-release-notarized Release and notarize: as above, then notarize the app and DMG, staple the ticket, and pass Gatekeeper checks"
 	@echo "  make test-mac              Localization guards + Mac unit tests"
+	@echo "  make test-release          Offline release script checks"
 	@echo "  make mac-publish CONFIRM=<version>  Publish the notarized release: appcast and files to R2, GitHub Release (DRY_RUN=1 uploads nothing)"
 	@echo "  make mac-update-keys BACKUP=<file>  Create (or reuse) the update signing key in the Keychain and export a backup outside the repo"
 	@echo "  make mac-check-sources     Manual: check all price and exchange rate data sources over the real network (not part of make test)"
@@ -148,6 +149,9 @@ test-site:
 	python3 scripts/i18n-guard.py --langs "$(LANGS)" --min-files 7 --platform web --root Site
 	cd Site && npm run check
 
+test-release:
+	python3 -B -m unittest discover -s scripts/release
+
 site-run:
 	python3 scripts/site/serve.py --port $(SITE_PORT)
 
@@ -168,6 +172,7 @@ mac-publish:
 	@test "$(CONFIRM)" = "$(VERSION)" || test -n "$(DRY_RUN)" || { echo "Publishing $(VERSION) (build $(BUILD_NUMBER)) is public. Run: make mac-publish CONFIRM=$(VERSION)"; exit 1; }
 	@BIN="$$(scripts/release/sparkle-tools.sh "$(SPARKLE_VERSION)" "$(SPARKLE_SHA256)" "$(SPARKLE_DIR)")" && \
 	    python3 scripts/release/publish.py --version "$(VERSION)" --build "$(BUILD_NUMBER)" --min-system "$(MIN_MACOS)" \
+	        --team "$(DEVELOPMENT_TEAM)" \
 	        --dist "$(MAC_DIST)" --notes "docs/release-notes/$(VERSION)" --work "$(MAC_BUILD_ROOT)/Publish" \
 	        --sparkle-bin "$$BIN" --key-account "$(SPARKLE_KEY_ACCOUNT)" --bucket "$(DOWNLOAD_BUCKET)" \
 	        --base-url "$(DOWNLOAD_URL)" --wrangler "npx --yes $(WRANGLER_PKG)" --node-bin "$(WRANGLER_NODE_BIN)" $(if $(DRY_RUN),--dry-run)

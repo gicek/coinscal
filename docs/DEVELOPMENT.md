@@ -19,9 +19,10 @@ If `xcode-select` points to the Command Line Tools, set `export DEVELOPER_DIR :=
 make project        # generate Apple/Coinscal.xcodeproj from Apple/project.yml
 make mac            # build Build/macOS/Debug/Coinscal.app (CONFIGURATION=Release for a release build)
 make mac-run        # build, verify the signature, and launch
-make test           # make test-mac + make test-site
+make test           # make test-mac + make test-site + make test-release
 make test-mac       # localization guards, catalog and release notes validation, unit tests
 make test-site      # website localization guards and offline checks
+make test-release   # offline release script checks
 make site-run       # website preview at http://localhost:8787/
 make mac-check-sources  # manual check of every data source over the network
 make catalog        # regenerate the coin catalog online

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Publishes a notarized release (make mac-publish; see docs/RELEASING.md).
 
-Order: check the notarized zip and DMG, the release notes, and that the build number is higher than the live
-appcast's -> sign the zip for Sparkle -> render release notes and appcast.xml -> upload the archives, the notes, and
-finally appcast.xml to R2 -> create the GitHub Release. Nothing is uploaded until every check has passed.
+Validate the notarized archives and notes, sign the ZIP for Sparkle, then check every live appcast.
+Upload the archives and notes before the appcasts, and create the GitHub Release last.
+A retry with the same archives can resume a partial release after the first appcast is live.
 
-Usage: scripts/release/publish.py --version 1.1 --build 2 --min-system 14.0 --dist Build/macOS/Dist \
+Usage: scripts/release/publish.py --version 1.1 --build 2 --min-system 14.0 --team <team> --dist Build/macOS/Dist \
     --notes docs/release-notes/1.1 --work Build/macOS/Publish --sparkle-bin <dir> --key-account ed25519 \
     --bucket coinscal-dl --base-url https://dl.coinscal.app --wrangler "npx --yes wrangler@<version>" \
     [--node-bin <dir>] [--dry-run]
@@ -15,22 +15,28 @@ from __future__ import annotations
 
 import argparse
 import email.utils
+import hashlib
 import html
+import json
 import os
+import plistlib
 import re
 import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
+from xml.etree import ElementTree
 from xml.sax.saxutils import escape, quoteattr
 
 LANGS = ("en", "zh-Hans", "zh-Hant")
 IMMUTABLE = "public, max-age=31536000, immutable"
 SHORT = "public, max-age=300"
+SPARKLE = "{http://www.andymatuschak.org/xml-namespaces/sparkle}"
 
 
 def fail(message: str) -> None:
@@ -80,37 +86,99 @@ def check_all_notes(root: Path) -> None:
     print(f"release notes: {len(versions)} versions, {len(LANGS)} languages each")
 
 
-def check_notarized(dist: Path, version: str) -> tuple[Path, Path]:
+def signing_hash(path: Path, team: str) -> str:
+    details = run(["codesign", "--display", "--verbose=4", str(path)], capture_output=True).stderr
+    if f"TeamIdentifier={team}" not in details.splitlines() or not re.search(r"^Authority=Developer ID Application:", details, re.M):
+        fail(f"{path.name}: expected Developer ID signing by team {team}")
+    match = re.search(r"^CDHash=([a-f0-9]+)$", details, re.M)
+    if not match:
+        fail(f"{path.name}: missing code signing hash")
+    return match.group(1)
+
+
+def check_app(app: Path, version: str, build: int, min_system: str, team: str) -> str:
+    run(["codesign", "--verify", "--deep", "--strict", str(app)])
+    with (app / "Contents" / "Info.plist").open("rb") as plist:
+        info = plistlib.load(plist)
+    for key, expected in (("CFBundleShortVersionString", version), ("CFBundleVersion", str(build)),
+                          ("LSMinimumSystemVersion", min_system)):
+        if info.get(key) != expected:
+            fail(f"{app}: {key} is {info.get(key)!r}, expected {expected!r}. Rebuild the notarized archives.")
+    return signing_hash(app, team)
+
+
+def check_notarized(dist: Path, version: str, build: int, min_system: str, team: str) -> tuple[Path, Path]:
     zip_path = dist / f"Coinscal-{version}.zip"
     dmg_path = dist / f"Coinscal-{version}.dmg"
     for path in (zip_path, dmg_path):
         if not path.exists():
             fail(f"missing {path}: run make mac-release-notarized first")
     run(["xcrun", "stapler", "validate", "-q", str(dmg_path)])
+    run(["codesign", "--verify", "--strict", str(dmg_path)])
+    signing_hash(dmg_path, team)
     with tempfile.TemporaryDirectory() as tmp:
-        run(["ditto", "-x", "-k", str(zip_path), tmp])
-        app = Path(tmp) / "Coinscal.app"
+        root = Path(tmp)
+        run(["ditto", "-x", "-k", str(zip_path), str(root / "zip")])
+        app = root / "zip" / "Coinscal.app"
         run(["xcrun", "stapler", "validate", "-q", str(app)])
         run(["spctl", "--assess", "--type", "execute", str(app)], capture_output=True)
-        plist = app / "Contents" / "Info.plist"
-        short = run(["/usr/libexec/PlistBuddy", "-c", "Print :CFBundleShortVersionString", str(plist)], capture_output=True).stdout.strip()
-        if short != version:
-            fail(f"{zip_path} contains version {short}, expected {version}")
+        archive_hash = check_app(app, version, build, min_system, team)
+        mount = root / "dmg"
+        mount.mkdir()
+        run(["hdiutil", "attach", "-readonly", "-nobrowse", "-mountpoint", str(mount), str(dmg_path)], capture_output=True)
+        try:
+            if check_app(mount / app.name, version, build, min_system, team) != archive_hash:
+                fail("the zip and DMG contain different signed builds")
+        finally:
+            run(["hdiutil", "detach", str(mount)], capture_output=True)
     return zip_path, dmg_path
 
 
-def live_build_number(base_url: str) -> int | None:
+def published_item(base_url: str, feed: str) -> tuple[int, str, str, str, str, str] | None:
     try:
         # Cloudflare's browser integrity check rejects the default Python-urllib User-Agent.
-        request = urllib.request.Request(f"{base_url}/appcast.xml", headers={"User-Agent": "Coinscal-publish/1.0"})
+        request = urllib.request.Request(f"{base_url}/{feed}?publish-check={time.time_ns()}",
+                                         headers={"User-Agent": "Coinscal-publish/1.0", "Cache-Control": "no-cache"})
         with urllib.request.urlopen(request, timeout=15) as response:
-            text = response.read().decode("utf-8")
+            channel = ElementTree.fromstring(response.read()).find("channel")
     except urllib.error.HTTPError as error:
         if error.code == 404:
             return None
         raise
-    match = re.search(r"<sparkle:version>(\d+)</sparkle:version>", text)
-    return int(match.group(1)) if match else None
+    item = channel.find("item") if channel is not None else None
+    enclosure = item.find("enclosure") if item is not None else None
+    if item is None or enclosure is None:
+        fail(f"{feed}: no release or enclosure in the live feed")
+    build = item.findtext(f"{SPARKLE}version", "")
+    if not build.isdecimal():
+        fail(f"{feed}: invalid live build number")
+    return (int(build), item.findtext(f"{SPARKLE}shortVersionString", ""),
+            item.findtext(f"{SPARKLE}minimumSystemVersion", ""), enclosure.get("url", ""),
+            enclosure.get("length", ""), enclosure.get(f"{SPARKLE}edSignature", ""))
+
+
+def completed_appcasts(base_url: str, names: list[str], expected: tuple[int, str, str, str, str, str]) -> set[str]:
+    build, version, _, archive_url, _, _ = expected
+    completed = set()
+    for feed in names:
+        live = published_item(base_url, feed)
+        if live == expected:
+            completed.add(feed)
+        elif live is not None and (live[0] >= build or live[1] == version or live[3] == archive_url):
+            fail(f"{feed}: build {live[0]} ({live[1]}) already occupies this build or version")
+    return completed
+
+
+def verify_uploaded_dmg(base_url: str, dmg: Path) -> None:
+    request = urllib.request.Request(f"{base_url}/{dmg.name}", headers={"User-Agent": "Coinscal-publish/1.0"})
+    with urllib.request.urlopen(request, timeout=30) as response, dmg.open("rb") as file:
+        def sha256(stream):
+            digest = hashlib.sha256()
+            for chunk in iter(lambda: stream.read(64 * 1024), b""):
+                digest.update(chunk)
+            return digest.hexdigest()
+        if sha256(response) != sha256(file):
+            fail("the local DMG differs from the one already uploaded. Restore the original DMG to resume.")
 
 
 def sign_archive(sparkle_bin: Path, account: str, zip_path: Path) -> tuple[str, str]:
@@ -185,26 +253,30 @@ def main() -> None:
         check_all_notes(Path(sys.argv[2]))
         return
     p = argparse.ArgumentParser(description="Publish a notarized Coinscal release")
-    for name in ("version", "min-system", "dist", "notes", "work", "sparkle-bin", "key-account", "bucket", "base-url", "wrangler"):
+    for name in ("version", "min-system", "team", "dist", "notes", "work", "sparkle-bin", "key-account", "bucket", "base-url", "wrangler"):
         p.add_argument(f"--{name}", required=True)
     p.add_argument("--build", required=True, type=int)
     p.add_argument("--node-bin", default="", help="Node 22+ bin directory to put first on PATH for Wrangler")
     p.add_argument("--dry-run", action="store_true", help="check, sign, and render, but upload nothing")
     a = p.parse_args()
+    if not a.team:
+        fail("set DEVELOPMENT_TEAM in local.mk to verify the release signing identity")
 
     base_url = a.base_url.rstrip("/")
     notes = load_notes(Path(a.notes), a.version)
-    zip_path, dmg_path = check_notarized(Path(a.dist), a.version)
-    live = live_build_number(base_url)
-    if live is not None and a.build <= live:
-        fail(f"build {a.build} is not higher than the live build {live}; raise CURRENT_PROJECT_VERSION")
-    if not a.dry_run and shutil.which("gh") is None:
-        fail("the GitHub CLI (gh) is required: brew install gh, then gh auth login")
+    zip_path, dmg_path = check_notarized(Path(a.dist), a.version, a.build, a.min_system, a.team)
     if not a.dry_run:
+        if shutil.which("gh") is None:
+            fail("the GitHub CLI (gh) is required: brew install gh, then gh auth login")
         run(["gh", "auth", "status"], capture_output=True)
 
     print(f"==> Signing {zip_path.name} for Sparkle")
     signature, length = sign_archive(Path(a.sparkle_bin), a.key_account, zip_path)
+    feed_names = [f"appcast.{lang}.xml" for lang in LANGS] + ["appcast.xml"]
+    expected = (a.build, a.version, a.min_system, f"{base_url}/{zip_path.name}", length, signature)
+    completed_feeds = completed_appcasts(base_url, feed_names, expected)
+    if completed_feeds:
+        verify_uploaded_dmg(base_url, dmg_path)
 
     work = Path(a.work) / a.version
     shutil.rmtree(work, ignore_errors=True)
@@ -238,6 +310,8 @@ def main() -> None:
     if a.node_bin:
         os.environ["PATH"] = f"{a.node_bin}{os.pathsep}{os.environ['PATH']}"
     for key, path, content_type, cache in uploads:
+        if completed_feeds and (key not in feed_names or key in completed_feeds):
+            continue  # Once any intended feed is live, archives and notes were uploaded before it.
         print(f"==> Uploading {key}")
         cmd = wrangler + ["r2", "object", "put", f"{a.bucket}/{key}", "--file", str(path),
                           "--content-type", content_type, "--cache-control", cache, "--remote"]
@@ -246,12 +320,21 @@ def main() -> None:
             if subprocess.run(cmd, text=True).returncode == 0:
                 break
             if attempt == 3:
-                fail(f"uploading {key} failed 3 times; the feeds are uploaded last, so the live feeds are unchanged")
+                fail(f"uploading {key} failed 3 times. Earlier uploads may be live. Retry with the original archives and notes.")
             print(f"    retrying {key} ({attempt}/2)")
 
     notes_md = work / "github-notes.md"
     notes_md.write_text("\n".join(f"- {item}" for item in notes["en"]) + "\n", encoding="utf-8")
     print(f"==> Creating GitHub Release v{a.version}")
+    if completed_feeds:
+        existing = subprocess.run(["gh", "release", "view", f"v{a.version}", "--json", "assets"],
+                                  capture_output=True, text=True)
+        if existing.returncode == 0:
+            assets = {asset["name"] for asset in json.loads(existing.stdout)["assets"]}
+            if {zip_path.name, dmg_path.name} <= assets:
+                print(f"Coinscal {a.version} (build {a.build}) is already published.")
+                return
+            fail(f"GitHub Release v{a.version} exists with missing assets. Upload the original archives to that release.")
     run(["gh", "release", "create", f"v{a.version}", str(zip_path), str(dmg_path),
          "--title", f"Coinscal {a.version}", "--notes-file", str(notes_md)])
     print(f"Published Coinscal {a.version} (build {a.build}) to {base_url} and GitHub.")
