@@ -75,7 +75,7 @@ Entry fields: `id`, `symbol`, `name`, `rank`, `logoURL`, `status` (`active`, `de
 
 Validation runs in Python (`generate_catalog.py validate`, part of `make test-mac`) and in Swift (`CoinCatalog.validate`), with the same rules: schema version, id and symbol character sets, name length, 200–1000 listed coins, tradable bitcoin and ethereum, no duplicate tradable symbols, logo hosts on the allowlist, listed coins tradable, migration targets present and tradable.
 
-The current snapshot has 451 listed coins down to market cap rank 960. 79 logos are bundled (`coin-<id>` assets); other logos are downloaded on demand ([Architecture](ARCHITECTURE.md#coin-catalog-client)).
+The current snapshot has 447 listed coins. 79 logos are bundled (`coin-<id>` assets); other logos are downloaded on demand ([Architecture](ARCHITECTURE.md#coin-catalog-client)).
 
 ## Checking the Sources
 
