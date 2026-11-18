@@ -45,15 +45,25 @@ final class MenuBarViewModel: ObservableObject {
         return coin
     }
 
-    /// Choose the higher-contrast foreground while keeping the selected background, including custom colors.
-    static func textColor(on background: NSColor) -> NSColor {
-        guard let rgb = background.usingColorSpace(.sRGB) else { return .white }
+    /// Keep white text readable by darkening light fills in linear sRGB.
+    static func priceBadgeBackground(_ color: NSColor) -> NSColor {
+        guard let rgb = color.usingColorSpace(.sRGB) else { return .black }
         func linear(_ component: CGFloat) -> CGFloat {
             component <= 0.04045 ? component / 12.92 : pow((component + 0.055) / 1.055, 2.4)
         }
-        let luminance = 0.2126 * linear(rgb.redComponent)
-            + 0.7152 * linear(rgb.greenComponent) + 0.0722 * linear(rgb.blueComponent)
-        return luminance > 0.179 ? .black : .white
+        let red = linear(rgb.redComponent)
+        let green = linear(rgb.greenComponent)
+        let blue = linear(rgb.blueComponent)
+        let luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+        let maximumLuminance: CGFloat = 0.18
+        guard luminance > maximumLuminance else { return color }
+
+        let scale = maximumLuminance / luminance
+        func encode(_ component: CGFloat) -> CGFloat {
+            let value = component * scale
+            return value <= 0.0031308 ? 12.92 * value : 1.055 * pow(value, 1 / 2.4) - 0.055
+        }
+        return NSColor(srgbRed: encode(red), green: encode(green), blue: encode(blue), alpha: 1)
     }
 
     private func updateStatusItem(coins: [Coin], settings: AppSettings, settingsVM: SettingsViewModel) {
@@ -84,7 +94,7 @@ final class MenuBarViewModel: ObservableObject {
             button.setAccessibilityLabel(nil)
             return
         case (true, true):
-            style = .init(textColor: Self.textColor(on: priceColor), background: priceColor)
+            style = .init(textColor: .white, background: Self.priceBadgeBackground(priceColor))
         case (true, false):
             // Text = price color, no background.
             style = .init(textColor: priceColor, background: nil)

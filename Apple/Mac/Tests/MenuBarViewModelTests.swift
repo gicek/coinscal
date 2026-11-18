@@ -52,4 +52,15 @@ import Testing
         MenuBarViewModel.applyLogo(logo, to: button)
         #expect(button.image === logo)
     }
+
+    @Test func priceBadgeKeepsDarkFillsAndDarkensLightFillsForWhiteText() throws {
+        let dark = NSColor(srgbRed: 0.1, green: 0.2, blue: 0.1, alpha: 1)
+        #expect(MenuBarViewModel.priceBadgeBackground(dark) == dark)
+
+        let green = NSColor(srgbRed: 44.0 / 255, green: 189.0 / 255, blue: 132.0 / 255, alpha: 1)
+        let fill = try #require(MenuBarViewModel.priceBadgeBackground(green).usingColorSpace(.sRGB))
+        #expect(abs(fill.redComponent * 255 - 28) < 1)
+        #expect(abs(fill.greenComponent * 255 - 134) < 1)
+        #expect(abs(fill.blueComponent * 255 - 92) < 1)
+    }
 }

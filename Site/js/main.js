@@ -1,6 +1,7 @@
 // The landing page: a Mac menu bar at the top of the hero (Coinscal, language, Wi-Fi, appearance, clock) over
 // a live demo of the app's panel.
 import { LINKS } from "./config.js";
+import { PRICE_BADGE_FILLS } from "./coins.js";
 import { formatShort } from "./format.js";
 import { detectLanguage, language, onLanguageChange, setLanguage, t } from "./i18n.js";
 import { ExchangeRates, PriceFeed } from "./prices.js";
@@ -150,7 +151,7 @@ function renderItem() {
     const price = formatShort(quote.price * rate);
     const color = priceColor(settings, quote.change);
     item.dataset.mode = settings.background ? (color ? "fill" : "inverse") : color ? "tint" : "plain";
-    if (color) item.style.setProperty("--item-color", color);
+    if (color) item.style.setProperty("--item-color", settings.background ? PRICE_BADGE_FILLS[color] ?? color : color);
     else item.style.removeProperty("--item-color");
     itemLabel.textContent = `${coin.symbol} ${price}`;
     item.setAttribute("aria-label", t("menubar.itemPrice", { symbol: coin.symbol, price }));

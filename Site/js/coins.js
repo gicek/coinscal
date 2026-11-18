@@ -24,3 +24,8 @@ export const CURRENCIES = [
 // Constants.Defaults.upColorHex / downColorHex.
 export const UP_COLOR = "#2CBD84";
 export const DOWN_COLOR = "#F6465D";
+// The app's price badge fills, darkened to keep white text readable.
+export const PRICE_BADGE_FILLS = {
+    [UP_COLOR]: "#1C865C",
+    [DOWN_COLOR]: "#D63C50",
+};

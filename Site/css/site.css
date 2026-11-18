@@ -503,7 +503,7 @@ button.menubar-extra:hover,
 
 .menubar-coinscal[data-mode="fill"] .item-label {
     background: var(--item-color);
-    color: #141414;
+    color: #fff;
 }
 
 .menubar-coinscal[data-mode="inverse"] .item-label {

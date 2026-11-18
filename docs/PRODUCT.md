@@ -20,7 +20,7 @@ Out of scope: accounts and sync, a Coinscal server, trading, holdings and profit
 - "Show" is "Price" (default) or "Icon". With "Icon" the item always shows the monochrome logo.
 - With a price: `<symbol> <price>`, for example `BTC 65,000`, without a currency symbol. Decimals depend on magnitude, without trailing zeros: none from 100, up to two from 1 to 100, up to four below 1. A positive price that would round to zero uses compact scientific notation.
 - Without a price (starting up or empty watchlist), the item shows the monochrome logo. If a refresh fails, it keeps the last available price.
-- "Color by Price Change" colors the price by the coin's 24h change. "Show Background" puts it on a rounded background: the price color with black or white text, whichever has more contrast, or, with coloring off, the menu bar text color with inverted text.
+- "Color by Price Change" colors the price by the coin's 24h change. With "Show Background" on, the colored badge uses white text and darkens light price colors for contrast. With price coloring off, the badge uses the menu bar text color for its background and inverts the text.
 - Left click toggles the panel. Right click opens the menu.
 
 ## Panel
