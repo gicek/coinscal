@@ -60,10 +60,13 @@ Final configuration options:
 
 WidgetKit can't refresh every 10 seconds like the menu bar: the system gives each widget a reload budget (on the order of dozens per day), so it shows "near real-time" data. That's why every widget shows its update time.
 
-- On every polling round, the app writes a snapshot to the App Group shared container: coins, prices, 24h change, status, quote currency, color settings, language, and write time. The settings themselves stay in the original `UserDefaults` domain and are not migrated.
-- The app requests a widget reload (`WidgetCenter.reloadAllTimelines()`) at most once every 5 minutes, or earlier when a price moved more than 1% since the last push. The system may coalesce further.
-- Widget timeline: reads the snapshot to produce one entry; the next reload is scheduled 15 minutes later.
-- When the app isn't running (snapshot not updated for more than 15 minutes), the widget fetches prices over the network itself: the price service, coin catalog, and exchange rate code are compiled into the extension, and the extension requests `network.client`. Fetched results are used only for that timeline and are not written back to the snapshot. If fetching fails, it uses the old snapshot and shows the stale state.
+- The widgets are separate from the menu bar and the desktop ticker, which follow the app's own polling; nothing here changes their refresh.
+- The app writes a snapshot to the App Group shared container: coins, prices, 24h change, status, quote currency, color settings, language, and write time. The settings themselves stay in the original `UserDefaults` domain and are not migrated.
+  - While a widget is placed on the desktop or in Notification Center, the snapshot is written on every polling round.
+  - With no widget placed, it is written only when a setting the widgets show changes (quote currency, language, colors, watchlist, menu bar coin), so a widget added later shows the right coins at once; prices are not written. The app asks WidgetKit which widgets are placed at most every 5 minutes.
+- Widget timeline: produces one entry; the next reload is scheduled 15 minutes later, and the system stretches it to fit its budget. When a widget is added, the system loads its timeline right away.
+- The app requests a reload (`WidgetCenter.reloadAllTimelines()`) only when a setting the widgets show changes while a widget is placed. It doesn't request reloads for time or price moves (changed 2026-11-18; it used to request one every 5 minutes and on any price move over 1%, about 290 requests a day, which used up the system's reload budget so widgets stopped updating, often in the evening, until the budget recovered).
+- When the app isn't running (snapshot not updated for more than 15 minutes), the widget fetches prices over the network itself: the price service, coin catalog, and exchange rate code are compiled into the extension, and the extension requests `network.client`. Fetched results are used only for that timeline and are not written back to the snapshot. If fetching fails or takes longer than 15 seconds (`WidgetContent.fetchTimeout`), it uses the old snapshot and shows the stale state.
 
 ## Project Setup
 
@@ -73,7 +76,7 @@ WidgetKit can't refresh every 10 seconds like the menu bar: the system gives eac
 - App Group: `$(TeamIdentifierPrefix)com.gicek.coinscal` (on macOS, prefixed with the Team ID; no provisioning profile needed). Both targets' entitlements include this group; the extension also needs the sandbox and `network.client`.
 - Configuration uses `AppIntentConfiguration` (macOS 14+). Coin options are an `AppEntity`, with the option list taken from the catalog in the snapshot.
 - Strings live in `Localizable.xcstrings` (semantic keys `widget.*`) in all three languages. The localization guard also scans `Apple/MacWidget`.
-- Tests (`WidgetTests`): snapshot encoding/decoding and fault tolerance, sorting / taking the first N, staleness checks, configuration defaults, without touching the real App Group.
+- Tests (`WidgetTests`): snapshot encoding/decoding and fault tolerance, sorting / taking the first N, staleness checks, configuration defaults, when the snapshot is written and when a reload is requested, without touching the real App Group or WidgetKit.
 
 ## Constraints
 
@@ -86,6 +89,6 @@ WidgetKit can't refresh every 10 seconds like the menu bar: the system gives eac
 
 - Both widgets can be added on the desktop and in Notification Center; all three sizes lay out correctly; change is distinguishable in light, dark, and monochrome modes.
 - Configuration defaults are correct; with "Follow Menu Bar Coin", changing the coin in the app is reflected at the next reload.
-- While the app runs, the update time is no older than about 15 minutes; after quitting the app, the widget fetches prices itself and shows the stale state when offline.
+- While the app runs, the update time keeps advancing through the whole day (every 15 to 30 minutes, as the system budget allows); after quitting the app, the widget fetches prices itself and shows the stale state when offline.
 - Strings are complete in all three languages, and the localization guard passes.
 - Clicking a widget opens the menu bar popover.

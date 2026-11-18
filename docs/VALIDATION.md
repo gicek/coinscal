@@ -11,6 +11,16 @@
 
 ## Records
 
+### 2026-11-18: Widget reloads
+
+The app no longer reloads the widgets every 5 minutes or on price moves, writes prices only while a widget is placed, and the widget's own request times out after 15 seconds ([WIDGET](WIDGET.md)).
+
+- Verified: `make test-mac` passes. Before the change, the system log showed 268 to 310 reload requests from Coinscal a day, one every 5 minutes.
+- Pending:
+  1. With a widget placed, its update time keeps advancing past 8 p.m. and through the next day.
+  2. Changing the quote currency, language, or menu bar coin in the app updates a placed widget soon after.
+  3. With no widget placed, adding one from the gallery shows current prices and the user's watchlist right away.
+
 ### 2026-11-18: Right-click menu
 
 The right-click menu drops "About Coinscal" and hides item images on macOS 27.

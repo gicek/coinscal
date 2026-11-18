@@ -4,6 +4,12 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-11-18
 
+### Fixed: Widgets stopped updating in the evening
+- Symptom: desktop and Notification Center widgets often stopped updating around 8 p.m. and didn't recover that day.
+- Root cause: besides each widget's own 15-minute timeline, the app asked WidgetKit to reload every widget every 5 minutes and on any price move over 1%, about 290 requests a day (counted in the system log). Requests from an app that isn't in front count against each widget's daily reload budget (dozens a day); once it ran out, the system refused every reload, the widgets' own included. The widget's own price request also had no overall deadline, so a slow failover could outlast the system's limit for building a timeline.
+- Fix: the app requests a reload only when a setting the widgets show changes while a widget is placed; the widgets refresh on their own timeline. With no widget placed, the app writes only those settings to the snapshot, not prices, and doesn't reload; it checks for placed widgets at most every 5 minutes and hands a newly added widget the latest prices without a reload. The widget's own request is cut off after 15 seconds, falling back to the last snapshot. The menu bar and the desktop ticker are unaffected.
+- Tests: `onlyVisibleSettingsReloadAndPricesNeedPlacedWidgets`, `writerFollowsPlacedWidgets` (replace the old throttling tests).
+
 ### Removed: About in the right-click menu
 The right-click menu no longer has "About Coinscal"; Settings → About still shows the same page. The menu is now: menu bar coin, Settings, Check for Updates, Quit. The unused `menu.about` string was removed in all three languages.
 

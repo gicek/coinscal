@@ -125,38 +125,81 @@ import Testing
         #expect(s.downColorHex == Constants.Defaults.upColorHex)
     }
 
-    @Test func reloadIsThrottledUnlessSomethingVisibleChanges() {
+    @Test func onlyVisibleSettingsReloadAndPricesNeedPlacedWidgets() {
         let base = snapshot(writtenAgo: 0)
-        let reloadedAt = now
-        func later(_ seconds: TimeInterval, _ change: (inout WidgetSnapshot) -> Void = { _ in }) -> WidgetSnapshot {
+        func later(_ change: (inout WidgetSnapshot) -> Void = { _ in }) -> WidgetSnapshot {
             var next = base
-            next.writtenAt = now.addingTimeInterval(seconds)
+            next.writtenAt = now.addingTimeInterval(60 * 60)
             change(&next)
             return next
         }
-        #expect(WidgetSnapshotWriter.needsReload(previous: nil, lastReloadAt: nil, next: base), "first write")
-        #expect(!WidgetSnapshotWriter.needsReload(previous: base, lastReloadAt: reloadedAt, next: later(60)))
-        #expect(WidgetSnapshotWriter.needsReload(previous: base, lastReloadAt: reloadedAt, next: later(5 * 60)), "5 minutes passed")
-        #expect(!WidgetSnapshotWriter.needsReload(previous: base, lastReloadAt: reloadedAt,
-                                                  next: later(60) { $0.quotes["bitcoin"]?.price = 80_700 }), "0.875% move")
-        #expect(WidgetSnapshotWriter.needsReload(previous: base, lastReloadAt: reloadedAt,
-                                                 next: later(60) { $0.quotes["bitcoin"]?.price = 81_000 }), "1.25% move")
-        #expect(WidgetSnapshotWriter.needsReload(previous: base, lastReloadAt: reloadedAt, next: later(60) { $0.currency = .cny }))
-        #expect(WidgetSnapshotWriter.needsReload(previous: base, lastReloadAt: reloadedAt, next: later(60) { $0.displayedCoinId = "solana" }))
-        #expect(WidgetSnapshotWriter.needsReload(previous: base, lastReloadAt: reloadedAt, next: later(60) { $0.language = .en }))
+        typealias Plan = WidgetSnapshotWriter.Plan
+        #expect(WidgetSnapshotWriter.plan(previous: nil, next: base, widgetsInstalled: true) == Plan(save: true, reload: false),
+                "first write after launch saves without a reload")
+        // Prices alone, even a big move an hour later, never reload.
+        let moved = later { $0.quotes["bitcoin"]?.price = 90_000 }
+        #expect(WidgetSnapshotWriter.plan(previous: base, next: moved, widgetsInstalled: true) == Plan(save: true, reload: false))
+        #expect(WidgetSnapshotWriter.plan(previous: base, next: moved, widgetsInstalled: false) == Plan(save: false, reload: false),
+                "no widget placed: prices aren't written")
+        #expect(WidgetSnapshotWriter.plan(previous: base, next: moved, widgetsInstalled: nil) == Plan(save: false, reload: false))
+        // Visible settings are always written, but reload only placed widgets.
+        for change in [{ (s: inout WidgetSnapshot) in s.currency = .cny }, { $0.displayedCoinId = "solana" },
+                       { $0.language = .en }, { $0.watchlist = ["bitcoin"] }, { $0.upColorHex = "#000000" }] {
+            let next = later(change)
+            #expect(WidgetSnapshotWriter.plan(previous: base, next: next, widgetsInstalled: true) == Plan(save: true, reload: true))
+            #expect(WidgetSnapshotWriter.plan(previous: base, next: next, widgetsInstalled: false) == Plan(save: true, reload: false))
+        }
     }
 
-    @Test func writerSavesEveryTimeButReloadsOnce() throws {
+    @Test func writerFollowsPlacedWidgets() throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("widget-tests-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: dir) }
+        let store = WidgetSnapshotStore(directory: dir)
         var reloads = 0
         var clock = now
-        let writer = WidgetSnapshotWriter(store: WidgetSnapshotStore(directory: dir), reloadWidgets: { reloads += 1 }, now: { clock })
-        writer.write(coins: [], settings: AppSettings())
+        var installed = false
+        var checks = 0
+        let writer = WidgetSnapshotWriter(
+            store: store, reloadWidgets: { reloads += 1 },
+            checkInstalled: { completion in checks += 1; completion(installed) }, now: { clock }
+        )
+        var settings = AppSettings()
+        let btc = Coin(id: "bitcoin", symbol: "BTC", name: "Bitcoin", rank: 1, logoAssetName: nil, logoURL: nil,
+                       currentPrice: 80_000, priceChange24hPercent: 1)
+        writer.write(coins: [btc], settings: settings)
+        let launchWrite = clock
+        #expect(store.load()?.writtenAt == launchWrite, "the first write always saves the settings")
+
+        // No widget: later prices are not written and nothing reloads.
         clock = clock.addingTimeInterval(30)
-        writer.write(coins: [], settings: AppSettings())
+        writer.write(coins: [btc], settings: settings)
+        #expect(store.load()?.writtenAt == launchWrite)
+        #expect(checks == 1, "WidgetKit is asked again only after the check interval")
+
+        // A settings change is written even without widgets, without a reload.
+        clock = clock.addingTimeInterval(30)
+        settings.baseCurrency = .cny
+        writer.write(coins: [btc], settings: settings)
+        #expect(store.load()?.currency == .cny)
+        #expect(reloads == 0)
+
+        // A widget is added: the next check writes the latest prices at once, without a reload.
+        installed = true
+        clock = clock.addingTimeInterval(WidgetSnapshotWriter.installedCheckInterval)
+        writer.write(coins: [btc], settings: settings)
+        #expect(checks == 2)
+        #expect(store.load()?.writtenAt == clock)
+        #expect(reloads == 0)
+
+        // Placed: every update is written, and only a visible settings change reloads.
+        clock = clock.addingTimeInterval(10)
+        writer.write(coins: [btc], settings: settings)
+        #expect(store.load()?.writtenAt == clock)
+        #expect(reloads == 0)
+        settings.language = .en
+        clock = clock.addingTimeInterval(10)
+        writer.write(coins: [btc], settings: settings)
         #expect(reloads == 1)
-        #expect(WidgetSnapshotStore(directory: dir).load()?.writtenAt == clock, "the snapshot itself is always current")
     }
 
     // MARK: Localization

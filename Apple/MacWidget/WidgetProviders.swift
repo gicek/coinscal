@@ -58,7 +58,7 @@ enum WidgetDataLoader {
         )
     }
 
-    /// nil when every source failed.
+    /// nil when every source failed or the request took longer than `WidgetContent.fetchTimeout`.
     private static func fetch(_ coins: [CoinMetadata], currency: BaseCurrency) async -> [String: WidgetSnapshot.Quote]? {
         guard !coins.isEmpty else { return [:] }
         var cancellable: AnyCancellable?
@@ -66,6 +66,8 @@ enum WidgetDataLoader {
             var resumed = false
             cancellable = priceService.fetchQuotes(symbols: coins.map(\.symbol), currency: currency)
                 .receive(on: DispatchQueue.main)
+                // Finishes without a value on timeout, which resumes with nil below.
+                .timeout(.seconds(WidgetContent.fetchTimeout), scheduler: DispatchQueue.main)
                 .sink(receiveCompletion: { _ in
                     if !resumed { resumed = true; continuation.resume(returning: nil) }
                 }, receiveValue: { value in
