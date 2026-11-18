@@ -1,0 +1,5 @@
+- Clicking the menu bar price closes the panel again on macOS 27, and the panel looks as before.
+- Widgets keep updating throughout the day, and the widget gallery previews your own coins with live prices.
+- The menu bar price stays sharp on a display that isn't active, and the right-click menu shows text only, without "About Coinscal".
+- Release notes for updates appear in the language you chose in Coinscal.
+- An updated coin list.

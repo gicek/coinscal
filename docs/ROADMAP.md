@@ -2,7 +2,7 @@
 
 ## Status
 
-Version 1.x, as defined in [Product](PRODUCT.md), is implemented and released: menu bar price, panel, watchlist, alerts, display currencies, widgets, the desktop ticker, in-app updates, and the website. 1.0.1 is the latest release. Open verification items are tracked in [Validation](VALIDATION.md).
+Version 1.x, as defined in [Product](PRODUCT.md), is implemented and released: menu bar price, panel, watchlist, alerts, display currencies, widgets, the desktop ticker, in-app updates, and the website. 1.1.0 is the latest release. Open verification items are tracked in [Validation](VALIDATION.md).
 
 ## Candidates
 

@@ -4,6 +4,8 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 
 ## Unreleased
 
+## 1.1.0 — 2026-11-18
+
 ### Fixed
 
 - Clicking the menu bar item now closes the panel on macOS 27; before, the panel disappeared and reopened.
@@ -19,6 +21,7 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 - The app writes widget data only while a widget is placed.
 - The right-click menu no longer has "About Coinscal"; it remains in Settings.
 - The panel is drawn by Coinscal instead of a system popover, with the same size, material, and placement.
+- The coin catalog is refreshed: 447 searchable coins.
 
 ### Development
 
