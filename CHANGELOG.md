@@ -7,6 +7,7 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 ### Fixed
 
 - Opening the menu bar panel no longer takes the active state from the frontmost app.
+- The menu bar panel has a thin outline like system popovers, instead of a doubled border.
 
 ### Added
 

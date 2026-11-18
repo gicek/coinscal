@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 /// Menu bar popover with the coin list and quick actions in the footer. The panel behind it provides the
-/// system popover material, corners, and shadow (`MenuBarPanelController`); this view adds only the edge line.
+/// system popover material, corners, and shadow (`MenuBarPanelController`); the shadow also draws the thin outline.
 /// Height follows the watchlist size: at least 4 rows, at most 8, then it scrolls.
 struct CoinPopoverView: View {
     @EnvironmentObject var coinListVM: CoinListViewModel
@@ -23,10 +23,6 @@ struct CoinPopoverView: View {
             width: Constants.Popover.width,
             height: Constants.Popover.height(forCoinCount: coinListVM.coins.count)
         )
-        .overlay {
-            RoundedRectangle(cornerRadius: Constants.Popover.cornerRadius, style: .circular)
-                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
-        }
         .clipShape(RoundedRectangle(cornerRadius: Constants.Popover.cornerRadius, style: .circular))
     }
 
