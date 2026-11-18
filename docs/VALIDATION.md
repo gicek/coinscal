@@ -1,188 +1,56 @@
-# Coinscal Implementation and Verification Status
+# Validation
 
-> The single record of what is verified and what is still pending. Entries are newest first; each says what changed, what was verified, and what remains to be tested. For features, see the [README](../README.md); for scope, see the [Project Definition](PROJECT.md); for change history, see the changelogs.
+What is verified and what still needs a manual check. Update this file when a check runs or a change adds manual work.
 
-## Automated Checks (last run 2026-11-18)
+## Automated Checks
 
-- `make test`: PASS.
-  - App: localization guards scan 45 files with 0 issues; the bundled coin catalog passes Python validation; 117 unit tests in 15 suites pass (`** TEST SUCCEEDED **`). Coverage: alert evaluation, price formatting, settings encoding/decoding and fault tolerance, menu bar price / icon logic, menu bar panel placement, widget coin selection / freshness / sorting / reload throttling / string keys, desktop ticker position and level, data source parsing, failover and cross-exchange fill-in, exchange rate caching and fallback, polling and currency switching, catalog validation, successor replacement, on-demand logo download and cache cleanup.
-  - Website: localization guards scan 7 scripts with 0 issues; 9 offline checks pass (formatting matches `PriceFormatter`, every page key exists, the CSP hash matches each inline script, outbound links are HTTPS, every demo coin has a logo, demo coins match the app's recommended coins, release notes cover every language, demo settings fall back field by field, price colors and the menu bar coin follow the app's rules).
-- `make mac-check-sources` (real network, manual): PASS. All four price sources and three exchange rate sources respond. All 450 catalog symbols get a price (USDT is priced locally); 374 symbols quoted by two or more sources agree within 2%, except two warnings within the 20% limit (ZIL 14.9%, AI 5.6%; illiquid pairs). With the Binance hosts unreachable, round 1 fails over in 10.3 s and round 2 starts from the working source in 0.1 s. All three exchange rate sources cover the 12 currencies, and failover from the first source works.
+Last run Nov 18, 2026.
 
-## Records
+| Check | Result |
+|---|---|
+| `make test-mac` | Localization guards (45 files), catalog validation, 117 unit tests in 15 suites: pass |
+| `make test-site` | Localization guards (7 files), 9 offline checks: pass |
+| `make mac-check-sources` (Oct 16, 2026) | All 4 price and 3 exchange rate sources respond; all 450 catalog symbols priced; failover with Binance unreachable takes one round |
+| CI | Repository hygiene, localization guards, website checks |
 
-### 2026-11-18: Menu bar price on an inactive display
+## Verified on a Real Mac
 
-A colored menu bar price, or one with a background, is drawn as an image.
+macOS 27.2.1 with a debug build, unless noted.
 
-- Verified: `make test-mac` passes. On macOS 27.2.1 with the status item on a secondary display, screenshots before and after: before, the inactive display showed the price blurred and heavier; after, with the background on (active and inactive) and off (inactive), the text stays sharp and fades like the neighboring items. The background is as wide as before (about 100pt for "BTC 64,529").
-- Pending:
-  1. Color on, background off, on an active display; "Color by Price Change" off with the background on, in light and dark menu bars.
-  2. On a non-Retina display.
+- Menu bar price, panel, right-click menu, and all Settings panes; settings survive an upgrade; instant language switching; no alerts on currency changes; notifications; login item; delisted and renamed coins (macOS 26, 1.0).
+- Panel: toggles reliably from the status item with a trackpad; closes on outside clicks, Esc, right click, app switching, and Settings; opens from `coinscal://popover`; looks like the system popover in light mode.
+- Right-click menu shows text only.
+- Menu bar price stays sharp on an inactive display, with and without a background.
+- The app no longer requests periodic widget reloads (none in 6 minutes, down from one every 5 minutes); "Coinscal" and "Coinscal Debug" widgets coexist.
+- Desktop ticker: level, click-through, positioning across displays, and persistence (macOS 26).
+- Release: notarized zip and DMG pass `spctl`; 1.0 and 1.0.1 published; downloads match the local builds; the website serves the latest DMG.
 
-### 2026-11-18: Separate debug app
+## Pending
 
-Debug builds are "Coinscal Debug" with their own IDs, App Group, and URL scheme.
+**Widgets**
+- With a widget placed, the update time keeps advancing through the evening and the next day.
+- Changing the display currency, language, or menu bar coin updates placed widgets soon after.
+- The gallery preview shows the user's coins with live prices, and offline falls back to sample prices.
+- All sizes in light, dark, and monochrome modes.
 
-- Verified: Release build settings keep `com.gicek.coinscal` and `com.gicek.coinscal.widget`. The debug build's Info.plist and signed entitlements carry `com.gicek.coinscal.debug`, `com.gicek.coinscal.debug.widget`, App Group `8XB77FYLQ6.com.gicek.coinscal.debug`, and scheme `coinscal-debug`. The installed 1.0.1 and the debug build run at the same time. After `make test-mac`, only `Build/macOS/Debug` is registered for `com.gicek.coinscal.debug.widget`. `make test` passes.
-- Pending:
-  1. The widget gallery lists "Coinscal" and "Coinscal Debug"; a "Coinscal Debug" widget previews and shows the debug build's data, and clicking it opens the debug build's panel.
+**Panel and menu bar**
+- With a real mouse, the panel's buttons ("Settings", "Manage Watchlist", "Quit", "Add Coins", "Update Available") work on the first click, from the status item and from a widget.
+- The panel's look in dark mode, and on macOS 14.
+- VoiceOver reads the panel and its rows.
+- The panel over a full-screen app and on a display without a menu bar.
+- The colored price without a background on an active display; the background with coloring off on light and dark menu bars; a non-Retina display.
+- The right-click menu shows no icons on macOS 14 and 26.
 
-### 2026-11-18: Widget reloads
+**Settings and desktop ticker**
+- Settings layout and title bar in all three languages, and on macOS 14 and 15.
+- Add panel: hover and click to remove and re-add; Return adds the first result.
+- Desktop ticker: resizing in place when text size or the watchlist changes, at most 16 coins, pulled back on screen near the bottom edge, readability over a dark wallpaper.
 
-The app no longer reloads the widgets every 5 minutes or on price moves, writes prices only while a widget is placed, and the widget's own request times out after 15 seconds ([WIDGET](WIDGET.md)).
+**Updates and release**
+- An update from 1.0 to 1.0.1 end to end: release notes in the system language, relaunch, settings and widgets intact.
+- A scheduled check shows "Update Available" without opening a window; a tampered archive is rejected; offline checks stay silent.
+- First launch from the DMG on another Mac is not blocked by Gatekeeper.
 
-- Verified: `make test-mac` passes. Before the change, the system log showed 268 to 310 reload requests from Coinscal a day, one every 5 minutes.
-- Pending:
-  1. With a widget placed, its update time keeps advancing past 8 p.m. and through the next day.
-  2. Changing the quote currency, language, or menu bar coin in the app updates a placed widget soon after.
-  3. With no widget placed, the gallery preview shows the menu bar coin and the watchlist with current prices, and the added widget shows them right away; offline, the preview falls back to the sample prices.
-
-### 2026-11-18: Right-click menu
-
-The right-click menu drops "About Coinscal" and hides item images on macOS 27.
-
-- Verified: `make test-mac` passes (localization guards report no orphan or missing keys after removing `menu.about`). On macOS 27.2.1 with a debug build, the right-click menu shows "Menu Bar Coin", "Settings", "Check for Updates", and "Quit Coinscal" as text only, with no gear in front of "Settings".
-- Pending:
-  1. The "Menu Bar Coin" submenu shows no icons on macOS 27.
-  2. On macOS 14 and macOS 26, the menu still shows no icons.
-
-### 2026-11-18: Menu bar panel
-
-The menu bar popover is now an app-managed `NSPanel`, so clicking the status item closes it again on macOS 27 ([MENU_BAR_PANEL](MENU_BAR_PANEL.md)).
-
-- Verified: `make test` passes. With real trackpad clicks on macOS 27.2.1, repeated status item clicks open and close the panel every time (confirmed by the maintainer). With a debug build (synthetic mouse events and Accessibility): status item clicks open and close the panel four times in a row; a click in another app, Esc, a right click on the status item (the context menu appears), switching to Finder, and a click in the Settings window each close it; `coinscal://popover` opens it and an outside click closes it; pressing "Manage Watchlist" opens Settings on the Watchlist pane and closes the panel. The panel sits centered under the status item on a secondary display. In light mode, in front of a window full of text, the background stays an even frosted gray, the price colors read clearly, and the corners, edge line, and shadow match the old popover.
-- Pending:
-  1. With a real mouse or trackpad: the panel's Settings, "Manage Watchlist", Quit, "Add Coins", and "Update Available" buttons work on the first click, both from the status item and from a widget click.
-  2. Dark mode on macOS 27, and both modes on macOS 14: the panel's material, corners, and shadow look like the old popover.
-  3. VoiceOver reads the panel and its rows.
-  4. Opening the panel over a full-screen app and on a display without a menu bar.
-
-### 2026-10-16: 1.0.1 release
-
-1.0.1 (build 2) published with `make mac-publish CONFIRM=1.0.1` ([UPDATES](UPDATES.md)).
-
-- Verified: `make test` passes. `make mac-release-notarized`: app and DMG notarization Accepted, `spctl` reports `Notarized Developer ID` for both. `make mac-publish DRY_RUN=1` passed. After publishing, the zip, the DMG, and `Coinscal.dmg` on `dl.coinscal.app` match the local builds byte for byte; `appcast.xml` lists build 2 / 1.0.1; the release notes pages are served; GitHub Release `v1.0.1` has the zip and DMG, tagged at the release commit.
-- Pending:
-  1. With 1.0 installed: "Check for Updates" offers 1.0.1 with notes in the system language; installing relaunches into 1.0.1 with settings, watchlist, widgets, and login item intact.
-
-### 2026-10-16: Data source limits
-
-Primary batches leave out coins an exchange doesn't list, rate-limited sources are skipped, exchange rates are shared through the App Group, and ExchangeRate-API is credited ([DATA_SOURCE_LIMITS](DATA_SOURCE_LIMITS.md)).
-
-- Verified: `make test` and `make mac-check-sources` pass. Real network, watchlist BTC, ETH, OKB: only the first round requested Binance's full list; later batches asked for BTC and ETH only (weight +2), and OKB was priced from OKX every round. Real Mac: a relaunch and a widget reload within the hour reused `exchange-rates.json` without requesting rates; with a table older than an hour, the widget requested rates and rewrote the file. The About pane and the website footer (deployed to coinscal.app and coinscal.gicek.com) show the "Rates By Exchange Rate API" link.
-
-### 2026-10-16: Remove coins from the add panel
-
-Clicking an added coin in the Watchlist "+" panel removes it; hovering shows a red minus ([DESIGN](DESIGN.md)).
-
-- Verified: `make test-mac` passes.
-- Pending:
-  1. On a real Mac: hover an added row (red minus and highlight), click it (removed from the list below and from the menu bar if it was the menu bar coin), click again (added back at the end); Return still adds the first result that isn't added.
-
-### 2026-10-16: Desktop panel text size
-
-"Text Size" Normal / Large; Large adds 2pt to every text and keeps the icons ([DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).
-
-- Verified: `make test-mac` passes, including the rendered-height check at both sizes. On a real Mac with 7 coins, Large measured 400×351; names, prices, and changes are not truncated, and the icons keep their size.
-- Pending:
-  1. Switch between Normal and Large in Settings while the panel is shown and while adjusting: it resizes in place with its top edge fixed.
-
-### 2026-10-16: Desktop panel with one layout that fits the watchlist
-
-No size setting; the large widget's list with up to 16 coins and a height that fits them ([DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).
-
-- Verified: `make test-mac` passes, including the rendered-height check. On a real Mac with 8 coins, a panel saved as Large by the old version reopened at 364×361 with its top edge in place; the panel ends 14pt below the last row.
-- Pending:
-  1. Add and remove coins (1, 16, more than 16): the panel grows and shrinks downward and shows at most 16.
-  2. A panel near the bottom of a display that grows past it is pulled back on screen.
-
-### 2026-10-16: Colored text on the transparent desktop panel
-
-When the panel background is below 20%, 24h changes and the stale time are white and only the leading ▲ / ▼ or ⚠︎ keeps its color ([DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)).
-
-- Verified: `make test-mac` passes. On a real desktop over a light blue-gray to beige wallpaper with the background below 20%, the changes read as clearly as the prices and the arrow colors are recognizable.
-- Pending:
-  1. The same check over a dark wallpaper; widgets look unchanged.
-
-### 2026-10-16: In-app updates and the 1.0 release
-
-Sparkle 2.10.0 in the app, update signing key, release signing, and `make mac-publish` ([UPDATES](UPDATES.md)).
-
-- Verified: R2 bucket `coinscal-dl` serves only through `https://dl.coinscal.app` (the `r2.dev` URL is disabled; `/` and unknown keys return 404); a probe object uploaded with Wrangler was served over HTTPS with its content type and cache headers, then deleted. `make test` passes with 102 tests in 14 suites (5 new in `UpdateControllerTests`); the Debug build embeds `Sparkle.framework`, the entitlements expand to `com.gicek.coinscal-spks` / `-spki`, and `Info.plist` carries the feed URL and public key; a Developer ID-signed `make mac-release` build has `Installer.xpc`, `Downloader.xpc`, `Autoupdate`, and `Updater.app` re-signed with the Team ID, Hardened Runtime, and a timestamp, and passes the release checks; the appcast and release notes pages render as valid XML and HTML with escaping. `make mac-release-notarized` with Sparkle embedded: app and DMG notarization Accepted, `spctl` reports `Notarized Developer ID` for both. `make mac-publish DRY_RUN=1` for 1.0: all checks pass, the zip is signed with the Keychain key, and the signature verifies against the app's `SUPublicEDKey` (CryptoKit). Published with `make mac-publish CONFIRM=1.0` (one transient Wrangler upload failure before retries were added; the appcast is uploaded last, so the feed was never inconsistent): the zip, DMG, and `Coinscal.dmg` on `dl.coinscal.app` match the local builds byte for byte; `appcast.xml` (`max-age=300`) and the release notes (immutable) are served with the right content types; the GitHub Release `v1.0` has the zip and DMG; the website's download buttons serve the DMG.
-- Pending:
-  1. Download the DMG from the website on another Mac: first launch isn't blocked by Gatekeeper.
-  2. End to end with two published builds: a manual check offers the new build with release notes in the system language; installing replaces and relaunches the app; settings, watchlist, widgets, and the login item survive.
-  3. A scheduled check shows "Update Available" in the popover without opening a window, and the capsule disappears after the update window is seen.
-  4. An archive with a bad EdDSA signature is rejected; offline, a scheduled check stays silent and the app keeps working.
-  5. Right-click menu and About pane layout in all three languages.
-
-### 2026-10-16: Website
-
-Static site in `Site/`, deployed to `coinscal.app` and `coinscal.gicek.com` ([WEBSITE](WEBSITE.md)).
-
-- Verified (Chrome via Playwright, local preview and production): live prices over the Binance WebSocket and the Wi-Fi state; with the WebSocket blocked, REST polls every 10 seconds (requests at 0.3 s, 10.3 s, 21.3 s, 32.3 s) and prices stay live; the panel shows and hides from the Coinscal item and the power button; currency, background, and watchlist changes reach the panel and the menu bar item; the language menu works by mouse and keyboard and switches all three languages in place; light and dark; 390 pt wide with no horizontal scroll. On both domains: HTTPS, the CSP and other headers in effect, unknown paths and files in `.assetsignore` return 404, no console errors, and Cloudflare Web Analytics loads under the CSP on `coinscal.app`.
-- Pending: Safari on macOS and iOS (glass panel `backdrop-filter`, `light-dark()` colors, select menus, language menu); Lighthouse ≥ 90 in performance, accessibility, best practices, and SEO; download buttons, once the repository and its first release are public.
-
-### 2026-10-16: Settings window default size; no scroll bars in lists
-
-- Verified on a real Mac: with no saved frame, the Settings window opens at 786×500 (twice in a row), and a saved 800×500 frame is still restored; the watchlist list's scroll area has no scroll bar (Accessibility).
-- Pending: none.
-
-### 2026-10-15: Developer ID code signing and notarization
-
-- Verified: `make mac-release-notarized` got Accepted for both the app and DMG; ticket stapling validates; `spctl` assesses both as `Notarized Developer ID`; the app extracted from the zip with a download quarantine attribute passes Gatekeeper; the app and the widget are Developer ID signed, with Hardened Runtime, a timestamp, no `get-task-allow`, and the App Group expanded to the Team prefix; the signed Release app runs, shows prices, and the widget extension launches. Without notarization, `spctl` reports `Unnotarized Developer ID` (expected).
-- Pending: download the zip and DMG through a browser on another Mac; first launch isn't blocked by Gatekeeper, and the widget can be added.
-
-### 2026-10-15: DMG installer
-
-- Verified (macOS 26, Retina): layout aligns with the background; the volume icon in the Finder title bar and sidebar shows a disk with the logo; `hdiutil verify` and the code signing check of the bundled app pass.
-- Pending: open the DMG on another Mac (macOS 14 / 15, including a non-Retina display): the background is sharp, the icons sit at both ends of the illustration, the volume icon shows the logo, and file names are readable in dark mode.
-- Known limitation (accepted 2026-10-15): with "show hidden files" on, Finder occasionally scrolls sideways and reveals `.background` and `.VolumeIcon.icns` (2 of 5 times in testing). Both files are required; users who don't show hidden files are unaffected.
-
-### 2026-10-15: Coin catalog top 1000 and on-demand logos
-
-- Verified: five coins without a bundled logo (HYPE, CKB, CVC, NVDAx, MOVR) added from search each got a valid `CoinLogos/<id>.img` (PNG or JPEG, 1–28KB) in the App Group container, and bundled coins weren't downloaded; removing CVC and MOVR deleted their files and kept the others; the catalog has 451 listed coins (119KB); generating with `--previous` keeps old ids and migrations (EOS → Vaulta, FTM → Sonic).
-- Pending: a downloaded logo stays after going offline and relaunching; the watchlist widget and the desktop ticker show it on their next refresh.
-
-### 2026-10-15: Desktop ticker
-
-- Verified (measurements in [DESKTOP_OVERLAY](DESKTOP_OVERLAY.md)): level between the wallpaper and the icons; top-right by default; click-through; turning it on enters adjustment; switching size during adjustment stays in adjustment; switching size when placed keeps the top-left corner fixed; adjusting saves the position and restores click-through; the position persists after relaunch without entering adjustment; dragging to an external display persists after relaunch; the opacity slider writes to settings.
-- Pending: how the frosted glass blends with real wallpapers; light / dark readability at each opacity, especially below 20% on light wallpapers; desktop icons under the panel can still be selected and dragged; unplugging the panel's display moves it to the nearest display, and it returns when reconnected; position after sleep and wake; full-screen apps and switching Spaces; unaffected by "Click wallpaper to reveal desktop".
-
-### 2026-10-15: Desktop and Notification Center widgets
-
-- Verified: the extension is registered by the system; the app writes snapshots; `coinscal://popover` opens the popover both while the app runs and from a cold launch.
-- Pending: both widgets in all three sizes can be added on the desktop and in Notification Center; change is distinguishable in light, dark, and monochrome (app window in front); edit option defaults and changes take effect; updates within about 15 minutes while the app runs, and fetches prices itself after the app quits; clicking a widget opens the popover even when the app isn't running, and clicking the desktop or another app closes it.
-
-### 2026-10-15: Settings window and icons
-
-- Verified: on macOS 26 (Accessibility), the title bar height and title position match in all three panes, the title follows the pane and the language, and "General" scrolls under the title bar.
-- Pending:
-  1. Title bar on macOS 14 / 15: same checks as above.
-  2. Settings "Menu Bar" section and "Show" switch: section and row names are correct in all three languages; Price ↔ Icon takes effect immediately; in Icon mode the related options are grayed out while the quote currency stays editable; the segmented control isn't truncated in any language, and the title refreshes after switching languages.
-  3. Layout of the whole Settings window in all three languages (longest English labels: "Color by Price Change", "Green Up, Red Down").
-  4. Redrawn icons: the menu bar logo (shown with no price, for example when launched offline) is sharp and correctly sized on light and dark menu bars and on Retina and non-Retina displays; the app icon matches the size of other icons in Finder, Launchpad, and notifications; the About pane logo is sharp.
-
-### 2026-10-15: Coinscal 1.0 baseline
-
-Debug build on macOS 26; the preferences domain was backed up before testing and restored afterward.
-
-- Verified on a real Mac:
-  1. Menu bar price, left-click popover, right-click menu, and the three Settings panes.
-  2. Upgrade compatibility: existing settings (language, watchlist and order, alert conditions, display options, open at login) read back unchanged.
-  3. Instant switching among the three languages, including the Settings window title and the color scheme radio group.
-  4. USDT in the watchlist shows 1.00; with a coin not listed on Binance, other coins still update.
-  5. Switching the quote currency doesn't trigger alerts; prices convert with exchange rates.
-  6. System notifications arrive with correct text (they don't appear when the app's notifications are off in System Settings, which is system behavior).
-  7. "Open at Login" drives the system login item (on → enabled, off → disabled).
-  8. Delisted coins show "No market data"; a renamed coin (RENDER) shows live prices.
-- Pending:
-  1. With MATIC in the watchlist and a catalog that marks it `migrated` (the bundled snapshot has no migrated entries; this applies to a future catalog update), it shows as POL with a price after launch (unit-tested).
-  2. The "No market data" text for delisted coins in the popover.
-  3. A first launch with no saved settings doesn't register a login item (unit-tested).
-  4. Above / Below alerts fire only when the price crosses the threshold (unit-tested).
-
-## Focused Verification
-
-The checklist for remote coin catalog updates (not implemented) is in "Acceptance Checklist" in [COIN_CATALOG](COIN_CATALOG.md).
+**Website**
+- Safari on macOS and iOS: glass panel, `light-dark()` colors, menus.
+- Lighthouse ≥ 90 in all four categories.

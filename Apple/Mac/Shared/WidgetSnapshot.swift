@@ -1,6 +1,6 @@
 import Foundation
 
-/// What the app hands to the widget extension through the App Group container (docs/WIDGET.md).
+/// What the app hands to the widget extension through the App Group container (docs/ARCHITECTURE.md, "Widgets").
 /// Written after every poll; the widget uses it while fresh and fetches prices itself otherwise.
 struct WidgetSnapshot: Codable, Equatable, Sendable {
     struct Quote: Codable, Equatable, Sendable {

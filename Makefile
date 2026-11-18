@@ -9,7 +9,7 @@ LANGS := en,zh-Hans,zh-Hant
 # Three localization guards (scripts/i18n-guard.py): raise --min-files as the project grows so a broken path can't pass silently
 I18N_GUARD := python3 scripts/i18n-guard.py --langs "$(LANGS)" --min-files 20
 
-# Built-in coin catalog (docs/COIN_CATALOG.md); make test-mac validates it offline, make catalog regenerates it online
+# Built-in coin catalog (docs/DATA_SOURCES.md); make test-mac validates it offline, make catalog regenerates it online
 CATALOG_FILE := Apple/Mac/Resources/coins.json
 
 # Local developer config (not committed; template in local.mk.example)
@@ -37,7 +37,7 @@ LSREGISTER := /System/Library/Frameworks/CoreServices.framework/Frameworks/Launc
 MAC_APP := $(MAC_BUILD_ROOT)/$(CONFIGURATION)/$(PRODUCT).app
 MAC_DIST := $(MAC_BUILD_ROOT)/Dist
 MAC_RELEASE_APP := $(MAC_BUILD_ROOT)/Release/$(PRODUCT).app
-# Release signing (docs/DEVELOPMENT.md, "Release"): manual Developer ID signing, no development certificate or provisioning profile.
+# Release signing (docs/RELEASING.md): manual Developer ID signing, no development certificate or provisioning profile.
 # Notarization credentials go in local.mk: NOTARY_PROFILE, or ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH
 DEVELOPER_ID ?= Developer ID Application
 RELEASE_SIGNING_FLAGS := DEVELOPMENT_TEAM="$(DEVELOPMENT_TEAM)" CODE_SIGN_STYLE=Manual \
@@ -50,13 +50,13 @@ BUILD_NUMBER := $(shell sed -nE 's/^ *CURRENT_PROJECT_VERSION: *"?([^"]+)"?.*/\1
 MIN_MACOS := $(shell sed -nE 's/^ *macOS: *"?([^"]+)"?.*/\1/p' Apple/project.yml | head -1)
 BUILD_TARGETS += mac
 TEST_TARGETS += test-mac
-# Sparkle (in-app updates, docs/UPDATES.md): command-line tools from the pinned release; the signing key lives in the
+# Sparkle (in-app updates, docs/RELEASING.md): command-line tools from the pinned release; the signing key lives in the
 # login Keychain under this account
 SPARKLE_VERSION := 2.10.0
 SPARKLE_SHA256 := c2bf58aa8387266ac179357b1415d6f2635f044da8be41042af32425dae6da0c
 SPARKLE_DIR := $(BUILD_ROOT)/Sparkle/$(SPARKLE_VERSION)
 SPARKLE_KEY_ACCOUNT := com.gicek.coinscal
-# Update files (docs/UPDATES.md): R2 bucket served only through this download domain
+# Update files (docs/RELEASING.md): R2 bucket served only through this download domain
 DOWNLOAD_BUCKET := coinscal-dl
 DOWNLOAD_URL := https://dl.coinscal.app
 
@@ -128,7 +128,7 @@ mac-release: mac-release-app
 # Check notarization credentials before building, so a missing one doesn't waste a Release build
 mac-release-notarized:
 	@test -n "$(NOTARY_PROFILE)" || { test -n "$(ASC_KEY_ID)" && test -n "$(ASC_ISSUER_ID)" && test -n "$(ASC_KEY_PATH)"; } || \
-	    { echo "Notarization credentials missing: set NOTARY_PROFILE, or ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH, in local.mk (see docs/DEVELOPMENT.md, \"Release\")"; exit 1; }
+	    { echo "Notarization credentials missing: set NOTARY_PROFILE, or ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH, in local.mk (see docs/RELEASING.md)"; exit 1; }
 	$(MAKE) mac-release-app
 	$(RELEASE_ENV) scripts/release/release.sh "$(MAC_RELEASE_APP)" "$(MAC_DIST)" "$(MAC_BUILD_ROOT)/Release-work" "$(VERSION)" --notarize
 

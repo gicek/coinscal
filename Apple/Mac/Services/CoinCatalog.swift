@@ -2,7 +2,7 @@ import AppKit
 import Combine
 import OSLog
 
-/// Coin catalog: the single metadata source for the watchlist, search, recommendations and the context menu (docs/COIN_CATALOG.md).
+/// Coin catalog: the single metadata source for the watchlist, search, recommendations and the context menu (docs/DATA_SOURCES.md, docs/ARCHITECTURE.md).
 /// Currently reads the bundled `coins.json` snapshot only; remote updates are phase 3 of the plan.
 @MainActor
 final class CoinCatalog: ObservableObject {

@@ -1,7 +1,7 @@
 import AppKit
 
 /// Logos of watchlist coins without a bundled asset, downloaded once by the app (`CoinLogoStore`) into the App Group
-/// container so the widget and the desktop ticker can show them too (docs/COIN_CATALOG.md, "Logos").
+/// container so the widget and the desktop ticker can show them too (docs/ARCHITECTURE.md, "Coin Catalog Client").
 /// A nil directory (no App Group, e.g. an unsigned build) means no cache: views fall back to the remote URL or a placeholder.
 struct CoinLogoCache: Sendable {
     static let folderName = "CoinLogos"

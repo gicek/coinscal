@@ -1,8 +1,7 @@
 name: tests
 
-# Covers components that don't depend on a machine-specific toolchain. App target tests, which depend on a pinned Xcode version, run locally with `make test`.
-# Uninitialized components (no gradlew / package.json) are detected and skipped by each job's first step,
-# so CI isn't red on a freshly scaffolded repo; components start running once initialized.
+# Checks that don't need Xcode: repository hygiene, localization guards, and the website's offline checks.
+# The app's unit tests need Xcode 27 and run locally with `make test` (docs/DEVELOPMENT.md).
 
 on:
   push:
@@ -33,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Three Mac string guards
-        # Same as the i18n step in make test-mac; app unit tests depend on the local Xcode 26 SDK and run locally with make test
+        # Same as the i18n step in make test-mac
         run: python3 scripts/i18n-guard.py --langs "en,zh-Hans,zh-Hant" --min-files 20 --platform apple --root Apple/Mac --extra Apple/MacWidget
       - name: Three website string guards
         # Same as the i18n step in make test-site

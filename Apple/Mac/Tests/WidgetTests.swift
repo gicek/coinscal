@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import Coinscal
 
-/// Widget rules (docs/WIDGET.md). The snapshot store only ever uses a temporary directory, never the App Group.
+/// Widget rules (docs/ARCHITECTURE.md, "Widgets"). The snapshot store only ever uses a temporary directory, never the App Group.
 @MainActor
 @Suite struct WidgetTests {
     private let now = Date(timeIntervalSince1970: 1_800_000_000)

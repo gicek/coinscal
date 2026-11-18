@@ -9,7 +9,7 @@ struct CoinscalWidgets: WidgetBundle {
     }
 }
 
-/// Small: one coin (docs/WIDGET.md).
+/// Small: one coin (docs/PRODUCT.md, "Widgets").
 struct CoinPriceWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: "CoinPriceWidget", intent: CoinPriceConfigurationIntent.self, provider: CoinPriceProvider()) { entry in

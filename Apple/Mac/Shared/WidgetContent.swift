@@ -43,7 +43,7 @@ struct WidgetEntryContent: Equatable, Sendable {
     }
 }
 
-/// Pure widget rules (docs/WIDGET.md), shared by the app (tests) and the extension.
+/// Pure widget rules (docs/ARCHITECTURE.md, "Widgets"), shared by the app (tests) and the extension.
 enum WidgetContent {
     /// Coin entity id meaning "follow the menu bar coin" (the price widget's default).
     static let followMenuBarCoinID = "follow-menu-bar"

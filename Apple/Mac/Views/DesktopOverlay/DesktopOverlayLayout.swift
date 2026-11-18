@@ -1,7 +1,7 @@
 import CoreGraphics
 import Foundation
 
-/// Pure rules of the desktop overlay (docs/DESKTOP_OVERLAY.md): window size, placement and content.
+/// Pure rules of the desktop overlay (docs/ARCHITECTURE.md, "Desktop Ticker"): window size, placement and content.
 enum DesktopOverlayLayout {
     /// Gap to the visible screen edge for the default corner.
     static let margin: CGFloat = 24

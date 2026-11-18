@@ -5,7 +5,7 @@
 # Environment: DEVELOPER_ID (signing identity, default "Developer ID Application"), DEVELOPMENT_TEAM;
 #   notarization credentials, one of: NOTARY_PROFILE (the keychain profile name saved by notarytool
 #   store-credentials), or ASC_KEY_ID + ASC_ISSUER_ID + ASC_KEY_PATH (App Store Connect API key).
-# Called by make mac-release / make mac-release-notarized; see "Release" in docs/DEVELOPMENT.md.
+# Called by make mac-release / make mac-release-notarized; see docs/RELEASING.md.
 set -euo pipefail
 
 APP="$1"
@@ -95,7 +95,7 @@ verify_app_signature() {
 [ -x "$APP/Contents/MacOS/$PRODUCT" ] || { echo "Missing build product: ${APP}"; exit 1; }
 if [ "$NOTARIZE" = 1 ] && ! notary_args >/dev/null; then
     echo "Missing notarization credentials: set NOTARY_PROFILE in local.mk (run xcrun notarytool store-credentials first),"
-    echo "or ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH. See \"Release\" in docs/DEVELOPMENT.md."
+    echo "or ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH. See docs/RELEASING.md."
     exit 1
 fi
 

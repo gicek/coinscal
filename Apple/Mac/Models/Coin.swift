@@ -1,6 +1,6 @@
 import Foundation
 
-/// Trading status of a catalog coin (docs/COIN_CATALOG.md).
+/// Trading status of a catalog coin (docs/DATA_SOURCES.md, "Coin Catalog").
 enum CoinStatus: String, Codable, Sendable {
     /// At least one price source has a USDT spot pair.
     case active

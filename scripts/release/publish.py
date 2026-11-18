@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publishes a notarized release (make mac-publish; design in docs/UPDATES.md).
+"""Publishes a notarized release (make mac-publish; see docs/RELEASING.md).
 
 Order: check the notarized zip and DMG, the release notes, and that the build number is higher than the live
 appcast's -> sign the zip for Sparkle -> render release notes and appcast.xml -> upload the archives, the notes, and

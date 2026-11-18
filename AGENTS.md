@@ -1,121 +1,82 @@
-# Coinscal Repository Development Rules
+# Repository Rules
 
-This file applies to the whole repository and follows the shared project development guide (`project-guide`). Where it conflicts with the guide, this file wins, and the difference is recorded in "Deviations from the Standard".
+Rules for everyone changing this repository, human or agent. Product scope is in [docs/PRODUCT.md](docs/PRODUCT.md), the code structure in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Project Profile
+## Project
 
-| Dimension | Value |
+| Item | Value |
 |---|---|
-| Client platform | macOS (menu bar app) |
-| Shared core | None |
-| Website | Static site in `Site/` (plain HTML, CSS, and JavaScript, no build step), served at `coinscal.app` and `coinscal.gicek.com` by Cloudflare Workers Static Assets (`make site-deploy`); see [WEBSITE](docs/WEBSITE.md) |
-| Backend | None (the client calls public price / exchange rate APIs directly) |
-| Admin console | None |
-| Distribution | Direct Mac download as zip and DMG, signed with Developer ID (`make mac-release`); notarized with the ticket stapled before public distribution (`make mac-release-notarized`); published to `dl.coinscal.app` and GitHub Releases (`make mac-publish`), with in-app updates through Sparkle ([UPDATES](docs/UPDATES.md)) |
-| UI languages | `en`, `zh-Hans`, `zh-Hant` (source language `en`), switchable instantly in the app and on the website |
-| Minimum OS | macOS 14 (the 4-year rule would give macOS 13; see "Confirmed Product Decisions" in PROJECT for why) |
-| License | MIT (`LICENSE`). The repo will be public: don't commit keys, internal addresses, or personal config |
-| Guide version | project-guide 1.1 |
+| Product | Coinscal, a macOS menu bar app for crypto prices |
+| App | `Apple/`: target and scheme `CoinscalMac` (`Apple/Mac`), widget extension `CoinscalWidget` (`Apple/MacWidget`, shared code in `Apple/Mac/Shared`), tests `CoinscalMacTests` (`Apple/Mac/Tests`) |
+| Website | `Site/`: static HTML, CSS, and JavaScript on Cloudflare ([docs/WEBSITE.md](docs/WEBSITE.md)) |
+| Backend | None; the app calls public, key-free APIs |
+| Platform | macOS 14+, Apple silicon; built with Xcode 27 |
+| Languages | `en` (source), `zh-Hans`, `zh-Hant` |
+| Distribution | Developer ID-signed, notarized zip and DMG with Sparkle updates ([docs/RELEASING.md](docs/RELEASING.md)) |
+| License | MIT; the repository is public |
 
-## Product Name
+## Names and Identifiers
 
-- Product name: `Coinscal`
-- Tagline: Real-time crypto price monitor
-- Don't introduce former product names in code, docs, targets, bundle IDs, logs, or UI strings.
+- The product name is `Coinscal` everywhere: bundle name, process, Swift module.
+- Release bundle ID `com.gicek.coinscal`, widget `com.gicek.coinscal.widget`, App Group `$(TeamIdentifierPrefix)com.gicek.coinscal`, URL scheme `coinscal`. Debug builds use the `.debug` variants and the scheme `coinscal-debug`, named "Coinscal Debug".
+- These values come only from `COINSCAL_APP_ID`, `COINSCAL_DISPLAY_NAME`, and `COINSCAL_URL_SCHEME` in `Apple/project.yml`. Never hardcode them in code, entitlements, or Info.plist.
+- User settings live in the `UserDefaults` domain of the bundle ID; changing the release ID requires a settings migration.
 
-## Where Status and History Live
+## Build
 
-Documents are either current-state or historical. Keep each kind in its own place.
-
-| Kind | Documents | Rule |
-|---|---|---|
-| Current state | `README.md`, `AGENTS.md`, `docs/PROJECT.md`, `docs/DESIGN.md`, `docs/TECHNICAL.md`, `docs/DEVELOPMENT.md`, `docs/LOCALIZATION.md`, topic docs (`docs/<TOPIC>.md`), `THIRD_PARTY_NOTICES.md` | Describe the project as it is now. When something changes, rewrite the text; don't append "previously…" or "changed on…" narratives. Product decisions keep their approval date, and a changed default notes its date and old value in one parenthetical. |
-| History | `Apple/Mac/docs/CHANGELOG.md`, `Site/docs/CHANGELOG.md` | What changed and when, newest first. Fixes record symptom, root cause, fix, and tests. Entries aren't rewritten later. |
-| Status | `docs/VALIDATION.md` | What is verified and what is pending, with dates, newest first. |
-| Plans | `docs/ROADMAP.md`, `docs/PLAN.md` | What comes next. ROADMAP is the commitment; PLAN is a working draft and the tech debt register. |
-
-`README.md` covers only the introduction, shipped features, requirements, quick start, and links to docs. `docs/PROJECT.md` defines product scope; don't describe roadmap plans as shipped features.
-
-## Document Precedence
-
-Before changing scope or architecture, read in this order:
-
-1. `docs/PROJECT.md` defines the product and the first milestone.
-2. `docs/DESIGN.md` defines user flows, interaction rules, and UI states.
-3. `docs/TECHNICAL.md` defines data contracts, data sources, the concurrency model, and the test strategy.
-4. `docs/ROADMAP.md` defines development order and items under consideration.
-
-When documents conflict, the higher one wins; fix the lower one in the same change. `docs/PLAN.md` is the day-to-day work plan and tech debt log. It isn't a scope commitment and can change freely. When an item enters development and changes scope, interaction, or data contracts, still update the baseline docs above.
-
-**Changelogs**: `Apple/Mac/docs/CHANGELOG.md` (app) and `Site/docs/CHANGELOG.md` (website) record additions, changes, fixes, and removals in reverse date order. Add an entry to the affected component's changelog when a change is merged.
-
-## First Milestone Scope
-
-The first milestone (1.x) is a standalone menu bar price tool: the current price of one coin in the menu bar, the watchlist in a popover, per-coin price alerts, quote currency conversion, and a three-language UI. `docs/PROJECT.md` defines the scope.
-
-**Explicitly out of scope**: accounts and cloud sync, a custom backend, trading and order placement, holdings and P&L tracking, candlestick and historical charts, data sources that need an API key, and custom coins outside the coin catalog. Update `docs/PROJECT.md` and `docs/ROADMAP.md` before adding any of these.
-
-## Fixed Project Names
-
-- Xcode project: `Apple/Coinscal.xcodeproj`, generated from `Apple/project.yml`
-- macOS target and scheme: `CoinscalMac` (source in `Apple/Mac`; test target `CoinscalMacTests`, source in `Apple/Mac/Tests`)
-- Widget extension target: `CoinscalWidget` (source in `Apple/MacWidget`; source shared with the main app is in `Apple/Mac/Shared`, and other shared files are listed one by one in `project.yml`), bundle ID `com.gicek.coinscal.widget`, App Group `$(TeamIdentifierPrefix)com.gicek.coinscal`.
-- Website: `Site/` (messages in `Site/messages/`, tests in `Site/test/`, changelog in `Site/docs/CHANGELOG.md`).
-- Bundle ID: `com.gicek.coinscal` (tests `com.gicek.coinscal.tests`). The UserDefaults domain follows the bundle ID; changing the ID loses all user settings.
-- Debug builds are a separate app, "Coinscal Debug": `com.gicek.coinscal.debug`, widget `com.gicek.coinscal.debug.widget`, App Group `$(TeamIdentifierPrefix)com.gicek.coinscal.debug`, URL scheme `coinscal-debug`. These come from `COINSCAL_APP_ID`, `COINSCAL_DISPLAY_NAME`, and `COINSCAL_URL_SCHEME` per configuration in `project.yml`; never hardcode the IDs or the scheme in code, entitlements, or Info.plist. Release values are the ones above.
-- The product name is `Coinscal` everywhere (app bundle name, display name, process name, Swift module name).
-
-If the official bundle ID needs a different organization prefix, change all targets and all docs together, and provide a settings migration.
-
-## Build Output
-
-- Use the root `Makefile` for building, testing, running, and releasing. `make help` lists all commands.
-- All build caches and products go in the root `Build/macOS/`. Don't add `.build`, `DerivedData`, `build`, or `dist` in source directories. The website has no build step and is deployed from `Site/` as is.
-- `Build/` is a disposable derived directory and isn't committed to Git. Clean it with `make clean`.
-- Put machine-private config in `local.mk` (not committed; template in `local.mk.example`).
-- `Apple/project.yml` is the source of the Xcode project. After changing targets, build settings, or source paths, run `make project`. Don't edit `project.pbxproj` by hand. Adding or removing source files doesn't require a `project.yml` change (files are included by directory), but rerun `make project`.
+- Use the root `Makefile` (`make help`). All build output goes to `Build/`, which is never committed; nothing is built in source directories.
+- `Apple/project.yml` is the source of the Xcode project. Run `make project` after changing it or adding files; never edit `project.pbxproj` by hand. Files are included by directory, except that the widget extension lists the app files it compiles.
+- Machine-specific settings go in `local.mk` (template `local.mk.example`).
 
 ## Architecture Rules
 
-- UI state and view models are `@MainActor`. The price and exchange rate services are currently Combine publishers that deliver results on the main thread (the `PriceServicing` contract). New code uses async/await; the migration plan is in ROADMAP.
-- Inject networking, settings storage, system notifications, and the updater through protocols: `HTTPClient`, `SettingsStore`, `PriceAlertNotifying`, `UpdaterBackend`. Don't use `URLSession.shared`, `UserDefaults.standard`, or `UNUserNotificationCenter` directly in business types.
-- Polling must not cancel and resend while the previous request is still in flight. (When a data source times out, the next poll would interrupt failover, and it would never reach the later data sources.)
-- An alert's reference price and the current price must be in the same quote currency. On a currency change, discard in-flight results and reset the reference price.
-- `AppSettings` decoding must tolerate errors field by field, and new fields need defaults. Keep `addedCoins` as the JSON key for `watchlistCoins`.
-- Log with `Logger` (subsystem `com.gicek.coinscal`), not `print`. Don't log user settings.
-- **Text fields inside List rows are a trap** (`WatchlistView`): the underlying `NSTableView` intercepts first-responder clicks on in-row controls, and SwiftUI `FocusState` is unreliable inside rows. So the threshold input wraps an AppKit `NSTextField` that doesn't take part in hit testing while not editing; an outer tap gesture calls `makeFirstResponder` directly (`FullHitTextField` / `AlertFieldProxy`). The representable must implement `sizeThatFits` to fill the width. Don't "simplify" it back to a SwiftUI `TextField`.
-- **Watchlist drag reordering is gesture-driven** (`WatchlistReorderSupport.swift`): insertion slot = floating row center ÷ fixed row height of 44pt; on release, the order is committed once after the settle animation. Don't switch back to per-row hit testing with NSDraggingSession / DropDelegate; it jitters back and forth while rows animate out of the way.
-- **The menu bar popover is an `NSPanel`, not an `NSPopover`** (`MenuBarPanelController`): on macOS 27 pressing the status item closes a `.transient` popover on mouse-down and the mouse-up action reopens it. Keep the dismissal checks ignoring presses inside the status item window, and keep `acceptsFirstMouse` on the hosting view (the app is often not active while the panel is shown). See [MENU_BAR_PANEL](docs/MENU_BAR_PANEL.md).
-- **Settings window toolbar items live at the `SettingsWindow` level and exist on every pane** (hidden on panes that don't need them). Don't move them into a single pane's `.toolbar` or use `if` to leave an item empty: on a pane with no toolbar items SwiftUI removes the whole window toolbar, and the title bar and sidebar shift (see TECHNICAL).
-- **Website**: no framework, build step, or npm dependencies. Outbound links live only in `Site/js/config.js` (pages use `data-link`). Every visible string has a key in all three `Site/messages/*.json` files. Changing the inline script in a page's `<head>` changes its CSP hash: update `Site/_headers` in the same change (`make test-site` fails otherwise). A new API the demo calls must be added to the CSP `connect-src`.
-- Settings window panes don't set an explicit background color, so the system window material shows through. (On macOS 26 an opaque `windowBackgroundColor` layer doesn't match the material.)
+- View models and UI state are `@MainActor`. Services return Combine publishers that deliver on the main thread (`PriceServicing`); keep new services consistent with that until the async/await migration.
+- Inject networking, settings, notifications, and the updater through `HTTPClient`, `SettingsStore`, `PriceAlertNotifying`, and `UpdaterBackend`. Business types never use `URLSession.shared`, `UserDefaults.standard`, or `UNUserNotificationCenter` directly.
+- A polling round is never cancelled by the next timer tick; otherwise a slow source keeps failover from reaching the later sources.
+- Alert reference prices are valid in one display currency; a currency change discards results in flight and resets the references.
+- `AppSettings` decodes field by field with defaults for new fields; the JSON key of `watchlistCoins` stays `addedCoins`.
+- Log with `Logger` (subsystem `com.gicek.coinscal`), never `print`, and never log settings or the watchlist.
+- The widget snapshot writer reloads widgets only when a widget-visible setting changes; periodic or price-driven reloads exhaust the WidgetKit budget.
+- Keep these implementations; each replaces a simpler version that failed ([docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)):
+  - The menu bar panel is an `NSPanel`, not an `NSPopover`; its dismissal ignores presses in the status item window, and its hosting view accepts the first mouse.
+  - A colored menu bar price is drawn as one image, not an attributed title over a layer background.
+  - Watchlist row text fields wrap `NSTextField` (`FullHitTextField`, `AlertFieldProxy`), not a SwiftUI `TextField`.
+  - Watchlist reordering is gesture-driven (`WatchlistReorderSupport.swift`), not per-row drop targets.
+  - Settings toolbar items live on `SettingsWindow` and exist on every pane, hidden where unused.
+- Website: no framework, build step, or npm dependencies; outbound links only in `Site/js/config.js`; every visible string keyed in all three `Site/messages/*.json`; a changed inline script needs its new hash in `Site/_headers`; a new API needs a CSP `connect-src` entry.
 
 ## Security
 
-- Don't commit keys, signing material, or API tokens. Logs must not contain keys, tokens, or user content.
-- The sandbox requests only `network.client`. All data sources must use HTTPS; no ATS exceptions.
-- Pin versions when adding a dependency or tool, and update `THIRD_PARTY_NOTICES.md` in the same change. Don't copy, link, or derive from GPL code. The only third-party code dependency is Sparkle (Swift Package, pinned in `Apple/project.yml`, lock file committed); the third-party tools are Wrangler and Sparkle's command-line tools, pinned in the `Makefile`.
-- Cloudflare credentials stay in Wrangler's user config (`make site-login`) or the environment, never in the repository.
-- The EdDSA private key that signs updates stays in the login Keychain (account `com.gicek.coinscal`) and in the maintainer's offline backup. Only the public key (`SUPublicEDKey` in `Info.plist`) is committed. Changing the key strands installed copies on their current version.
+- Never commit keys, tokens, certificates, or local configuration. Logs contain no secrets or user content.
+- The app sandbox grants only `network.client` (plus the App Group and Sparkle's installer exceptions). All endpoints use HTTPS, with no ATS exceptions.
+- Dependencies and tools are pinned; a change updates [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) in the same commit. No GPL-derived code. The only code dependency is Sparkle.
+- The update signing key stays in the maintainer's Keychain and offline backup; only `SUPublicEDKey` is committed.
 
-## Tests and Definition of Done
+## Tests and Done
 
-- Add tests for feature changes at the lowest effective layer (Swift Testing for the app, `node:test` in `Site/test/` for the website). Items that need a real Mac or manual verification go under pending verification in `docs/VALIDATION.md`.
-- Write user-visible strings in the source language only and add them to `Apple/Mac/Resources/Localizable.xcstrings`, filling in all three languages in the same change. A localization guard failure in `make test-mac` is a defect; don't skip it. Use `Text(verbatim:)` for literals that don't need localization.
-- **Tests never touch the real UserDefaults, notification center, login items, updater, or network**: inject `InMemorySettingsStore`, `SpyNotifier`, `StubHTTPClient`, `FakePriceService`, `FakeUpdaterBackend` (`Apple/Mac/Tests/TestSupport.swift`). When the app launches as the test host, `AppDelegate` does no setup.
-- `make test` is the full test entry point. Judge success by the `** TEST SUCCEEDED **` result line, not by the exit code after a pipe.
-- When product decisions, user-visible interactions, milestone scope, dependencies, data sources, or file paths change, update the matching docs.
-- For string-only changes with no logic change, run `make test-mac` (includes the localization guards) and update the docs. For the website, run `make test-site`.
+- Add tests at the lowest effective level: Swift Testing for the app, `node:test` in `Site/test/` for the website. Tests never touch the real `UserDefaults`, notification center, login items, updater, or network; use the doubles in `Apple/Mac/Tests/TestSupport.swift`.
+- Write user-visible strings in English and add all three languages to the catalog in the same change ([docs/LOCALIZATION.md](docs/LOCALIZATION.md)). A localization guard failure is a defect.
+- `make test` must end with `** TEST SUCCEEDED **` and pass the website checks.
+- Manual checks that a change needs go into [docs/VALIDATION.md](docs/VALIDATION.md).
 
-## AI Collaboration
+## Documents
 
-- Don't commit unless explicitly asked. One change per commit; format `<type>(<scope>): <summary>`, imperative mood (e.g. `fix(alerts): reset reference price on currency change`).
-- For proposals that change product scope, data sources, or architecture, first write `docs/<TOPIC>.md` and register it under "Features Under Consideration" in ROADMAP. Implement only after approval.
-- Record decisions, removals, and default changes with an absolute date and a reason.
-- When confidence is low or something is ambiguous, list the options and let the user choose. Don't implement based on a guess.
+| Document | Role |
+|---|---|
+| `README.md` | Introduction, features, install, build, documentation index |
+| `docs/PRODUCT.md` | Scope and behavior; the reference for what the app does |
+| `docs/ARCHITECTURE.md` | Code structure, contracts, and implementation constraints |
+| `docs/DATA_SOURCES.md`, `docs/LOCALIZATION.md`, `docs/WEBSITE.md` | Topic references |
+| `docs/DEVELOPMENT.md`, `docs/RELEASING.md` | How to build, test, and release |
+| `docs/ROADMAP.md` | Status, candidates, and known issues |
+| `docs/VALIDATION.md` | Verification status |
+| `CHANGELOG.md` | User-visible changes by release |
 
-## Deviations from the Standard
+- Documents describe the current state. When behavior changes, rewrite the affected text instead of appending history; history belongs in `CHANGELOG.md` and Git.
+- A change that affects behavior, scope, data sources, dependencies, or paths updates the matching documents in the same change. If documents disagree, `PRODUCT.md` wins over `ARCHITECTURE.md`, which wins over the topic documents; fix the other one.
+- A change to scope, data sources, or architecture is proposed and approved before implementation, and recorded in `PRODUCT.md` or `ROADMAP.md`.
 
-- **Semantic localization keys** (e.g. `menu.change`) instead of English source strings as keys: to support instant in-app language switching, all strings go through `loc(_:)`, which picks the `.lproj` sub-bundle for the language. String Catalog entries are marked `extractionState: manual`, and `SWIFT_EMIT_LOC_STRINGS = NO`.
-- **Single-platform docs not merged**: DESIGN and PLAN stay separate rather than being merged into PROJECT / ROADMAP.
-- **CI doesn't run app tests**: the app target depends on the local Xcode 26 SDK, which hosted runners may not have. `make test` runs locally; CI runs the localization guards, the website checks, and the artifact hygiene check (see the comments in `.github/workflows/tests.yml`).
+## Commits
+
+- Commit only when asked. One change per commit, as `<type>(<scope>): <summary>` in the imperative.
+- When requirements are unclear, present the options instead of guessing.

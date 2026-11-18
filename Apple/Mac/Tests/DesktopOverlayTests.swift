@@ -4,7 +4,7 @@ import SwiftUI
 import Testing
 @testable import Coinscal
 
-/// Desktop overlay rules (docs/DESKTOP_OVERLAY.md). No window is created here.
+/// Desktop overlay rules (docs/ARCHITECTURE.md, "Desktop Ticker"). No window is created here.
 @MainActor
 @Suite struct DesktopOverlayTests {
     private let screen = CGRect(x: 0, y: 0, width: 1440, height: 875)

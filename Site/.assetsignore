@@ -3,7 +3,5 @@
 wrangler.jsonc
 package.json
 test
-docs
-README.md
 .wrangler
 releases

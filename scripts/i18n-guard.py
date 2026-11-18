@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Three localization guards (project-guide localization.md section 4). Called by `make test-<component>`;
+"""Three localization guards (docs/LOCALIZATION.md, "Guards"). Called by `make test-<component>`;
 exits with code 1 if any guard fails.
 
   1. Source scan: fails when source code contains non-source-language text outside localization APIs (literals

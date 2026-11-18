@@ -1,7 +1,7 @@
 import AppIntents
 import WidgetKit
 
-// "Edit Widget" options (docs/WIDGET.md). Titles are String Catalog keys; option lists follow the
+// "Edit Widget" options (docs/PRODUCT.md, "Widgets"). Titles are String Catalog keys; option lists follow the
 // system language because the system renders the edit panel.
 
 enum WidgetCurrencyOption: String, AppEnum {

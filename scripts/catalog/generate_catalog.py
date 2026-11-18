@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate and validate the coin catalog coins.json (plan: docs/COIN_CATALOG.md).
+"""Generate and validate the coin catalog coins.json (docs/DATA_SOURCES.md, "Coin Catalog").
 
     generate  CoinGecko top 1000 by market cap ∩ USDT spot pairs on any of Binance/OKX/Bybit → every tradable coin is listed
               (searchable); every id from the previous catalog is kept (migrated / delisted / tradable outside the top 1000)

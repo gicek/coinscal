@@ -4,7 +4,7 @@ export const SITE_URL = "https://coinscal.app/";
 
 export const LINKS = {
     github: "https://github.com/gicek/coinscal",
-    // The latest notarized DMG on the download domain (docs/UPDATES.md).
+    // The latest notarized DMG on the download domain (docs/RELEASING.md).
     download: "https://dl.coinscal.app/Coinscal.dmg",
     releases: "https://github.com/gicek/coinscal/releases",
     issues: "https://github.com/gicek/coinscal/issues",

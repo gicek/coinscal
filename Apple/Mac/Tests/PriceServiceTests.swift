@@ -93,7 +93,7 @@ import Testing
     }
 
     /// Regression: a coin Binance doesn't list made every poll a rejected batch plus the full list (weight 82 instead
-    /// of 2, docs/DATA_SOURCE_LIMITS.md). Once the full list shows it is missing, it stays out of the batch.
+    /// of 2, docs/DATA_SOURCES.md). Once the full list shows it is missing, it stays out of the batch.
     @Test func coinMissingOnBinanceLeavesTheBatch() async throws {
         let client = StubHTTPClient()
         client.on({ self.isBinance($0) && $0.hasQuery }, reply: .status(400, json(#"{"code":-1121,"msg":"Invalid symbol."}"#)))

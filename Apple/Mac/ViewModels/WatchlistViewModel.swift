@@ -15,7 +15,7 @@ final class WatchlistViewModel: ObservableObject {
     }
 
     /// What the add-coin panel lists: every listed coin in catalog order until a query is typed, then the matches.
-    /// Searched synchronously (about 100 coins), so the list never lags the text.
+    /// Searched synchronously (about 450 coins), so the list never lags the text.
     var addCoinResults: [CoinMetadata] {
         searchText.trimmingCharacters(in: .whitespaces).isEmpty ? catalog.listed : search(searchText)
     }

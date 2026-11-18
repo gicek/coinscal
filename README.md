@@ -1,83 +1,61 @@
 # Coinscal
 
-A lightweight macOS menu bar app for crypto prices. It keeps your watchlist prices and 24h change in the menu bar and sends a system notification when a price hits your target. No backend, no account, no data collection.
+Coinscal is a macOS menu bar app for crypto prices. It shows the price of a chosen coin in the menu bar, your watchlist in a panel, desktop and Notification Center widgets, and notifies you when a price reaches your target. It has no backend, no account, and collects no data.
+
+Website: [coinscal.app](https://coinscal.app/) · Download: [latest release](https://github.com/gicek/coinscal/releases/latest)
 
 ## Features
 
-- **Menu bar prices**: Shows the current price of the selected coin, colored by direction (green up / red down, red up / green down, or custom), with an optional background tint. Can also show only the app icon.
-- **Watchlist popover**: Left-click to see the price and 24h change of every coin in your watchlist. Right-click to quickly switch the menu bar coin.
-- **Watchlist management**: Search about 450 tradable coins (the top 1000 by market cap that trade on Binance, OKX, or Bybit) or add from recommended coins, and drag the handle to reorder. When a project migrates to a successor coin (e.g. MATIC → POL), the app switches to the new coin automatically.
-- **Desktop and Notification Center widgets**: Price and 24h change for a single coin or your watchlist. You can edit the coin, quote currency, sort order, and colors. Widgets update on their own even when the app isn't running.
-- **Desktop ticker**: Pins prices to the desktop like a sticky note. Mouse clicks pass straight through, it blends into the wallpaper, and it updates with the app every 10 seconds.
-- **Price alerts**: Set above, below, or percent-change alerts per coin. A triggered alert sends a system notification.
-- **Multiple quote currencies**: USD, CNY, KRW, HKD, JPY, TWD, SGD, MYR, AUD, CAD, EUR, GBP, with automatic exchange rate conversion.
-- **Multi-source failover**: Switches automatically when any price or exchange rate data source is unavailable. No API key needed.
-- **In-app updates**: Checks for a new version once a day, shows the release notes, and installs after you agree. Updates are signed and verified before installing.
-- **Launch at login** and **multiple languages**: English / Simplified Chinese / Traditional Chinese, switchable instantly while running.
+- **Menu bar price**: the selected coin's price, optionally colored by 24h change and set on a colored background, or just the app icon.
+- **Watchlist panel**: click the menu bar item for the price and 24h change of every coin in your watchlist.
+- **Watchlist**: search about 450 coins (the top 1000 by market cap that trade against USDT on Binance, OKX, or Bybit), add recommended coins, and drag to reorder. Coins the catalog marks as migrated to a successor are replaced automatically.
+- **Price alerts**: per coin, above or below a price, or a percentage move; delivered as system notifications.
+- **Widgets**: "Coin Price" and "Watchlist" for the desktop and Notification Center. They refresh on their own, even when the app isn't running.
+- **Desktop ticker**: a click-through price list pinned to the desktop, updated with the app every 10 seconds.
+- **12 display currencies**: USD, CNY, KRW, HKD, JPY, TWD, SGD, MYR, AUD, CAD, EUR, GBP.
+- **Reliable data**: public, key-free APIs with automatic failover between sources.
+- **In-app updates**: a daily check, release notes, and signed updates installed only after you agree.
+- **Languages**: English, Simplified Chinese, and Traditional Chinese, switchable without a restart.
 
 ## Requirements
 
-| Item | Requirement |
-|---|---|
-| System | macOS 14 or later, Apple silicon |
-| Development | Xcode 26.5, XcodeGen (`brew install xcodegen`); Node.js 20+ for website checks |
-
-## Quick Start
-
-```bash
-make mac-run                # Generate the project, build, and launch
-make test                   # Localization guards, unit tests, and website checks
-make mac-release            # Release: Developer ID-signed zip and DMG in Build/macOS/Dist/
-make mac-release-notarized  # Release and notarize: sign, notarize, and staple the ticket
-make site-run               # Preview the website at http://localhost:8787/
-make help                   # All commands
-```
-
-After launch, the BTC price appears in the menu bar. Left-click to open the watchlist popover, then use "Manage Watchlist" in the bottom bar to add coins and set alerts.
-
-## Data Sources
-
-The app calls public, key-free APIs directly and fails over in order:
-
-| Type | Source |
-|---|---|
-| Prices | Binance → Binance mirror (data-api.binance.vision) → OKX → Bybit |
-| Exchange rates | open.er-api.com → jsDelivr currency-api → currency-api.pages.dev (cached for 1 hour) |
-| Updates | `dl.coinscal.app` (Sparkle feed and signed archives) |
-| Coin catalog | Built-in snapshot, generated from CoinGecko market cap ranks and the spot listings of the three exchanges (`make catalog`) |
-
-Only coins quoted in USDT with a spot pair on the exchanges above are supported.
+macOS 14 or later on Apple silicon.
 
 ## Privacy
 
-- No servers, no sign-up, no data collected or uploaded.
-- Network requests go only to the public APIs above and, once a day, to `dl.coinscal.app` to check for updates (the sandbox grants only `network.client`).
-- Settings stay on your Mac.
-- The app requests notification permission only for price alerts.
+- Coinscal talks only to the public price and exchange rate APIs listed in [Data Sources](docs/DATA_SOURCES.md), and once a day to `dl.coinscal.app` to check for updates.
+- No account, analytics, or telemetry. Settings stay on your Mac.
+- Notification permission is used only for price alerts.
 
-## Development
+## Building from Source
 
+Requires Xcode 27 and XcodeGen (`brew install xcodegen`).
+
+```bash
+make mac-run    # generate the Xcode project, build, and launch "Coinscal Debug"
+make test       # localization guards, unit tests, and website checks
+make help       # all commands
 ```
-Apple/
-├── project.yml          # XcodeGen source → Coinscal.xcodeproj
-└── Mac/                 # App source (App / Models / Services / ViewModels / Views / Utilities / Resources)
-    ├── Tests/           # Unit tests (Swift Testing)
-    └── docs/CHANGELOG.md
-Site/                    # Website (static HTML / CSS / JS, deployed to Cloudflare)
-docs/                    # Project docs
-scripts/                 # Localization guard, DMG, release, coin catalog, website preview
-Build/                   # All build output (not committed)
-```
+
+Debug builds are a separate app, "Coinscal Debug", so they run next to an installed copy. See the [Development Guide](docs/DEVELOPMENT.md).
 
 ## Documentation
 
-- Website: [coinscal.app](https://coinscal.app/)
-- [Development rules](AGENTS.md)
-- [Project definition](docs/PROJECT.md) · [Interaction design](docs/DESIGN.md) · [Technical architecture](docs/TECHNICAL.md) · [Roadmap](docs/ROADMAP.md)
-- [Work plan](docs/PLAN.md) · [Implementation and verification status](docs/VALIDATION.md) · [Development guide](docs/DEVELOPMENT.md) · [Localization](docs/LOCALIZATION.md)
-- Topics: [Coin catalog](docs/COIN_CATALOG.md) · [Widgets](docs/WIDGET.md) · [Desktop ticker](docs/DESKTOP_OVERLAY.md) · [Website](docs/WEBSITE.md) · [Data source limits](docs/DATA_SOURCE_LIMITS.md)
-- [Changelog](Apple/Mac/docs/CHANGELOG.md) · [Website changelog](Site/docs/CHANGELOG.md) · [Third-party notices](THIRD_PARTY_NOTICES.md)
+| Document | Contents |
+|---|---|
+| [Product](docs/PRODUCT.md) | Scope, behavior of every surface, and product rules |
+| [Architecture](docs/ARCHITECTURE.md) | Code structure, data flow, contracts, and platform notes |
+| [Data Sources](docs/DATA_SOURCES.md) | Price and exchange rate sources, rate limits, and the coin catalog |
+| [Development](docs/DEVELOPMENT.md) | Toolchain, commands, configuration, and testing |
+| [Releasing](docs/RELEASING.md) | Signing, notarization, publishing, and in-app updates |
+| [Localization](docs/LOCALIZATION.md) | Languages, string rules, and terminology |
+| [Website](docs/WEBSITE.md) | The `coinscal.app` site and its live demo |
+| [Roadmap](docs/ROADMAP.md) | Status, candidates, and known issues |
+| [Validation](docs/VALIDATION.md) | Automated checks and pending manual verification |
+| [Changelog](CHANGELOG.md) | Changes by release |
+
+Contributions are welcome; see [CONTRIBUTING](CONTRIBUTING.md). Report security issues as described in [SECURITY](SECURITY.md).
 
 ## License
 
-[MIT](LICENSE). Third-party data and assets are listed in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE). Third-party components, data, and assets are listed in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md).

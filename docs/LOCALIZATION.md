@@ -1,56 +1,44 @@
-# Coinscal Localization
+# Localization
 
-> Localization contract and terminology. For implementation details, see "Localization Implementation" in [Technical Architecture](TECHNICAL.md).
+## Languages
 
-## Languages and Source
+`en` (source), `zh-Hans`, and `zh-Hant`, matching `LANGS` in the Makefile. App strings live in `Apple/Mac/Resources/Localizable.xcstrings`, website strings in `Site/messages/<lang>.json`. Both use semantic keys (for example `menu.quit` in the app), and every key is added in all three languages in the same change.
 
-Supported languages: `en`, `zh-Hans`, `zh-Hant` (matching `LANGS` in the Makefile). The source language is English. App strings live in `Apple/Mac/Resources/Localizable.xcstrings` and website strings in `Site/messages/<lang>.json`, both with semantic keys (such as `menu.change`); add all three languages in the same change. On first launch the app follows the system language and falls back to English if there is no match.
-
-## Manual Switching
-
-| Option | Persisted value | Display name |
+| Option | Stored value | Shown as |
 |---|---|---|
 | Follow System | `system` | Localized (`lang.system`) |
 | English | `en` | English |
-| Simplified Chinese | `zh-Hans` | Endonym in Simplified Chinese (`lang.endonym.zh-Hans`) |
-| Traditional Chinese | `zh-Hant` | Endonym in Traditional Chinese (`lang.endonym.zh-Hant`) |
+| Simplified Chinese | `zh-Hans` | Its own name (`lang.endonym.zh-Hans`) |
+| Traditional Chinese | `zh-Hant` | Its own name (`lang.endonym.zh-Hant`) |
 
-Sparkle's update window uses Sparkle's own translations and follows the system language, not the in-app setting; release notes are published in all three languages and Sparkle picks the one matching the system language.
-
-Each language's display name is written in that language itself and is not localized (catalog keys `lang.endonym.*`, with the same value in all three languages). Switching takes effect immediately without a restart. The system languages `zh-TW`, `zh-HK`, and `zh-MO` resolve to Traditional Chinese.
+Following the system uses the first preferred system language: Chinese tags resolve to Simplified or Traditional Chinese (`zh-TW`, `zh-HK`, and `zh-MO` to Traditional), anything else to English. Switching applies immediately. Sparkle's update window and the release notes follow the system language, not the in-app choice.
 
 ## Writing Strings
 
-- In code, get strings only through `loc("key")`; for format strings use `String(format: loc(...), ...)`.
-- Use `Text(verbatim:)` for literals that don't need localization (product name, `--`, `%`).
-- Numbers and prices always use POSIX formatting and don't change with the language (see "Copy Rules" in DESIGN).
+- Write user-visible strings in English only, then add the translations to the catalog.
+- Read strings only through `loc("key")`; format with `String(format: loc(…), …)`. Use `Text(verbatim:)` for text that isn't translated (the product name, `--`, `%`).
+- Strings with several arguments use positional placeholders (`%1$@`, `%2$@`), with the same count in every language.
+- Button and menu item labels never end with an ellipsis; placeholders may.
+- Prices and numbers use POSIX formatting in every language.
+- Traditional Chinese uses Taiwan terminology.
 
 ## Guards
 
-The three guards (source scan, complete translations, matching keys) are implemented in `scripts/i18n-guard.py` and run automatically in `make test-mac`, `make test-site`, and CI. For the website, guard 3 checks `t("…")` calls; `make test-site` also checks every `data-i18n` key in the pages. Guard 3 only recognizes literal keys in system APIs such as `Text("…")` and **doesn't check `loc("…")`**: when you add a key, confirm yourself that all three languages have it.
-
-## Additional Writing Rules
-
-- Strings with multiple arguments use positional placeholders (`%1$@`, `%2$@`) so translations can reorder them. All three languages must have the same number of placeholders.
-- Button and menu item labels never end with an ellipsis, even when they open a window (`Settings`, not `Settings…`) (2026-10-16; previously an ellipsis per macOS convention). Placeholder text such as the search field's may still end with one.
-- Traditional Chinese uses Taiwan terminology for terms such as Settings, Menu Bar, Quit, Add, Symbol (code), Default, and Component.
+`scripts/i18n-guard.py` checks that source files contain no non-English text outside localization calls, that every key has all three languages, and that keys used in code exist. It runs in `make test-mac`, `make test-site`, and CI. It recognizes literal keys in system APIs such as `Text("…")`, and `t("…")` on the website, but not `loc("…")`; confirm new `loc` keys yourself. `WidgetTests.widgetKeysAreTranslated` covers the `widget.*` and `coin.status.*` keys, and `make test-site` checks every `data-i18n` key in the pages.
 
 ## Terminology
 
-The Simplified and Traditional Chinese terms are the values of these keys in `Localizable.xcstrings`.
+The Chinese terms are the values of these keys in `Localizable.xcstrings`.
 
-| Concept | English | Catalog key |
+| Concept | English | Key |
 |---|---|---|
 | Watchlist | Watchlist | `nav.watchlist` |
-| Alert condition: above | Above | `alertKind.above` |
-| Alert condition: below | Below | `alertKind.below` |
-| Alert condition: change | Change | `alertKind.change` |
-| Alert condition: off | Off | `alertKind.notSet` |
-| Quote currency | Display Currency | `general.display.currency` |
-| Price alerts (toggle) | Price Alerts | `general.notification.priceAlert` |
+| Alert: above / below / change / off | Above / Below / Change / Off | `alertKind.above`, `alertKind.below`, `alertKind.change`, `alertKind.notSet` |
+| Display currency | Display Currency | `general.display.currency` |
+| Price alerts | Price Alerts | `general.notification.priceAlert` |
 | Open at login | Open at Login | `general.launch.atLogin` |
 | Menu bar | Menu Bar | `general.section.menubar` |
-| Settings (window / menu) | Settings | `menu.setting` |
-| Quit | Quit | `menu.quit` (`Quit Coinscal`) |
+| Settings | Settings | `menu.setting` |
+| Quit | Quit Coinscal | `menu.quit` |
 | No market data | No market data | `coin.status.delisted` |
-| Recommended coins | Recommended | `watchlist.recommended` |
+| Recommended | Recommended | `watchlist.recommended` |

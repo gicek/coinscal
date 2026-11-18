@@ -3,7 +3,7 @@ import Combine
 import OSLog
 import WidgetKit
 
-/// Hands prices and display settings to the desktop and Notification Center widgets (docs/WIDGET.md). It has nothing
+/// Hands prices and display settings to the desktop and Notification Center widgets (docs/ARCHITECTURE.md, "Widgets"). It has nothing
 /// to do with the menu bar or the desktop ticker, which follow the app's own polling.
 ///
 /// - The widgets refresh on their own timeline (`WidgetContent.refreshInterval`); the app never asks for periodic or

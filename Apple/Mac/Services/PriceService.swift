@@ -25,7 +25,7 @@ protocol PriceServicing {
 /// - Fill-in: symbols the primary source does not list are requested from sources on other exchanges.
 ///   A symbol a source has confirmed it does not list is skipped there for `unavailableTTL`, also in the primary
 ///   batch: one coin Binance lacks would otherwise make every Binance batch fail with HTTP 400 and fall back to the
-///   full list (weight 80 instead of 2, docs/DATA_SOURCE_LIMITS.md). Request failures are transient and not remembered.
+///   full list (weight 80 instead of 2, docs/DATA_SOURCES.md). Request failures are transient and not remembered.
 /// - Rate limits: an exchange that answers with a rate limit is skipped until its `Retry-After` (or a default) passes,
 ///   mirrors included, since they share the per-IP budget. Continuing after Binance's 429 gets the IP banned.
 ///

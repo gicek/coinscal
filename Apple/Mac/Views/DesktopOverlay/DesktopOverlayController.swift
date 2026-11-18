@@ -9,7 +9,7 @@ final class DesktopOverlayWindow: NSWindow {
     override var canBecomeMain: Bool { false }
 }
 
-/// Desktop overlay (docs/DESKTOP_OVERLAY.md): a transparent, click-through window between the wallpaper and the
+/// Desktop overlay (docs/ARCHITECTURE.md, "Desktop Ticker"): a transparent, click-through window between the wallpaper and the
 /// desktop icons, on every Space, outside Mission Control and the window cycle. Prices follow the app's polling,
 /// so unlike WidgetKit there is no refresh budget. Can be dragged onto any display.
 @MainActor

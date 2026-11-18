@@ -13,7 +13,7 @@ struct AppSettings: Codable {
     var pollingInterval: TimeInterval = Constants.Defaults.pollingInterval
     var showMenuBarBackground: Bool = false
     var menuBarContent: MenuBarContent = .price
-    /// Desktop overlay (docs/DESKTOP_OVERLAY.md): a click-through price panel on the desktop.
+    /// Desktop overlay (docs/ARCHITECTURE.md, "Desktop Ticker"): a click-through price panel on the desktop.
     var desktopOverlayEnabled: Bool = false
     /// Opacity of the frosted background (0...1); the text stays opaque.
     var desktopOverlayBackgroundOpacity: Double = 1

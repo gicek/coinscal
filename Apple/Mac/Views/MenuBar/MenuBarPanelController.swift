@@ -25,7 +25,7 @@ final class MenuBarPanelHostingView<Content: View>: NSHostingView<Content> {
 /// Shows the menu bar content below the status item and decides open or close from the panel's own visibility.
 ///
 /// An `NSPopover` can't do this on macOS 27: pressing the status item closes a `.transient` popover on mouse-down
-/// (it loses key status), and the status item action then reopens it on mouse-up (docs/MENU_BAR_PANEL.md).
+/// (it loses key status), and the status item action then reopens it on mouse-up (docs/ARCHITECTURE.md, "Panel").
 /// The panel closes on clicks outside it, Esc, and losing key status, except when the status item press itself
 /// takes key status or reaches the outside-click monitor: that press ends in the toggle, which closes the panel.
 @MainActor

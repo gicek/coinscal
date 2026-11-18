@@ -2,7 +2,7 @@ import AppKit
 import Combine
 import Sparkle
 
-/// The updater the UI talks to; Sparkle in the app, a fake in tests (docs/UPDATES.md).
+/// The updater the UI talks to; Sparkle in the app, a fake in tests (docs/ARCHITECTURE.md, "Updates").
 @MainActor
 protocol UpdaterBackend: AnyObject {
     /// False while a check or an update session is already running.

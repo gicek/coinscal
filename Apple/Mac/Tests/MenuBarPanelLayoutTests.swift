@@ -2,7 +2,7 @@ import CoreGraphics
 import Testing
 @testable import Coinscal
 
-/// Menu bar panel placement (docs/MENU_BAR_PANEL.md). Global coordinates, origin at the bottom left.
+/// Menu bar panel placement (docs/ARCHITECTURE.md, "Panel"). Global coordinates, origin at the bottom left.
 @Suite struct MenuBarPanelLayoutTests {
     /// A 1440×900 display with a 24pt menu bar.
     private let visible = CGRect(x: 0, y: 0, width: 1440, height: 876)

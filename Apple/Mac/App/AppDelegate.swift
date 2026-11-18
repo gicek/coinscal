@@ -26,7 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var desktopOverlay = DesktopOverlayController()
     /// Lazy like the snapshot writer: the App Group container and the network stay untouched in the unit-test host.
     private lazy var logoStore = CoinLogoStore(client: URLSession.shared)
-    /// Always present for the views; Sparkle is attached only outside the unit-test host (docs/UPDATES.md).
+    /// Always present for the views; Sparkle is attached only outside the unit-test host (docs/ARCHITECTURE.md, "Updates").
     let updateController = UpdateController()
     /// A widget click launched the app: the URL arrives before the panel exists, so it is shown after setup.
     private var opensPanelAfterLaunch = false
@@ -120,7 +120,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 #endif
     }
 
-    /// Widgets open `coinscal://popover` when clicked (docs/WIDGET.md).
+    /// Widgets open `coinscal://popover` when clicked (docs/ARCHITECTURE.md, "Widgets").
     func application(_ application: NSApplication, open urls: [URL]) {
         guard !Self.isRunningUnitTests, urls.contains(where: { $0.scheme == WidgetStyle.urlScheme }) else { return }
         guard menuBarPanel != nil else {

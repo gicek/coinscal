@@ -2,7 +2,7 @@ import AppKit
 import Combine
 import os
 
-/// Keeps a local copy of the logo of every watchlist coin that has no bundled asset (docs/COIN_CATALOG.md, "Logos").
+/// Keeps a local copy of the logo of every watchlist coin that has no bundled asset (docs/ARCHITECTURE.md, "Coin Catalog Client").
 /// The catalog lists hundreds of coins but only the top ones ship with a logo; the rest are downloaded once when a coin
 /// enters the watchlist, then read from the App Group container by the app, the widget, and the desktop ticker.
 @MainActor
