@@ -11,6 +11,15 @@
 
 ## Records
 
+### 2026-11-18: Menu bar price on an inactive display
+
+A colored menu bar price, or one with a background, is drawn as an image.
+
+- Verified: `make test-mac` passes. On macOS 27.2.1 with the status item on a secondary display, screenshots before and after: before, the inactive display showed the price blurred and heavier; after, with the background on (active and inactive) and off (inactive), the text stays sharp and fades like the neighboring items. The background is as wide as before (about 100pt for "BTC 64,529").
+- Pending:
+  1. Color on, background off, on an active display; "Color by Price Change" off with the background on, in light and dark menu bars.
+  2. On a non-Retina display.
+
 ### 2026-11-18: Separate debug app
 
 Debug builds are "Coinscal Debug" with their own IDs, App Group, and URL scheme.

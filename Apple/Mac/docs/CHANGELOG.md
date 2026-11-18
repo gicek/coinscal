@@ -4,6 +4,12 @@ Features added, changed, fixed, and removed, newest first. Third-level headings 
 
 ## 2026-11-18
 
+### Fixed: Blurry menu bar price on an inactive display
+- Symptom: when the display with the Coinscal status item wasn't the active one, the price text looked blurred and heavier, with or without a background, while the other status items only faded.
+- Root cause: a colored price was an attributed title drawn over a layer background color on the status bar button. When macOS fades the menu bar of an inactive display, that combination renders the text blurred.
+- Fix: a colored price, or one with a background, is drawn as one non-template image with the text and the rounded background (`MenuBarTitleImage`), which fades evenly like other status items. Size and look are unchanged; the default style stays a system-drawn title.
+- Tests: checked on macOS 27.2.1 with two displays, active and inactive, with the background on and off (see VALIDATION).
+
 ### Changed: Debug builds are a separate "Coinscal Debug" app
 Debug builds use their own bundle IDs (`com.gicek.coinscal.debug`, widget `com.gicek.coinscal.debug.widget`), App Group, display name "Coinscal Debug", and URL scheme `coinscal-debug`, set per configuration in `project.yml` (`COINSCAL_APP_ID`, `COINSCAL_DISPLAY_NAME`, `COINSCAL_URL_SCHEME`). Before, they shared everything with the release, so a debug build quit when the installed app ran, and the system picked one of several identical widget extensions at random. Now both run side by side and the widget gallery lists both. Release builds are unchanged. `make test-mac` unregisters its test host app afterwards so it doesn't add a second "Coinscal Debug" widget.
 

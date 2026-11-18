@@ -54,54 +54,43 @@ final class MenuBarViewModel: ObservableObject {
 
         let priceText = PriceFormatter.formatShort(price)
         let title = "\(displayedCoin.symbol) \(priceText)"
-        // With a background, pad the text with spaces for visual insets.
-        let displayTitle = settings.showMenuBarBackground ? " \(title) " : title
 
         guard let button = statusItem?.button else { return }
         statusItem?.length = NSStatusItem.variableLength
-        button.image = nil
+        button.layer?.backgroundColor = nil
 
         let priceColor = settingsVM.priceNSColor(changePercent: displayedCoin.priceChange24hPercent)
-        let showBg = settings.showMenuBarBackground
-        let showColor = settings.priceColorEnabled
-
         let font = NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+        let isDarkMenuBar = button.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
 
-        switch (showColor, showBg) {
+        let style: MenuBarTitleImage.Style
+        switch (settings.priceColorEnabled, settings.showMenuBarBackground) {
+        case (false, false):
+            // Default style: a plain title the system draws and tints like other menu bar text.
+            button.image = nil
+            button.attributedTitle = NSAttributedString()
+            button.title = title
+            button.setAccessibilityLabel(nil)
+            return
         case (true, true):
             // Background = price color, text = white.
-            let attrs: [NSAttributedString.Key: Any] = [.foregroundColor: NSColor.white, .font: font]
-            button.attributedTitle = NSAttributedString(string: displayTitle, attributes: attrs)
-            button.layer?.backgroundColor = priceColor.cgColor
+            style = .init(textColor: .white, background: priceColor)
         case (true, false):
             // Text = price color, no background.
-            let attrs: [NSAttributedString.Key: Any] = [.foregroundColor: priceColor, .font: font]
-            button.attributedTitle = NSAttributedString(string: displayTitle, attributes: attrs)
-            button.layer?.backgroundColor = nil
+            style = .init(textColor: priceColor, background: nil)
         case (false, true):
             // Background = menu bar text color (white on a dark bar, black on a light one), text = inverted.
-            let menuBarTextColor = button.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-                ? NSColor.white : NSColor.black
-            let textOnBg = button.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-                ? NSColor.black : NSColor.white
-            let attrs: [NSAttributedString.Key: Any] = [.foregroundColor: textOnBg, .font: font]
-            button.attributedTitle = NSAttributedString(string: displayTitle, attributes: attrs)
-            button.layer?.backgroundColor = menuBarTextColor.cgColor
-        case (false, false):
-            // Default style.
-            button.attributedTitle = NSAttributedString()
-            button.title = displayTitle
-            button.layer?.backgroundColor = nil
+            style = .init(textColor: isDarkMenuBar ? .black : .white, background: isDarkMenuBar ? .white : .black)
         }
-
-        button.wantsLayer = true
-        if showBg {
-            button.layer?.cornerRadius = 4
-            button.layer?.masksToBounds = true
-        } else {
-            button.layer?.cornerRadius = 0
-            button.layer?.masksToBounds = false
-        }
+        // A colored title or a background is drawn into one image: the menu bar of an inactive display fades its
+        // items, and an attributed title over a layer background then renders as blurred, heavier text.
+        let height = button.bounds.height > 0 ? button.bounds.height : NSStatusBar.system.thickness
+        button.attributedTitle = NSAttributedString()
+        button.title = ""
+        button.image = MenuBarTitleImage.make(text: title, font: font, style: style, height: height)
+        button.imagePosition = .imageOnly
+        button.imageScaling = .scaleNone
+        button.setAccessibilityLabel(title)
     }
 
     /// Puts the logo on the button unless that exact image is already there (a placeholder does not count).
@@ -120,7 +109,41 @@ final class MenuBarViewModel: ObservableObject {
         button.attributedTitle = NSAttributedString()
         button.title = ""
         button.layer?.backgroundColor = nil
-        button.layer?.cornerRadius = 0
-        button.layer?.masksToBounds = false
+        button.setAccessibilityLabel("Coinscal")
+    }
+}
+
+/// The menu bar price as one non-template image: text, and optionally a rounded background behind it.
+enum MenuBarTitleImage {
+    struct Style {
+        var textColor: NSColor
+        var background: NSColor?
+    }
+
+    /// Space between the text and the edges of the background.
+    static let horizontalPadding: CGFloat = 13
+    static let cornerRadius: CGFloat = 4
+
+    static func size(text: String, font: NSFont, style: Style, height: CGFloat) -> NSSize {
+        let textWidth = ceil((text as NSString).size(withAttributes: [.font: font]).width)
+        return NSSize(width: textWidth + (style.background == nil ? 0 : horizontalPadding * 2), height: height)
+    }
+
+    static func make(text: String, font: NSFont, style: Style, height: CGFloat) -> NSImage {
+        let size = size(text: text, font: font, style: style, height: height)
+        let image = NSImage(size: size, flipped: false) { rect in
+            if let background = style.background {
+                background.setFill()
+                NSBezierPath(roundedRect: rect, xRadius: cornerRadius, yRadius: cornerRadius).fill()
+            }
+            let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: style.textColor]
+            let textSize = (text as NSString).size(withAttributes: attributes)
+            let origin = NSPoint(x: (rect.width - textSize.width) / 2, y: ((rect.height - textSize.height) / 2).rounded())
+            (text as NSString).draw(at: origin, withAttributes: attributes)
+            return true
+        }
+        image.isTemplate = false
+        image.accessibilityDescription = text
+        return image
     }
 }
