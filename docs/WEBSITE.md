@@ -5,7 +5,7 @@
 ## Stack
 
 - Plain HTML, CSS, and JavaScript modules: no framework, build step, or npm dependencies.
-- Hosted on Cloudflare Workers Static Assets without Worker code (`Site/wrangler.jsonc`). `Site/.assetsignore` keeps tooling, tests, and release notes from being served.
+- Hosted on Cloudflare Workers Static Assets without Worker code (`Site/wrangler.jsonc`). `Site/.assetsignore` keeps tooling and tests from being served.
 - Pages: `/` (landing), `/privacy`, `404.html`.
 
 | Path | Contents |
@@ -17,7 +17,6 @@
 | `js/i18n.js`, `messages/*.json` | Localization |
 | `js/config.js` | Every outbound link |
 | `_headers` | CSP and security headers |
-| `releases/*.json` | Release notes for in-app updates ([Releasing](RELEASING.md)); not served |
 | `test/` | Offline checks (`make test-site`) |
 
 ## Hero

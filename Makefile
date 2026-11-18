@@ -135,6 +135,7 @@ mac-release-notarized:
 test-mac: project
 	$(I18N_GUARD) --platform apple --root Apple/Mac --extra Apple/MacWidget
 	python3 scripts/catalog/generate_catalog.py validate $(CATALOG_FILE)
+	python3 scripts/release/publish.py --check-notes docs/release-notes
 	xcodebuild $(XCODEBUILD_TEST_FLAGS) -project "$(APPLE_PROJECT)" -scheme "$(MAC_SCHEME)" \
 	    -configuration "$(CONFIGURATION)" -destination 'platform=macOS,arch=arm64' \
 	    -derivedDataPath "$(MAC_BUILD_ROOT)/Tests/DerivedData" \
@@ -167,7 +168,7 @@ mac-publish:
 	@test "$(CONFIRM)" = "$(VERSION)" || test -n "$(DRY_RUN)" || { echo "Publishing $(VERSION) (build $(BUILD_NUMBER)) is public. Run: make mac-publish CONFIRM=$(VERSION)"; exit 1; }
 	@BIN="$$(scripts/release/sparkle-tools.sh "$(SPARKLE_VERSION)" "$(SPARKLE_SHA256)" "$(SPARKLE_DIR)")" && \
 	    python3 scripts/release/publish.py --version "$(VERSION)" --build "$(BUILD_NUMBER)" --min-system "$(MIN_MACOS)" \
-	        --dist "$(MAC_DIST)" --notes "Site/releases/$(VERSION).json" --work "$(MAC_BUILD_ROOT)/Publish" \
+	        --dist "$(MAC_DIST)" --notes "docs/release-notes/$(VERSION)" --work "$(MAC_BUILD_ROOT)/Publish" \
 	        --sparkle-bin "$$BIN" --key-account "$(SPARKLE_KEY_ACCOUNT)" --bucket "$(DOWNLOAD_BUCKET)" \
 	        --base-url "$(DOWNLOAD_URL)" --wrangler "npx --yes $(WRANGLER_PKG)" --node-bin "$(WRANGLER_NODE_BIN)" $(if $(DRY_RUN),--dry-run)
 

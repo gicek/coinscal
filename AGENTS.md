@@ -71,6 +71,7 @@ Rules for everyone changing this repository, human or agent. Product scope is in
 | `docs/ROADMAP.md` | Status, candidates, and known issues |
 | `docs/VALIDATION.md` | Verification status |
 | `CHANGELOG.md` | User-visible changes by release |
+| `docs/release-notes/<version>/` | Release notes shown in the update window, one Markdown file per language |
 
 - Documents describe the current state. When behavior changes, rewrite the affected text instead of appending history; history belongs in `CHANGELOG.md` and Git.
 - A change that affects behavior, scope, data sources, dependencies, or paths updates the matching documents in the same change. If documents disagree, `PRODUCT.md` wins over `ARCHITECTURE.md`, which wins over the topic documents; fix the other one.

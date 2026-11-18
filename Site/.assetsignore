@@ -4,4 +4,3 @@ wrangler.jsonc
 package.json
 test
 .wrangler
-releases

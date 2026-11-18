@@ -8,10 +8,10 @@ Last run Nov 18, 2026.
 
 | Check | Result |
 |---|---|
-| `make test-mac` | Localization guards (45 files), catalog validation, 118 unit tests in 15 suites: pass |
-| `make test-site` | Localization guards (7 files), 9 offline checks: pass |
+| `make test-mac` | Localization guards (45 files), catalog and release notes validation, 118 unit tests in 15 suites: pass |
+| `make test-site` | Localization guards (7 files), 8 offline checks: pass |
 | `make mac-check-sources` (Oct 16, 2026) | All 4 price and 3 exchange rate sources respond; all 450 catalog symbols priced; failover with Binance unreachable takes one round |
-| CI | Repository hygiene, localization guards, website checks |
+| CI | Repository hygiene, localization guards, release notes, website checks |
 
 ## Verified on a Real Mac
 

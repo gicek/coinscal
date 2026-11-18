@@ -20,7 +20,7 @@ make project        # generate Apple/Coinscal.xcodeproj from Apple/project.yml
 make mac            # build Build/macOS/Debug/Coinscal.app (CONFIGURATION=Release for a release build)
 make mac-run        # build, verify the signature, and launch
 make test           # make test-mac + make test-site
-make test-mac       # localization guards, catalog validation, unit tests
+make test-mac       # localization guards, catalog and release notes validation, unit tests
 make test-site      # website localization guards and offline checks
 make site-run       # website preview at http://localhost:8787/
 make mac-check-sources  # manual check of every data source over the network
@@ -61,7 +61,7 @@ Nothing is built inside source directories, and `Build/` is never committed.
 - Unit tests use Swift Testing and run with the debug app as host; `AppDelegate` skips all setup when `XCTestConfigurationFilePath` is set.
 - Tests inject test doubles instead of system services ([Architecture](ARCHITECTURE.md#testing)).
 - The `com.apple.linkd.autoShortcut` connection errors in test logs come from the sandboxed host and can be ignored.
-- CI (`.github/workflows/tests.yml`) runs the repository hygiene check, the localization guards, and the website checks. App tests need a local Xcode 27 and run with `make test` before merging.
+- CI (`.github/workflows/tests.yml`) runs the repository hygiene check, the localization guards, the release notes check, and the website checks. App tests need a local Xcode 27 and run with `make test` before merging.
 
 ## Website
 

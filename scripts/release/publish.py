@@ -6,7 +6,7 @@ appcast's -> sign the zip for Sparkle -> render release notes and appcast.xml ->
 finally appcast.xml to R2 -> create the GitHub Release. Nothing is uploaded until every check has passed.
 
 Usage: scripts/release/publish.py --version 1.1 --build 2 --min-system 14.0 --dist Build/macOS/Dist \
-    --notes Site/releases/1.1.json --work Build/macOS/Publish --sparkle-bin <dir> --key-account com.gicek.coinscal \
+    --notes docs/release-notes/1.1 --work Build/macOS/Publish --sparkle-bin <dir> --key-account com.gicek.coinscal \
     --bucket coinscal-dl --base-url https://dl.coinscal.app --wrangler "npx --yes wrangler@<version>" \
     [--node-bin <dir>] [--dry-run]
 """
@@ -16,7 +16,6 @@ from __future__ import annotations
 import argparse
 import email.utils
 import html
-import json
 import os
 import re
 import shlex
@@ -44,22 +43,41 @@ def run(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
 
 
 def load_notes(path: Path, version: str) -> dict[str, list[str]]:
-    """Release notes: {"version": "...", "notes": {"en": [...], "zh-Hans": [...], "zh-Hant": [...]}}."""
-    if not path.exists():
-        fail(f"release notes missing: {path}")
-    data = json.loads(path.read_text(encoding="utf-8"))
-    if data.get("version") != version:
-        fail(f"{path} is for version {data.get('version')!r}, not {version}")
-    notes = data.get("notes") or {}
-    counts = set()
+    """Release notes: docs/release-notes/<version>/<lang>.md for every UI language, one "- item" per line,
+    with the same number of items in every language."""
+    if path.name != version:
+        fail(f"{path} is not the notes directory for version {version}")
+    notes: dict[str, list[str]] = {}
     for lang in LANGS:
-        items = notes.get(lang)
-        if not items or not all(isinstance(i, str) and i.strip() for i in items):
-            fail(f"{path}: notes for {lang} are missing or empty")
-        counts.add(len(items))
-    if len(counts) != 1:
+        file = path / f"{lang}.md"
+        if not file.exists():
+            fail(f"release notes missing: {file}")
+        items = []
+        for number, line in enumerate(file.read_text(encoding="utf-8").splitlines(), 1):
+            if not line.strip():
+                continue
+            if not line.startswith("- ") or not line[2:].strip():
+                fail(f"{file}:{number}: every line must be a list item (\"- text\")")
+            items.append(line[2:].strip())
+        if not items:
+            fail(f"{file} has no items")
+        notes[lang] = items
+    if len({len(items) for items in notes.values()}) != 1:
         fail(f"{path}: every language must have the same number of items")
-    return {lang: notes[lang] for lang in LANGS}
+    return notes
+
+
+def check_all_notes(root: Path) -> None:
+    """Validates every version directory under `root` (make test-mac)."""
+    versions = sorted(p for p in root.iterdir() if p.is_dir())
+    if not versions:
+        fail(f"no release notes under {root}")
+    for directory in versions:
+        load_notes(directory, directory.name)
+        extra = sorted(f.name for f in directory.iterdir() if f.name not in {f"{lang}.md" for lang in LANGS})
+        if extra:
+            fail(f"{directory}: unexpected files {extra}")
+    print(f"release notes: {len(versions)} versions, {len(LANGS)} languages each")
 
 
 def check_notarized(dist: Path, version: str) -> tuple[Path, Path]:
@@ -163,6 +181,9 @@ def render_appcast(version: str, build: int, min_system: str, base_url: str, zip
 
 
 def main() -> None:
+    if len(sys.argv) == 3 and sys.argv[1] == "--check-notes":
+        check_all_notes(Path(sys.argv[2]))
+        return
     p = argparse.ArgumentParser(description="Publish a notarized Coinscal release")
     for name in ("version", "min-system", "dist", "notes", "work", "sparkle-bin", "key-account", "bucket", "base-url", "wrangler"):
         p.add_argument(f"--{name}", required=True)

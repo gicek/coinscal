@@ -19,11 +19,7 @@ Release commands need a logged-in GUI session (the DMG layout is written through
 
 1. **Version.** In `Apple/project.yml`, raise `CURRENT_PROJECT_VERSION` for every distributed build and `MARKETING_VERSION` for a new version. They are defined nowhere else.
 2. **Catalog.** Run `make catalog` to refresh the coin catalog, then `make test`.
-3. **Notes.** Write `Site/releases/<version>.json` with the same items in `en`, `zh-Hans`, and `zh-Hant`:
-   ```json
-   {"version": "1.0.2", "notes": {"en": ["…"], "zh-Hans": ["…"], "zh-Hant": ["…"]}}
-   ```
-   Add the release to `CHANGELOG.md`.
+3. **Notes.** Write the release notes in `docs/release-notes/<version>/`: `en.md`, `zh-Hans.md`, and `zh-Hant.md`, one `- item` per line, with the same items in every language. `make test-mac` checks every version. Add the release to `CHANGELOG.md`.
 4. **Build.** `make mac-release-notarized` produces `Build/macOS/Dist/Coinscal-<version>.zip` and `.dmg`.
 5. **Publish.** `make mac-publish DRY_RUN=1` checks and renders without uploading; then `make mac-publish CONFIRM=<version>`.
 

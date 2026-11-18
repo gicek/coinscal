@@ -1,0 +1,4 @@
+- Live prices and 24-hour change for your watchlist, right in the menu bar.
+- Price alerts for each coin: above or below a price, or a percentage move.
+- Desktop and Notification Center widgets, and a price panel pinned to the desktop.
+- 12 quote currencies, English and Chinese, and automatic updates.

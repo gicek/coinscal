@@ -1,0 +1,4 @@
+- Desktop panel: one layout whose height fits up to 16 coins, a new Large text size, and price changes that stay readable over light wallpapers.
+- Watchlist: click an added coin in the search panel to remove it. Recommended coins are now BTC, ETH, BNB, SOL, ZEC, HYPE, BCH, LTC, UNI, and AAVE.
+- Fewer requests to price sources: coins an exchange doesn't list are skipped, rate limits are respected, and widgets reuse the app's exchange rates.
+- Menus and buttons: no icon next to Settings on first launch, and no trailing ellipsis.

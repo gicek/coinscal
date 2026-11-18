@@ -34,6 +34,9 @@ jobs:
       - name: Three Mac string guards
         # Same as the i18n step in make test-mac
         run: python3 scripts/i18n-guard.py --langs "en,zh-Hans,zh-Hant" --min-files 20 --platform apple --root Apple/Mac --extra Apple/MacWidget
+      - name: Release notes
+        # Same as the release notes step in make test-mac
+        run: python3 scripts/release/publish.py --check-notes docs/release-notes
       - name: Three website string guards
         # Same as the i18n step in make test-site
         run: python3 scripts/i18n-guard.py --langs "en,zh-Hans,zh-Hant" --min-files 7 --platform web --root Site
