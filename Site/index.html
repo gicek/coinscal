@@ -96,7 +96,7 @@
 
     <div class="hero-inner">
         <header class="menubar">
-            <a class="site-brand" href="/"><img src="/img/app-icon.png" alt="" width="26" height="26"><span>Coinscal</span></a>
+            <a class="site-brand" href="/" aria-label="Coinscal"><img src="/img/app-icon.png" alt="" width="26" height="26"><span>Coinscal</span></a>
             <nav class="site-nav" aria-label="Site">
                 <a href="#features" data-i18n="nav.features">Features</a>
                 <a href="#download" data-i18n="nav.download">Download</a>
@@ -113,6 +113,7 @@
                             <div class="pn-header">
                                 <button type="button" class="pn-back" data-panel-back hidden aria-label="Back" data-i18n-aria="panel.back"><svg class="pn-glyph" aria-hidden="true"><use href="#symbol-chevron-left"/></svg></button>
                                 <span class="pn-title" data-panel-title>Coinscal</span>
+                                <span class="pn-notice" data-panel-notice hidden role="status" data-i18n="menubar.offline">Prices are unavailable</span>
                                 <span class="pn-spinner" data-panel-spinner hidden role="status" aria-label="Loading prices" data-i18n-aria="panel.loading"></span>
                             </div>
                             <div class="pn-body" data-panel-body>

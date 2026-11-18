@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 import { formatPercent, formatPrice, formatShort } from "../js/format.js";
 import { LINKS, SITE_URL } from "../js/config.js";
 import { DEFAULT_SETTINGS, loadSettings, menubarCoin, priceColor } from "../js/panel.js";
+import { language, setLanguage } from "../js/i18n.js";
+import { PriceFeed } from "../js/prices.js";
 import { COINS } from "../js/coins.js";
 
 const site = fileURLToPath(new URL("..", import.meta.url));
@@ -22,7 +24,10 @@ test("prices format like the app's PriceFormatter", () => {
     assert.equal(formatPrice(42.1), "42.10");
     assert.equal(formatPrice(0.5), "0.5000");
     assert.equal(formatPrice(0.12345678), "0.123457");
+    assert.equal(formatPrice(0.00000012345), "1.23e-7");
     assert.equal(formatShort(67234.56), "67,235");
+    assert.equal(formatShort(100.5), "100");
+    assert.equal(formatShort(0.000012345), "1.23e-5");
     assert.equal(formatShort(42.1), "42.1");
     assert.equal(formatShort(0.5), "0.5");
     assert.equal(formatPercent(1.234), "+1.23%");
@@ -103,4 +108,81 @@ test("price colors and the menu bar coin follow the app's rules", () => {
     assert.equal(menubarCoin({ ...s, menubarCoin: "solana" }).symbol, "BTC");
     assert.equal(menubarCoin({ ...s, menubarContent: "icon" }), null);
     assert.equal(menubarCoin({ ...s, coins: [] }), null);
+});
+
+function replaceGlobal(t, name, value) {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, name);
+    Object.defineProperty(globalThis, name, { configurable: true, value });
+    t.after(() => {
+        if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+        else delete globalThis[name];
+    });
+}
+
+test("REST fills coins without a recent stream tick and cannot overwrite a newer tick", async (t) => {
+    t.mock.method(Date, "now", () => 100_000);
+    replaceGlobal(t, "document", { hidden: false });
+    replaceGlobal(t, "navigator", { onLine: true });
+    let socket;
+    replaceGlobal(t, "WebSocket", class {
+        constructor() { socket = this; }
+        close() {}
+    });
+    const sendBTC = (price) => socket.onmessage({ data: JSON.stringify({ data: { s: "BTCUSDT", c: price } }) });
+
+    const feed = new PriceFeed();
+    feed.symbols = ["BTC", "HYPE"];
+    feed.openStream();
+
+    let complete;
+    const waiting = new Promise((resolve) => { complete = resolve; });
+    t.mock.method(globalThis, "fetch", () => waiting);
+    const firstPoll = feed.tick();
+    sendBTC(75);
+    complete({ ok: true, json: async () => [{ symbol: "BTCUSDT", lastPrice: 70 }, { symbol: "HYPEUSDT", lastPrice: 44 }] });
+    await firstPoll;
+    assert.equal(feed.quote("BTC").price, 75);
+    assert.equal(feed.quote("HYPE").price, 44);
+
+    t.mock.method(Date, "now", () => 112_000);
+    sendBTC(76);
+    const requests = [];
+    t.mock.method(globalThis, "fetch", async (url) => {
+        requests.push(url);
+        return { ok: true, json: async () => [{ symbol: "HYPEUSDT", lastPrice: 45 }] };
+    });
+    await feed.tick();
+    assert.equal(requests.length, 1);
+    assert.match(decodeURIComponent(requests[0]), /symbols=\["HYPEUSDT"\]/);
+    assert.equal(feed.quote("HYPE").price, 45);
+    assert.equal(feed.isStale("HYPE", 142_000), true);
+});
+
+test("the first failed price round ends the loading state", async (t) => {
+    t.mock.method(globalThis, "fetch", async () => { throw new Error("offline"); });
+    replaceGlobal(t, "navigator", { onLine: true });
+    let status;
+    const feed = new PriceFeed({ onStatus: (update) => { status = update; } });
+    feed.symbols = ["BTC"];
+    feed.reportStatus();
+    assert.equal(status.loading, true);
+    await feed.poll(feed.symbols);
+    assert.equal(status.loading, false);
+    assert.equal(status.unavailable, true);
+});
+
+test("a late language response cannot replace the user's latest choice", async (t) => {
+    replaceGlobal(t, "document", {
+        documentElement: { dataset: {}, classList: { remove() {} } },
+        querySelectorAll: () => [],
+    });
+    const pending = new Map();
+    t.mock.method(globalThis, "fetch", (url) => new Promise((resolve) => pending.set(url, resolve)));
+    const first = setLanguage("zh-Hans", { remember: false });
+    const second = setLanguage("zh-Hant", { remember: false });
+    pending.get("/messages/zh-Hant.json")({ ok: true, json: async () => ({}) });
+    await second;
+    pending.get("/messages/zh-Hans.json")({ ok: true, json: async () => ({}) });
+    await first;
+    assert.equal(language(), "zh-Hant");
 });

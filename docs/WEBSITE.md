@@ -33,7 +33,7 @@ Below the hero: four feature cards, a privacy section, the download section, and
 
 The demo calls the app's public APIs from the browser:
 
-- Prices: a Binance WebSocket (`data-stream.binance.vision`, `<symbol>usdt@ticker`). While it has been quiet for 15 seconds, or a coin has no price, REST rounds run at most every 10 seconds in the app's order (Binance, Binance mirror, OKX, Bybit), filling missing coins from the next source. OKX and Bybit are asked one coin at a time. Requests time out after 5 seconds, and rounds never overlap. New coins, coming back online, and returning to the tab start a round at once.
+- Prices: a Binance WebSocket (`data-stream.binance.vision`, `<symbol>usdt@ticker`). For coins without a WebSocket quote in the last 15 seconds, REST rounds run at most every 10 seconds in the app's order (Binance, Binance mirror, OKX, Bybit), filling missing coins from the next source. OKX and Bybit are asked one coin at a time. Requests time out after 5 seconds, and rounds never overlap. New coins, coming back online, and returning to the tab try a round at once. The stream pauses in hidden tabs. A delayed REST response cannot replace a newer stream quote. After 30 seconds without a quote for a coin, its row shows a stale-price label.
 - Exchange rates: open.er-api.com, then jsDelivr currency-api, cached for an hour.
 - Formatting matches `PriceFormatter`, which `make test-site` checks.
 
@@ -46,7 +46,7 @@ The demo calls the app's public APIs from the browser:
 ## Security and Privacy
 
 - `_headers` sets the CSP (site scripts, the hash of the one inline script, `connect-src` limited to the price and exchange rate APIs, Cloudflare Web Analytics), `nosniff`, `Referrer-Policy`, `Permissions-Policy`, and `Cross-Origin-Opener-Policy`. Changing the inline script changes its hash; `make test-site` fails until `_headers` matches.
-- No cookies or ads. The only third-party script is Cloudflare Web Analytics, injected on the `coinscal.app` zone; it is cookieless and disclosed on the privacy page. Local storage holds only the language, appearance, and demo settings.
+- No cookies or ads. The only third-party script is Cloudflare Web Analytics, injected on the `coinscal.app` zone; it is cookieless and disclosed on the privacy page. Local storage holds only the language, appearance, and demo settings. Price requests and subscriptions send the relevant demo coin symbols to the price providers.
 - Outbound links live only in `js/config.js`; pages reference them with `data-link`.
 
 ## Deployment

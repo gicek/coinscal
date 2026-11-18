@@ -156,11 +156,13 @@ function renderItem() {
     item.setAttribute("aria-label", t("menubar.itemPrice", { symbol: coin.symbol, price }));
 }
 
-let lastStatus = { online: false, loading: true };
+let lastStatus = { online: false, loading: true, stale: [] };
 
 function renderStatus(status) {
+    const staleChanged = lastStatus.stale.join() !== status.stale.join();
     lastStatus = status;
-    panel?.setLoading(status.loading);
+    panel?.setPriceStatus(status);
+    if (staleChanged) panel?.refreshPrices();
     if (wifi) {
         wifi.dataset.state = status.online ? "online" : "offline";
         wifi.setAttribute("aria-label", t(status.online ? "menubar.online" : "menubar.offline"));
@@ -175,7 +177,6 @@ function refresh() {
 
 function settingsChanged() {
     feed.setSymbols(panel.symbols);
-    if (panel.settings.currency !== "USD") rates.refresh();
     renderItem();
     layoutPanel();
 }
@@ -240,7 +241,6 @@ scheduleClock();
 if (panel) {
     panel.render();
     feed.setSymbols(panel.symbols);
-    if (panel.settings.currency !== "USD") rates.refresh();
     feed.start();
     setPanelOpen(true);
 }

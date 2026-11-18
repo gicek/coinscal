@@ -7,16 +7,25 @@ function fractionDigits(price) {
     return [0, 0];
 }
 
+function decimalPrice(price, min, max) {
+    if (price > 0 && price <= 10 ** -max / 2) return price.toExponential(2);
+    return new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: min,
+        maximumFractionDigits: max,
+        roundingMode: "halfEven",
+    }).format(price);
+}
+
 /** A popover price: grouped number without a currency symbol (the currency is implied). */
 export function formatPrice(price) {
     const [min, max] = fractionDigits(price);
-    return new Intl.NumberFormat("en-US", { minimumFractionDigits: min, maximumFractionDigits: max }).format(price);
+    return decimalPrice(price, min, max);
 }
 
 /** A menu bar price: like formatPrice, but without trailing zeros. */
 export function formatShort(price) {
     const max = price < 1 ? 4 : price < 100 ? 2 : 0;
-    return new Intl.NumberFormat("en-US", { minimumFractionDigits: 0, maximumFractionDigits: max }).format(price);
+    return decimalPrice(price, 0, max);
 }
 
 export function formatPercent(percent) {

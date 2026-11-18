@@ -1,6 +1,6 @@
 // Live prices for the demo, from the same public, keyless sources as the app, in the same order:
 // Binance → Binance mirror → OKX → Bybit (Constants.API). A Binance WebSocket stream keeps prices current
-// between REST refreshes; while it is quiet, or a coin has no price, REST polls at most every 10 seconds. Coins a
+// between REST refreshes; coins without recent stream ticks use REST at most every 10 seconds. Coins a
 // source lacks are filled in from the next one. Prices are in USDT, treated as USD.
 
 const TIMEOUT_MS = 5000;
@@ -84,8 +84,8 @@ export class PriceFeed {
         this.onStatus = onStatus;
         this.symbols = [];
         this.quotes = new Map();
-        this.lastSuccess = 0;
-        this.lastStreamMessage = 0;
+        this.completedPoll = false;
+        this.sequence = 0;
         this.lastPoll = 0;
         this.inFlight = false;
         this.socket = null;
@@ -95,10 +95,21 @@ export class PriceFeed {
 
     start() {
         setInterval(() => this.tick(), 1000);
-        window.addEventListener("online", () => this.tick(true));
-        window.addEventListener("offline", () => this.reportStatus());
+        window.addEventListener("online", () => {
+            this.openStream();
+            this.tick(true);
+        });
+        window.addEventListener("offline", () => {
+            this.closeStream();
+            this.reportStatus();
+        });
         document.addEventListener("visibilitychange", () => {
-            if (!document.hidden) this.tick(true);
+            if (document.hidden) {
+                this.closeStream();
+            } else {
+                this.openStream();
+                this.tick(true);
+            }
         });
     }
 
@@ -116,51 +127,65 @@ export class PriceFeed {
         return this.quotes.get(symbol) ?? null;
     }
 
-    /**
-     * Polls over REST at most every 10 seconds while the stream is quiet or a coin has no price yet; new coins,
-     * coming back online, and showing the tab poll at once. Never starts a round while one is in flight.
-     */
-    tick(force = false) {
-        this.reportStatus();
-        if (!this.symbols.length || this.inFlight || document.hidden) return;
-        const now = Date.now();
-        const streamHealthy = now - this.lastStreamMessage < STREAM_QUIET_MS;
-        const missing = this.symbols.some((s) => !this.quotes.has(s));
-        if (!force && (now - this.lastPoll < POLL_MS || (streamHealthy && !missing))) return;
-        this.poll();
+    isStale(symbol, now = Date.now()) {
+        const quote = this.quote(symbol);
+        return !!quote && now - quote.receivedAt >= ONLINE_WINDOW_MS;
     }
 
-    async poll() {
+    /** Stream coverage is per coin. REST fills in coins that have no recent stream tick. */
+    tick(force = false) {
+        this.reportStatus();
+        if (!this.symbols.length || this.inFlight || document.hidden || navigator.onLine === false) return;
+        const now = Date.now();
+        if (!force && now - this.lastPoll < POLL_MS) return;
+        const wanted = this.symbols.filter((symbol) => {
+            const quote = this.quote(symbol);
+            return !quote?.stream || now - quote.receivedAt >= STREAM_QUIET_MS;
+        });
+        if (wanted.length) return this.poll(wanted);
+    }
+
+    async poll(wanted) {
         this.inFlight = true;
         this.lastPoll = Date.now();
-        const wanted = [...this.symbols];
+        const sequence = ++this.sequence;
         let remaining = wanted;
+        let changed = false;
         for (const source of SOURCES) {
             if (!remaining.length) break;
             try {
                 const result = await source(remaining);
-                for (const [symbol, quote] of result) this.quotes.set(symbol, quote);
-                remaining = remaining.filter((s) => !result.has(s));
+                const receivedAt = Date.now();
+                for (const symbol of remaining) {
+                    const quote = result.get(symbol);
+                    if (!quote || !this.symbols.includes(symbol) || this.quote(symbol)?.sequence > sequence) continue;
+                    this.quotes.set(symbol, { ...quote, receivedAt, sequence, stream: false });
+                    changed = true;
+                }
+                remaining = remaining.filter((symbol) => this.symbols.includes(symbol) && !result.has(symbol)
+                    && !(this.quote(symbol)?.sequence > sequence));
             } catch {
                 // Try the next source in the same refresh.
             }
         }
         this.inFlight = false;
-        if (remaining.length < wanted.length) {
-            this.lastSuccess = Date.now();
-            this.onUpdate();
-        }
+        this.completedPoll = true;
+        if (changed) this.onUpdate();
         this.reportStatus();
     }
 
-    openStream() {
+    closeStream() {
         clearTimeout(this.reconnectTimer);
-        if (this.socket) {
-            this.socket.onclose = null;
-            this.socket.close();
-            this.socket = null;
-        }
-        if (!this.symbols.length || typeof WebSocket === "undefined") return;
+        if (!this.socket) return;
+        this.socket.onclose = null;
+        this.socket.onmessage = null;
+        this.socket.close();
+        this.socket = null;
+    }
+
+    openStream() {
+        this.closeStream();
+        if (!this.symbols.length || document.hidden || navigator.onLine === false || typeof WebSocket === "undefined") return;
         const streams = this.symbols.map((s) => `${s.toLowerCase()}usdt@ticker`).join("/");
         const socket = new WebSocket(`${BINANCE_STREAM}?streams=${streams}`);
         this.socket = socket;
@@ -173,8 +198,11 @@ export class PriceFeed {
             }
             const price = number(data?.c);
             if (!(price > 0) || typeof data.s !== "string") return;
-            this.quotes.set(data.s.replace(/USDT$/, ""), { price, change: number(data.P) });
-            this.lastStreamMessage = this.lastSuccess = Date.now();
+            const symbol = data.s.replace(/USDT$/, "");
+            if (!this.symbols.includes(symbol)) return;
+            this.quotes.set(symbol, {
+                price, change: number(data.P), receivedAt: Date.now(), sequence: ++this.sequence, stream: true,
+            });
             this.reconnectDelay = 2000;
             this.onUpdate();
             this.reportStatus();
@@ -187,8 +215,10 @@ export class PriceFeed {
     }
 
     reportStatus() {
-        const online = navigator.onLine !== false && Date.now() - this.lastSuccess < ONLINE_WINDOW_MS;
-        this.onStatus({ online, loading: !this.lastSuccess && !!this.symbols.length });
+        const stale = this.symbols.filter((symbol) => this.isStale(symbol));
+        const online = navigator.onLine !== false && this.symbols.some((symbol) => this.quote(symbol) && !this.isStale(symbol));
+        const loading = navigator.onLine !== false && !this.completedPoll && !online && !!this.symbols.length;
+        this.onStatus({ online, loading, stale, unavailable: !online && !loading && !!this.symbols.length });
     }
 }
 
@@ -219,6 +249,7 @@ export class ExchangeRates {
 
     refresh() {
         if (this.inFlight) return this.inFlight;
+        if (Date.now() - this.fetchedAt <= RATE_TTL_MS) return;
         this.inFlight = (async () => {
             for (const source of RATE_SOURCES) {
                 try {

@@ -33,6 +33,7 @@
     "empty": "尚未新增幣種",
     "addCoins": "新增幣種",
     "loading": "正在載入價格",
+    "stale": "報價已過期",
     "add": "新增 {name}",
     "remove": "移除 {name}",
     "catalogNote": "App 內可選更多幣種。",
@@ -118,7 +119,7 @@
     },
     "site": {
       "title": "本網站",
-      "body": "本網站不設定 Cookie，也沒有廣告。網站使用 Cloudflare Web Analytics 統計造訪量，它不使用 Cookie，也不會跨網站追蹤你。為執行即時示範，你的瀏覽器會從 Binance、OKX、Bybit 取得價格，從 ExchangeRate-API 與 jsDelivr 取得匯率。你選擇的語言、外觀與示範設定儲存在瀏覽器本機儲存空間中，不會傳送到任何地方。"
+      "body": "本網站不設定 Cookie，也沒有廣告。網站使用 Cloudflare Web Analytics 統計造訪量，它不使用 Cookie，也不會跨網站追蹤你。為執行即時示範，你的瀏覽器會從 Binance、OKX、Bybit 取得價格，從 ExchangeRate-API 與 jsDelivr 取得匯率。語言、外觀和示範設定儲存在瀏覽器本機。查詢行情時，瀏覽器會把相關示範幣種的代號傳送給行情資料供應商。"
     },
     "contact": {
       "title": "聯絡",

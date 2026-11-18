@@ -33,6 +33,7 @@
     "empty": "尚未添加币种",
     "addCoins": "添加币种",
     "loading": "正在加载价格",
+    "stale": "报价已过期",
     "add": "添加 {name}",
     "remove": "移除 {name}",
     "catalogNote": "应用内可选更多币种。",
@@ -118,7 +119,7 @@
     },
     "site": {
       "title": "本网站",
-      "body": "本网站不设置 Cookie，也没有广告。网站使用 Cloudflare Web Analytics 统计访问量，它不使用 Cookie，也不会跨网站追踪你。为运行实时演示，你的浏览器会从 Binance、OKX、Bybit 获取价格，从 ExchangeRate-API 和 jsDelivr 获取汇率。你选择的语言、外观和演示设置保存在浏览器本地存储中，不会发送到任何地方。"
+      "body": "本网站不设置 Cookie，也没有广告。网站使用 Cloudflare Web Analytics 统计访问量，它不使用 Cookie，也不会跨网站追踪你。为运行实时演示，你的浏览器会从 Binance、OKX、Bybit 获取价格，从 ExchangeRate-API 和 jsDelivr 获取汇率。语言、外观和演示设置保存在浏览器本地。查询行情时，浏览器会把相关演示币种的符号发送给行情数据商。"
     },
     "contact": {
       "title": "联系",

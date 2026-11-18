@@ -503,7 +503,7 @@ button.menubar-extra:hover,
 
 .menubar-coinscal[data-mode="fill"] .item-label {
     background: var(--item-color);
-    color: #fff;
+    color: #141414;
 }
 
 .menubar-coinscal[data-mode="inverse"] .item-label {
@@ -740,6 +740,11 @@ button.menubar-extra:hover,
 .pn-back .pn-glyph {
     width: 16px;
     height: 16px;
+}
+
+.pn-notice {
+    color: var(--pn-secondary);
+    font-size: 11px;
 }
 
 /* ProgressView().controlSize(.small).scaleEffect(0.72) */

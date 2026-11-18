@@ -6,6 +6,7 @@ const HTML_LANG = { en: "en", "zh-Hans": "zh-Hans", "zh-Hant": "zh-Hant" };
 
 let current = "en";
 let messages = {};
+let requestId = 0;
 const listeners = new Set();
 
 export function detectLanguage() {
@@ -49,13 +50,16 @@ export function apply(root = document) {
 
 export async function setLanguage(lang, { remember = true } = {}) {
     if (!LANGS.includes(lang)) lang = "en";
+    const id = ++requestId;
     try {
-        messages = await load(lang);
+        const loaded = await load(lang);
+        if (id !== requestId) return;
+        messages = loaded;
         current = lang;
     } catch {
         // Keep whatever is on screen; the HTML's English stays readable.
-        document.documentElement.classList.remove("i18n-pending");
-        if (!Object.keys(messages).length) return;
+        if (id === requestId) document.documentElement.classList.remove("i18n-pending");
+        return;
     }
     if (remember) {
         try { localStorage.setItem(STORAGE_KEY, current); } catch {}

@@ -97,6 +97,8 @@ export class Panel {
         this.title = root.querySelector("[data-panel-title]");
         this.back = root.querySelector("[data-panel-back]");
         this.spinner = root.querySelector("[data-panel-spinner]");
+        this.notice = root.querySelector("[data-panel-notice]");
+        this.priceStatus = {};
         this.footer = root.querySelector(".pn-footer");
         this.back.addEventListener("click", () => this.show("list"));
         root.querySelector('[data-action="settings"]').addEventListener("click", () => this.toggle("settings"));
@@ -128,8 +130,10 @@ export class Panel {
         target?.focus({ preventScroll: true });
     }
 
-    setLoading(loading) {
-        this.spinner.hidden = !loading || this.view !== "list";
+    setPriceStatus(status) {
+        this.priceStatus = status;
+        this.spinner.hidden = !status.loading || this.view !== "list";
+        this.notice.hidden = !status.unavailable || !!status.stale?.length || this.view !== "list";
     }
 
     bodyHeight() {
@@ -149,7 +153,11 @@ export class Panel {
         }
         this.body.style.height = `${this.bodyHeight()}px`;
         const content = view === "settings" ? this.renderSettings() : view === "watchlist" ? this.renderWatchlist() : this.renderList();
+        const focused = view === "settings" && this.body.contains(document.activeElement)
+            ? document.activeElement.dataset.setting : null;
         this.body.replaceChildren(content);
+        if (focused) this.body.querySelector(`[data-setting="${focused}"]`)?.focus({ preventScroll: true });
+        this.setPriceStatus(this.priceStatus);
     }
 
     /** Refreshes prices in place, so a stream update doesn't rebuild the list or the settings controls. */
@@ -211,13 +219,15 @@ export class Panel {
             this.lastPrices.set(coin.id, price);
             priceEl.style.color = color ?? "";
             priceEl.classList.remove("is-missing");
-            changeEl.textContent = quote.change == null ? "" : formatPercent(quote.change);
-            changeEl.style.color = color ?? "";
+            const stale = this.feed.isStale(coin.symbol);
+            changeEl.textContent = stale ? t("panel.stale") : quote.change == null ? "" : formatPercent(quote.change);
+            changeEl.style.color = stale ? "" : color ?? "";
         } else {
             priceEl.textContent = "--";
             priceEl.style.color = "";
             priceEl.classList.add("is-missing");
             changeEl.textContent = "";
+            changeEl.style.color = "";
         }
     }
 
@@ -227,6 +237,7 @@ export class Panel {
 
         const row = (labelKey, control) => {
             const line = el("label", "pn-setting");
+            control.dataset.setting = labelKey;
             line.append(el("span", "pn-setting-label", t(labelKey)), control);
             return line;
         };

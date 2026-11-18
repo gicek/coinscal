@@ -33,6 +33,7 @@
     "empty": "No coins added",
     "addCoins": "Add Coins",
     "loading": "Loading prices",
+    "stale": "Stale price",
     "add": "Add {name}",
     "remove": "Remove {name}",
     "catalogNote": "Many more coins are available in the app.",
@@ -118,7 +119,7 @@
     },
     "site": {
       "title": "This website",
-      "body": "This website sets no cookies and shows no ads. It uses Cloudflare Web Analytics, which counts visits without cookies and doesn't track you across sites. Your browser loads prices from Binance, OKX, and Bybit and exchange rates from ExchangeRate-API and jsDelivr to run the live demo. Your language, appearance, and demo settings are saved in your browser's local storage and never sent anywhere."
+      "body": "This website sets no cookies and shows no ads. It uses Cloudflare Web Analytics, which counts visits without cookies and doesn't track you across sites. Your browser loads prices from Binance, OKX, and Bybit and exchange rates from ExchangeRate-API and jsDelivr to run the live demo. Your browser stores your language, appearance, and demo settings locally. Price requests send the relevant demo coin symbols to the price providers."
     },
     "contact": {
       "title": "Contact",
