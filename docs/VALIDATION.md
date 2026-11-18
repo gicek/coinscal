@@ -8,10 +8,11 @@ Last run Nov 18, 2026.
 
 | Check | Result |
 |---|---|
-| `make test-mac` | Localization guards (45 files), catalog and release notes validation, 120 unit tests in 15 suites: pass |
-| `make test-site` | Localization guards (7 files), 8 offline checks: pass |
-| `make mac-check-sources` (Oct 16, 2026) | All 4 price and 3 exchange rate sources respond; all 450 catalog symbols priced; failover with Binance unreachable takes one round |
-| CI | Repository hygiene, localization guards, release notes, website checks |
+| `make test-mac` | Localization guards (45 files), catalog and release notes validation, 126 unit tests in 15 suites: pass |
+| `make test-site` | Localization guards (7 files), 11 offline checks: pass |
+| `make test-release` | 4 offline checks: pass |
+| `make mac-check-sources` | All 4 price and 3 exchange rate sources respond; 446 queried symbols priced, plus locally priced USDT; failover passes. Two cross-source price differences were reported as warnings. |
+| CI configuration | Linux hygiene, localization, release and website checks. The new macOS job runs Swift tests and checks the generated project. |
 
 ## Verified on a Real Mac
 
@@ -24,6 +25,8 @@ macOS 27.2.1 with a debug build, unless noted.
 - Menu bar price stays sharp on an inactive display, with and without a background.
 - The app no longer requests periodic widget reloads (none in 6 minutes, down from one every 5 minutes); "Coinscal" and "Coinscal Debug" widgets coexist.
 - Desktop ticker: level, click-through, positioning across displays, and persistence (macOS 26).
+- Watchlist: keyboard focus fits inside the reorder handle, which exposes Move Up and Move Down actions to accessibility tools.
+- Website preview: live prices in the desktop and 390 px layouts. Keyboard changes retain focus in the demo settings.
 - Update checks request the feed of the in-app language (`appcast.en.xml` in English, `appcast.zh-Hans.xml` after switching to Simplified Chinese).
 - Release: 1.1.0 (build 3) published Nov 18, 2026: notarized zip and DMG pass `spctl`; the archives and `Coinscal.dmg` on `dl.coinscal.app` match the local builds byte for byte; `appcast.xml` lists notes in three languages and each `appcast.<lang>.xml` only its own; GitHub Release `v1.1.0` carries the zip and DMG. The website is deployed with the demo fixes.
 
@@ -45,6 +48,7 @@ macOS 27.2.1 with a debug build, unless noted.
 - The right-click menu shows no icons on macOS 14 and 26.
 
 **Settings and desktop ticker**
+- On a real Mac, verify that editing and leaving an absolute alert amount preserves its decimals and that the field waits for the selected currency’s rate. Check reorder with the keyboard and VoiceOver.
 - Settings layout and title bar in all three languages, and on macOS 14 and 15.
 - Add panel: hover and click to remove and re-add; Return adds the first result.
 - Desktop ticker: resizing in place when text size or the watchlist changes, at most 16 coins, pulled back on screen near the bottom edge, readability over a dark wallpaper.

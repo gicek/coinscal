@@ -114,7 +114,7 @@ def tokenize(text: str, lang: str):
     yield from flush_code()
 
 
-APPLE_KEY_CALLS = re.compile(r'(?:String\(localized:|LocalizedStringKey\(|\bText\(|\bLabel\(|\bButton\(|\bToggle\(|\bSection\(|NSLocalizedString\()\s*"((?:[^"\\]|\\.)*)"')
+APPLE_KEY_CALLS = re.compile(r'(?:String\(localized:|LocalizedStringKey\(|\bloc\(|\bText\(|\bLabel\(|\bButton\(|\bToggle\(|\bSection\(|NSLocalizedString\()\s*"((?:[^"\\]|\\.)*)"')
 ANDROID_KEY_CALLS = re.compile(r"\bR\.(?:string|plurals)\.([A-Za-z0-9_]+)")
 WEB_KEY_CALLS = re.compile(r"\bt\(\s*['\"]([A-Za-z0-9_.\-]+)['\"]")
 

@@ -20,6 +20,7 @@ TEST_TARGETS :=
 
 # --- Apple ---
 APPLE_PROJECT := Apple/$(PRODUCT).xcodeproj
+XCODEGEN_VERSION := 2.46.0
 ifneq ($(strip $(DEVELOPMENT_TEAM)),)
 SIGNING_FLAGS := -allowProvisioningUpdates DEVELOPMENT_TEAM="$(DEVELOPMENT_TEAM)"
 else
@@ -98,7 +99,8 @@ build: $(BUILD_TARGETS)
 test: $(TEST_TARGETS)
 
 project:
-	@command -v xcodegen >/dev/null || { echo "XcodeGen is missing: brew install xcodegen"; exit 1; }
+	@command -v xcodegen >/dev/null || { echo "XcodeGen $(XCODEGEN_VERSION) is missing: brew install xcodegen"; exit 1; }
+	@test "$$(xcodegen --version)" = "Version: $(XCODEGEN_VERSION)" || { echo "Use XcodeGen $(XCODEGEN_VERSION) to generate the committed project."; exit 1; }
 	cd Apple && xcodegen generate --quiet
 
 mac: project

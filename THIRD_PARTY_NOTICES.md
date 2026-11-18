@@ -12,6 +12,7 @@ Everything else in the app uses Apple system frameworks. The About pane lists Sp
 
 | Tool | Version | License | Use |
 |---|---|---|---|
+| [XcodeGen](https://github.com/yonaskolb/XcodeGen) | 2.46.0, enforced by the Makefile and checksum-verified in CI | MIT | Generates the Xcode project |
 | Wrangler (Cloudflare) | 4.137.0, pinned in the `Makefile`, run through `npx` | MIT OR Apache-2.0 | Website deployment and release uploads |
 | Sparkle command-line tools | 2.10.0 release archive, SHA-256 pinned in the `Makefile` | MIT | Update signing key and archive signatures |
 

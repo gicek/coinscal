@@ -1,7 +1,6 @@
 name: tests
 
-# Checks that don't need Xcode: repository hygiene, localization guards, and the website's offline checks.
-# The app's unit tests need Xcode 27 and run locally with `make test` (docs/DEVELOPMENT.md).
+# Local equivalents are listed in docs/DEVELOPMENT.md.
 
 on:
   push:
@@ -37,6 +36,8 @@ jobs:
       - name: Release notes
         # Same as the release notes step in make test-mac
         run: python3 scripts/release/publish.py --check-notes docs/release-notes
+      - name: Release script tests
+        run: make test-release
       - name: Three website string guards
         # Same as the i18n step in make test-site
         run: python3 scripts/i18n-guard.py --langs "en,zh-Hans,zh-Hant" --min-files 7 --platform web --root Site
@@ -53,3 +54,20 @@ jobs:
         # Same as the npm step in make test-site; the site has no dependencies to install
         run: npm run check
         working-directory: Site
+
+  mac:
+    name: macOS build and tests
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install the pinned XcodeGen
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl -fsSL --retry 3 -o xcodegen.zip https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip
+          echo "4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806  xcodegen.zip" | shasum -a 256 -c -
+          unzip -q xcodegen.zip
+          echo "$PWD/xcodegen/bin" >> "$GITHUB_PATH"
+      - name: Build app and widget and run Swift tests
+        run: make test-mac
+      - name: Check that the generated project is current
+        run: git diff --exit-code -- Apple/Coinscal.xcodeproj

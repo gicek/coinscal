@@ -7,7 +7,7 @@ Run every command from the repository root. Repository rules are in [AGENTS.md](
 | Tool | Version | Notes |
 |---|---|---|
 | Xcode | 27 (macOS 27 SDK) | Required: the app uses macOS 27 APIs behind availability checks |
-| XcodeGen | 2.46 | `brew install xcodegen` |
+| XcodeGen | 2.46.0 | `brew install xcodegen` or the pinned release archive |
 | Python | 3.9+ | Localization guards, catalog tools, website preview |
 | Node.js | 20+ for website checks; 22+ for Wrangler | The Makefile picks the newest nvm-installed Node 22+ for Wrangler |
 
@@ -62,7 +62,7 @@ Nothing is built inside source directories, and `Build/` is never committed.
 - Unit tests use Swift Testing and run with the debug app as host; `AppDelegate` skips all setup when `XCTestConfigurationFilePath` is set.
 - Tests inject test doubles instead of system services ([Architecture](ARCHITECTURE.md#testing)).
 - The `com.apple.linkd.autoShortcut` connection errors in test logs come from the sandboxed host and can be ignored.
-- CI (`.github/workflows/tests.yml`) runs the repository hygiene check, the localization guards, the release notes check, and the website checks. App tests need a local Xcode 27 and run with `make test` before merging.
+- CI runs repository hygiene, localization, release script, and website checks on Linux. The `xcode-27` ARM64 job runs `make test-mac` and checks the generated Xcode project. Run `make test` locally before merging.
 
 ## Website
 

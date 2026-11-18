@@ -5,6 +5,7 @@ struct CoinscalApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     init() {
+        guard !AppDelegate.isRunningUnitTests else { return }
         // No icons in front of menu items. macOS 26 attaches action images to items such as "Settings" and reads
         // this key before `applicationDidFinishLaunching`, so set it here, before any menu exists. The app domain
         // also wins over a global `NSMenuEnableActionImages = YES`.

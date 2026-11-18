@@ -24,7 +24,7 @@ Following the system uses the first preferred system language: Chinese tags reso
 
 ## Guards
 
-`scripts/i18n-guard.py` checks that source files contain no non-English text outside localization calls, that every key has all three languages, and that keys used in code exist. It runs in `make test-mac`, `make test-site`, and CI. It recognizes literal keys in system APIs such as `Text("…")`, and `t("…")` on the website, but not `loc("…")`; confirm new `loc` keys yourself. `WidgetTests.widgetKeysAreTranslated` covers the `widget.*` and `coin.status.*` keys, and `make test-site` checks every `data-i18n` key in the pages.
+`scripts/i18n-guard.py` checks that source files contain no non-English text outside localization calls, that every key has all three languages, and that keys used in code exist. It runs in `make test-mac`, `make test-site`, and CI. It recognizes literal keys in system APIs such as `Text("…")`, `loc("…")` in the app, and `t("…")` on the website. Check dynamically assembled keys with tests. `WidgetTests.widgetKeysAreTranslated` covers the `widget.*` and `coin.status.*` keys, and `make test-site` checks every `data-i18n` key in the pages.
 
 ## Terminology
 

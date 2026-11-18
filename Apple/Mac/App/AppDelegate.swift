@@ -15,7 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var menuBarPanel: MenuBarPanelController!
     private var settingsWindow: NSWindow?
 
-    let settingsVM = SettingsViewModel()
+    private(set) lazy var settingsVM = SettingsViewModel()
     let catalog = CoinCatalog.bundled()
     lazy var coinListVM = CoinListViewModel(settingsViewModel: settingsVM, catalog: catalog)
     lazy var watchlistVM = WatchlistViewModel(catalog: catalog)
@@ -34,7 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// When launched as the unit-test host, set nothing up: no network polling, no notification permission,
     /// no login item, and no exiting because a release build of the app is already running.
-    private static var isRunningUnitTests: Bool {
+    static var isRunningUnitTests: Bool {
         ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     }
 
