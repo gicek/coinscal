@@ -24,7 +24,7 @@ macOS 27.2.1 with a debug build, unless noted.
 - The app no longer requests periodic widget reloads (none in 6 minutes, down from one every 5 minutes); "Coinscal" and "Coinscal Debug" widgets coexist.
 - Desktop ticker: level, click-through, positioning across displays, and persistence (macOS 26).
 - Update checks request the feed of the in-app language (`appcast.en.xml` in English, `appcast.zh-Hans.xml` after switching to Simplified Chinese).
-- Release: notarized zip and DMG pass `spctl`; 1.0 and 1.0.1 published; downloads match the local builds; the website serves the latest DMG.
+- Release: 1.1.0 (build 3) published Nov 18, 2026: notarized zip and DMG pass `spctl`; the archives and `Coinscal.dmg` on `dl.coinscal.app` match the local builds byte for byte; `appcast.xml` lists notes in three languages and each `appcast.<lang>.xml` only its own; GitHub Release `v1.1.0` carries the zip and DMG. The website is deployed with the demo fixes.
 
 ## Pending
 
@@ -48,8 +48,8 @@ macOS 27.2.1 with a debug build, unless noted.
 - Desktop ticker: resizing in place when text size or the watchlist changes, at most 16 coins, pulled back on screen near the bottom edge, readability over a dark wallpaper.
 
 **Updates and release**
-- An update from 1.0 to 1.0.1 end to end: release notes in the system language, relaunch, settings and widgets intact.
-- After the next release publishes the per-language feeds: release notes appear in the in-app language, including after switching languages.
+- An update from 1.0.1 to 1.1.0 end to end: release notes in the system language (1.0.1 reads `appcast.xml`), relaunch, settings and widgets intact.
+- From 1.1.0 on, release notes appear in the in-app language, including after switching languages (first testable with the next release).
 - A scheduled check shows "Update Available" without opening a window; a tampered archive is rejected; offline checks stay silent.
 - First launch from the DMG on another Mac is not blocked by Gatekeeper.
 
