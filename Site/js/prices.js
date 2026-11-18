@@ -1,7 +1,7 @@
 // Live prices for the demo, from the same public, keyless sources as the app, in the same order:
 // Binance → Binance mirror → OKX → Bybit (Constants.API). A Binance WebSocket stream keeps prices current
-// between REST refreshes; while it is quiet, REST polls every 10 seconds. Coins a source lacks are filled in
-// from the next one. Prices are in USDT, treated as USD.
+// between REST refreshes; while it is quiet, or a coin has no price, REST polls at most every 10 seconds. Coins a
+// source lacks are filled in from the next one. Prices are in USDT, treated as USD.
 
 const TIMEOUT_MS = 5000;
 const POLL_MS = 10000;
@@ -116,14 +116,17 @@ export class PriceFeed {
         return this.quotes.get(symbol) ?? null;
     }
 
-    /** Polls over REST when the stream has gone quiet. Never starts a request while one is in flight. */
+    /**
+     * Polls over REST at most every 10 seconds while the stream is quiet or a coin has no price yet; new coins,
+     * coming back online, and showing the tab poll at once. Never starts a round while one is in flight.
+     */
     tick(force = false) {
         this.reportStatus();
         if (!this.symbols.length || this.inFlight || document.hidden) return;
         const now = Date.now();
         const streamHealthy = now - this.lastStreamMessage < STREAM_QUIET_MS;
         const missing = this.symbols.some((s) => !this.quotes.has(s));
-        if (!force && !missing && (streamHealthy || now - this.lastPoll < POLL_MS)) return;
+        if (!force && (now - this.lastPoll < POLL_MS || (streamHealthy && !missing))) return;
         this.poll();
     }
 
