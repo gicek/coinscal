@@ -1,124 +1,77 @@
 import SwiftUI
 
 struct AboutView: View {
-    @EnvironmentObject var settingsVM: SettingsViewModel
-    @EnvironmentObject var updateController: UpdateController
-
     private let openSourceComponents: [(name: String, license: String, url: String)] = [
         ("Sparkle", "MIT License", "https://github.com/sparkle-project/Sparkle"),
     ]
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+        Form {
+            Section {
                 HStack(spacing: 16) {
                     Image("app-logo")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 80, height: 80)
+                        .frame(width: 64, height: 64)
                         .accessibilityHidden(true)
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(verbatim: "Coinscal")
-                            .font(.title)
+                            .font(.title2)
                             .bold()
                         Text(String(format: loc("about.version"), Constants.appVersion))
                             .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
                         Text(loc("about.slogan"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 }
+                .padding(.vertical, 4)
+            }
 
-                Divider()
+            Section(loc("about.section.contact")) {
+                AboutContactLinks()
+            }
 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(loc("about.section.updates"))
-                        .font(.headline)
-
-                    Toggle(loc("about.updates.automatic"), isOn: Binding(
-                        get: { updateController.automaticallyChecksForUpdates },
-                        set: { updateController.setAutomaticallyChecksForUpdates($0) }
-                    ))
-                    .disabled(!updateController.isAvailable)
-
-                    Toggle(loc("about.updates.autoInstall"), isOn: Binding(
-                        get: { updateController.automaticallyInstallsUpdates },
-                        set: { updateController.setAutomaticallyInstallsUpdates($0) }
-                    ))
-                    .disabled(!updateController.canAutomaticallyInstallUpdates)
-
-                    Button(loc("menu.checkForUpdates")) {
-                        updateController.checkForUpdates()
-                    }
-                    .disabled(!updateController.canCheckForUpdates)
-                }
-
-                Divider()
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(loc("about.section.contact"))
-                        .font(.headline)
-
-                    AboutContactLinks()
-                }
-
-                Divider()
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(loc("about.section.dataSources"))
-                        .font(.headline)
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        Label(loc("about.dataSource.price"), systemImage: "chart.line.uptrend.xyaxis")
-                        Label {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(loc("about.dataSource.exchangeRate"))
-                                // Required wording, kept in English in every language.
-                                Link(destination: Constants.Attribution.exchangeRateAPIURL) {
-                                    Text(verbatim: Constants.Attribution.exchangeRateAPIText)
-                                }
-                                .font(.caption)
-                                // The section is secondary-colored; keep the link looking like one.
-                                .foregroundStyle(Color.accentColor)
-                            }
-                        } icon: {
-                            Image(systemName: "dollarsign.arrow.circlepath")
+            Section(loc("about.section.dataSources")) {
+                Label(loc("about.dataSource.price"), systemImage: "chart.line.uptrend.xyaxis")
+                Label {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(loc("about.dataSource.exchangeRate"))
+                        // Required wording, kept in English in every language.
+                        Link(destination: Constants.Attribution.exchangeRateAPIURL) {
+                            Text(verbatim: Constants.Attribution.exchangeRateAPIText)
                         }
-                        // CoinGecko's free data terms require attribution (coin names, logos and ranks come from it).
-                        Label(loc("about.dataSource.coinInfo"), systemImage: "list.bullet")
+                        .font(.caption)
                     }
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
+                } icon: {
+                    Image(systemName: "dollarsign.arrow.circlepath")
                 }
+                // CoinGecko's free data terms require attribution (coin names, logos and ranks come from it).
+                Label(loc("about.dataSource.coinInfo"), systemImage: "list.bullet")
+            }
 
-                if !openSourceComponents.isEmpty {
-                    Divider()
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text(loc("about.section.opensource"))
-                            .font(.headline)
-
-                        ForEach(openSourceComponents, id: \.name) { component in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(verbatim: component.name).font(.callout)
-                                    Text(verbatim: component.license).font(.caption).foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                if let url = URL(string: component.url) {
-                                    Link(loc("about.opensource.view"), destination: url)
-                                        .font(.caption)
-                                }
+            if !openSourceComponents.isEmpty {
+                Section(loc("about.section.opensource")) {
+                    ForEach(openSourceComponents, id: \.name) { component in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(verbatim: component.name)
+                                Text(verbatim: component.license)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if let url = URL(string: component.url) {
+                                Link(loc("about.opensource.view"), destination: url)
                             }
                         }
                     }
                 }
             }
-            // Padding inside the scroll view: it starts right under the title bar and content scrolls under it.
-            .padding(Constants.Window.settingsContentPadding)
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .formStyle(.grouped)
     }
 }
 
@@ -128,7 +81,8 @@ struct AboutContactLinks: View {
     private static let iconWidth: CGFloat = 18
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        // One form row per link.
+        Group {
             Link(destination: Constants.Contact.emailURL) {
                 Label {
                     Text(verbatim: Constants.Contact.email)

@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-Only the latest release receives fixes. Coinscal updates itself; check for updates from the right-click menu or Settings → About.
+Only the latest release receives fixes. Coinscal updates itself; check for updates from the right-click menu or Settings → General.
 
 ## Reporting a Vulnerability
 

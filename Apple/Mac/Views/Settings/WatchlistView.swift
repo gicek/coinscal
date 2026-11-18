@@ -17,7 +17,7 @@ struct WatchlistView: View {
         static let contentInset: CGFloat = Constants.Window.settingsContentPadding - 8
     }
 
-    /// Added-coins list column widths (drag handle, alert picker + value, delete), aligned with the header.
+    /// Added-coins list column widths (drag handle, alert picker + value, delete).
     private enum WatchlistListLayout {
         static let dragHandleColumnWidth: CGFloat = 20
         static let deleteColumnWidth: CGFloat = 28
@@ -32,6 +32,10 @@ struct WatchlistView: View {
     @FocusState private var focusedReorderID: String?
     /// Owned by `SettingsWindow`, which hosts the "+" toolbar button (see the note there).
     @Binding var showAddCoin: Bool
+    /// The row under the pointer; only it shows the delete button.
+    @State private var hoveredRowID: String?
+    /// Notifications are turned off for Coinscal in System Settings; refreshed when the app becomes active.
+    @State private var notificationsDenied = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -71,6 +75,14 @@ struct WatchlistView: View {
             showAddCoin = false
             reorderSession.cancel()
         }
+        .task { await refreshNotificationAuthorization() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            Task { await refreshNotificationAuthorization() }
+        }
+    }
+
+    private func refreshNotificationAuthorization() async {
+        notificationsDenied = await NotificationService.shared.isAuthorizationDenied()
     }
 
     private func setAddCoinShown(_ shown: Bool) {
@@ -152,28 +164,54 @@ struct WatchlistView: View {
                 Text(loc("watchlist.added"))
                     .font(.headline)
                 Spacer()
-                Text(loc("watchlist.alert"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(width: WatchlistListLayout.alertColumnWidth, alignment: .center)
-                Spacer(minLength: 0)
-                    .frame(width: WatchlistListLayout.deleteColumnWidth)
+                // Master switch for every coin's alert condition below.
+                Toggle(loc("general.notification.priceAlert"), isOn: $settingsVM.settings.priceChangeNotificationEnabled)
+                    .toggleStyle(.switch)
+                    .controlSize(.small)
             }
             .padding(.vertical, 10)
             .fixedSize(horizontal: false, vertical: true)
 
+            if settingsVM.settings.priceChangeNotificationEnabled && notificationsDenied {
+                notificationsDeniedNotice
+            }
+
             Divider()
 
             if settingsVM.settings.watchlistCoins.isEmpty {
-                Text(loc("watchlist.empty"))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(40)
+                VStack(spacing: 12) {
+                    Text(loc("watchlist.empty"))
+                        .foregroundStyle(.secondary)
+                    Button(loc("popover.addCoins")) {
+                        setAddCoinShown(true)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(40)
             } else {
                 reorderableList
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    /// Alerts are on but macOS won't show them.
+    private var notificationsDeniedNotice: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+                .accessibilityHidden(true)
+            Text(loc("watchlist.notificationsDenied"))
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 8)
+            Button(loc("watchlist.openNotificationSettings")) {
+                NotificationService.shared.openSystemNotificationSettings()
+            }
+            .controlSize(.small)
+        }
+        .padding(.bottom, 10)
     }
 
     /// Display rows = watchlist coins with resolved metadata; the index is the geometric slot used by reordering.
@@ -231,6 +269,18 @@ struct WatchlistView: View {
             // Normally the same system window background as the detail pane.
             .watchlistRowBackground()
             .overlay(alignment: .bottom) { Divider() }
+            .contentShape(Rectangle())
+            .onHover { hovering in
+                if hovering {
+                    hoveredRowID = watchlistCoin.coinId
+                } else if hoveredRowID == watchlistCoin.coinId {
+                    hoveredRowID = nil
+                }
+            }
+            .contextMenu {
+                Button(loc("watchlist.delete")) { removeCoin(watchlistCoin.coinId) }
+            }
+            .accessibilityAction(named: loc("watchlist.delete")) { removeCoin(watchlistCoin.coinId) }
             // Make room for the gap: rows shift with the insertion slot, animated inside the session.
             .offset(y: reorderSession.offset(forRowAt: context.index))
             // The source row stays in place as an empty gap while dragging (the floating row is an overlay).
@@ -298,20 +348,29 @@ struct WatchlistView: View {
             .id(currency)
             .frame(width: WatchlistListLayout.alertColumnWidth, alignment: .center)
 
-            // Remove this coin (same logic as the view model, which also fixes the menu bar coin).
-            Button(action: {
-                reorderSession.cancel()
-                vm.removeCoin(watchlistCoin.coinId, from: &settingsVM.settings)
-                reloadCoinData()
-            }) {
+            // Shown on hover only; the context menu and an accessibility action also delete.
+            let showsDelete = reorderContext != nil
+                && reorderSession.draggedID == nil
+                && hoveredRowID == watchlistCoin.coinId
+            Button(action: { removeCoin(watchlistCoin.coinId) }) {
                 Image(systemName: "trash")
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
             .frame(width: WatchlistListLayout.deleteColumnWidth, alignment: .center)
-            .accessibilityLabel(loc("watchlist.delete"))
+            .opacity(showsDelete ? 1 : 0)
+            .allowsHitTesting(showsDelete)
+            .accessibilityHidden(true)
+            .help(loc("watchlist.delete"))
         }
+    }
+
+    /// Removes a coin (same logic as the view model, which also fixes the menu bar coin).
+    private func removeCoin(_ coinID: String) {
+        reorderSession.cancel()
+        vm.removeCoin(coinID, from: &settingsVM.settings)
+        reloadCoinData()
     }
 
     /// Shown under a coin that has no market.

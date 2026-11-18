@@ -392,7 +392,7 @@ extension AppDelegate: NSWindowDelegate {
 }
 
 enum SettingsTab: String, CaseIterable {
-    case general, watchlist, about
+    case general, display, watchlist, about
 }
 
 extension Notification.Name {

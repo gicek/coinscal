@@ -12,10 +12,10 @@ struct ColorPickerRow: View {
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack {
             Text(label)
-                .font(.callout)
-            ColorPicker("", selection: selectedColor)
+            Spacer()
+            ColorPicker(label, selection: selectedColor)
                 .labelsHidden()
                 .frame(width: 44)
         }

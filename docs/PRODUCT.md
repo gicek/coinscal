@@ -20,7 +20,7 @@ Out of scope: accounts and sync, a Coinscal server, trading, holdings and profit
 - "Show" is "Price" (default) or "Icon". With "Icon" the item always shows the monochrome logo.
 - With a price: `<symbol> <price>` by default, for example `BTC 65,000`. Turning off "Show Coin Symbol" displays only the number. The menu bar omits the currency symbol. Decimals depend on magnitude, without trailing zeros: none from 100, up to two from 1 to 100, up to four below 1. A positive price that would round to zero uses compact scientific notation.
 - Without a price (starting up or empty watchlist), the item shows the monochrome logo. If a refresh fails, it keeps the last available price.
-- "Color by Price Change" uses the selected price change basis to color the price. With "Show Background" on, the colored badge uses white text on the same price color used for plain text. With price coloring off, the badge uses the menu bar text color for its background and inverts the text.
+- "Color by Price Change" uses the selected price change basis to color the price. With "Show Badge" on, the colored badge uses white text on the same price color used for plain text. With price coloring off, the badge uses the menu bar text color for its background and inverts the text.
 - Left click toggles the panel. Right click opens the menu.
 
 ## Panel
@@ -35,20 +35,21 @@ Opening the panel leaves the frontmost app active, as the system's menu bar extr
 
 ## Settings
 
-A window with three panes, General, Watchlist, and About, under a shared title bar that shows the pane name. Default size 786×500, resizable from 600×420 to 800×500; the last size is remembered. Every change applies and saves immediately.
+A window with four panes, General, Display, Watchlist, and About, under a shared title bar that shows the pane name. Default size 786×500, resizable from 600×420 to 800×500; the last size is remembered. Every change applies and saves immediately. The app menu's "Settings" item (⌘,) opens the same window. All panes except Watchlist are grouped forms.
 
 - **General**
-  - Launch: "Open at Login" (off by default).
-  - Menu Bar: "Show" (Price / Icon), "Coin", "Show Coin Symbol", "Show Background", "Color by Price Change", and the "Color Scheme" menu (Green Up, Red Down / Red Up, Green Down / Custom). Icon mode disables the price controls. The color scheme and custom colors are available when price coloring is on. Disabled controls retain their selections.
-  - Desktop: "Show on Desktop", "Text Size" (Normal / Large), "Background Opacity", "Adjust Position"; grayed out while the ticker is off.
+  - "Open at Login" (off by default) and "Language" (Follow System, English, Simplified Chinese, Traditional Chinese).
   - Prices: "Display Currency" and "Price Change Basis". The basis selector offers "Rolling 24 Hours" (default), "Midnight (UTC+0)", and "Midnight (UTC+8)" in that order. The menu bar color, panel, desktop ticker, and widgets follow this setting.
-  - Notifications: "Price Alerts", the master switch for alerts.
-  - Language: Follow System, English, Simplified Chinese, Traditional Chinese.
+  - Updates: "Automatically Check for Updates" (on by default), "Automatically Install Updates" (off by default; available while automatic checks are on), and the version with "Check for Updates".
+- **Display**
+  - Menu Bar: "Show" (Price / Icon), "Coin", "Show Coin Symbol", "Color by Price Change", the "Color Scheme" menu (Green Up, Red Down / Red Up, Green Down / Custom) with "Up Color" and "Down Color" rows for Custom, and "Show Badge". Icon mode disables the price controls. The color scheme and custom colors are available when price coloring is on. Disabled controls retain their selections.
+  - Desktop: "Show on Desktop", "Text Size" (Normal / Large), "Background Opacity", and "Position" with "Adjust"; grayed out while the ticker is off.
 - **Watchlist**
   - "+" at the right of the title bar opens an add panel with a search field (focused) over the listed coins, matching symbol or name. With no input it lists every listed coin. Clicking a coin toggles it in the watchlist (added coins show a checkmark that turns into a remove sign on hover); the panel stays open. Return adds the first result not yet added. Esc, a click outside, "+" again, or switching panes closes it and clears the search.
   - "Recommended": BTC, ETH, BNB, SOL, ZEC, HYPE, BCH, LTC, UNI, AAVE; click to add or remove.
-  - The watchlist: drag handle to reorder (also with arrow keys when focused or VoiceOver actions), the alert condition and value, and delete. Coins without a market show "No market data".
-- **About**: version, "Automatically Check for Updates" (on by default), "Automatically Install Updates" (off by default; available while automatic checks are on), and "Check for Updates", contact, data sources with the "Rates By Exchange Rate API" credit, and open source components.
+  - The watchlist header holds "Price Alerts", the master switch for alerts. While it is on and macOS has notifications for Coinscal turned off, a notice under the header offers "Open System Settings".
+  - The watchlist: drag handle to reorder (also with arrow keys when focused or VoiceOver actions), the alert condition and value, and delete. The delete button appears on hover; the row's context menu and a VoiceOver action also delete. Coins without a market show "No market data". An empty watchlist shows "Add Coins", which opens the add panel.
+- **About**: version (selectable), contact, data sources with the "Rates By Exchange Rate API" credit, and open source components.
 
 ## Widgets
 

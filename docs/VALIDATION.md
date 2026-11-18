@@ -8,7 +8,7 @@ Last run Nov 18, 2026.
 
 | Check | Result |
 |---|---|
-| `make test-mac` | Localization guards (45 files), catalog and release notes validation, 134 unit tests in 15 suites: pass |
+| `make test-mac` | Localization guards (46 files), catalog and release notes validation, 137 unit tests in 16 suites: pass |
 | `make test-site` | Localization guards (7 files), 12 offline checks: pass |
 | `make test-release` | 4 offline checks: pass |
 | `make mac-check-sources` | All 4 price and 3 exchange rate sources respond. Both fixed-day modes return BTC and ETH changes from each price source. All 446 queried symbols are priced, plus locally priced USDT. Failover passes. Two cross-source price differences were reported as warnings. |
@@ -27,8 +27,9 @@ macOS 27.2.1 with a debug build, unless noted.
 - Desktop ticker: level, click-through, positioning across displays, and persistence (macOS 26).
 - Watchlist: keyboard focus fits inside the reorder handle, which exposes Move Up and Move Down actions to accessibility tools.
 - Website preview: live prices in the desktop and 390 px layouts. Keyboard changes retain focus in the demo settings.
+- Settings panes: General (launch, language, prices, updates), Display (menu bar and desktop ticker, with the Position row), Watchlist ("Price Alerts" in the header), and About as a grouped form. The app menu's "Settings" item opens the Settings window, not an empty one.
 - General → Prices: the native menu lists Rolling 24 Hours, Midnight (UTC+0), and Midnight (UTC+8) in order. The selected item is checked after switching to UTC+8. The desktop website preview switches to UTC+8 and shows its day-change heading and live BTC and ETH percentages.
-- General → Menu Bar: the symbol switch defaults to on. Icon mode disables the price controls, and switching back retains the symbol choice. Turning off price coloring disables the color scheme menu. In the website preview, the symbol switch updates the menu bar price immediately.
+- Display → Menu Bar: the symbol switch defaults to on. Icon mode disables the price controls, and switching back retains the symbol choice. Turning off price coloring disables the color scheme menu. In the website preview, the symbol switch updates the menu bar price immediately.
 - AppKit badge render: `BTC 64,750` measures 90 × 22 pt with a background and `64,750` measures 61 × 22 pt. The width without a background is 74 pt and 45 pt respectively.
 - Update checks request the feed of the in-app language (`appcast.en.xml` in English, `appcast.zh-Hans.xml` after switching to Simplified Chinese).
 - Release: 1.1.0 (build 3) published Nov 18, 2026: notarized zip and DMG pass `spctl`; the archives and `Coinscal.dmg` on `dl.coinscal.app` match the local builds byte for byte; `appcast.xml` lists notes in three languages and each `appcast.<lang>.xml` only its own; GitHub Release `v1.1.0` carries the zip and DMG. The website is deployed with the demo fixes.
@@ -55,6 +56,7 @@ macOS 27.2.1 with a debug build, unless noted.
 **Settings and desktop ticker**
 - On a real Mac, verify that editing and leaving an absolute alert amount preserves its decimals and that the field waits for the selected currency’s rate. Check reorder with the keyboard and VoiceOver.
 - Settings layout and title bar in all three languages, and on macOS 14 and 15.
+- Not yet checked by hand: the notifications-off notice and its "Open System Settings" button, hover delete and the row context menu with a real mouse, the Custom color rows, and the empty watchlist's "Add Coins".
 - Add panel: hover and click to remove and re-add; Return adds the first result.
 - Desktop ticker: resizing in place when text size or the watchlist changes, at most 16 coins, pulled back on screen near the bottom edge, readability over a dark wallpaper.
 

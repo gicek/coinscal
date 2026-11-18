@@ -90,6 +90,10 @@ struct SettingsWindow: View {
             GeneralSettingsView()
                 .environmentObject(settingsVM)
                 .environmentObject(coinListVM)
+        case .display:
+            DisplaySettingsView()
+                .environmentObject(settingsVM)
+                .environmentObject(coinListVM)
         case .watchlist:
             WatchlistView(showAddCoin: $showAddCoin)
                 .environmentObject(settingsVM)
@@ -97,10 +101,7 @@ struct SettingsWindow: View {
                 .padding(Constants.Window.settingsContentPadding)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         case .about:
-            // Pads its own content inside the scroll view (outer padding would clip scrolled content 24pt below the bar).
             AboutView()
-                .environmentObject(settingsVM)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
 }
@@ -110,6 +111,7 @@ extension SettingsTab: Hashable {
     var title: String {
         switch self {
         case .general:   return loc("nav.general")
+        case .display:   return loc("nav.display")
         case .watchlist: return loc("nav.watchlist")
         case .about:     return loc("nav.about")
         }
@@ -118,6 +120,7 @@ extension SettingsTab: Hashable {
     var systemImage: String {
         switch self {
         case .general:   return "gear"
+        case .display:   return "menubar.rectangle"
         case .watchlist: return "bitcoinsign.circle"
         case .about:     return "info.circle"
         }

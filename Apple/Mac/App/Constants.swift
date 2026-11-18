@@ -69,7 +69,7 @@ enum Constants {
         static let settingsSidebarIdealWidth: CGFloat = 190
 
         /// Content padding shared by the settings panes.
-        static let settingsContentPadding: CGFloat = 24
+        static let settingsContentPadding: CGFloat = 20
     }
 
     static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"

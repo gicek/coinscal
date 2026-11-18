@@ -19,10 +19,13 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 
 - Choose whether the menu bar price includes the coin symbol. The symbol is shown by default.
 - Choose rolling 24-hour change, UTC+0 midnight, or UTC+8 midnight in Settings → General → Prices.
-- "Automatically Install Updates" in Settings → About, off by default.
+- "Automatically Install Updates" in Settings → General → Updates, off by default.
+- The Watchlist pane warns when price alerts are on but macOS has notifications for Coinscal turned off, with a button to open System Settings.
 
 ### Changed
 
+- Reorganize Settings into General, Display, Watchlist, and About. Update options move from About to General, the menu bar and desktop ticker options get their own Display pane, and the "Price Alerts" switch moves to the watchlist header. About uses the same grouped layout as the other panes.
+- In the watchlist, the delete button appears on hover; right-click a row to delete it as well.
 - Group the menu bar options by what they control and show the color scheme in a drop-down menu.
 - Reduce the horizontal padding on menu bar price badges.
 - Stale quotes in the menu bar panel show the time they were last fetched.

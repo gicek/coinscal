@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import OSLog
 import UserNotifications
@@ -26,6 +27,23 @@ final class NotificationService: PriceAlertNotifying {
                 Self.logger.error("Notification permission error: \(error.localizedDescription, privacy: .public)")
             }
         }
+    }
+
+    /// True when the user has turned off Coinscal's notifications in System Settings.
+    func isAuthorizationDenied() async -> Bool {
+        let status = await withCheckedContinuation { (continuation: CheckedContinuation<UNAuthorizationStatus, Never>) in
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                continuation.resume(returning: settings.authorizationStatus)
+            }
+        }
+        return status == .denied
+    }
+
+    /// Opens Coinscal's page in System Settings → Notifications.
+    func openSystemNotificationSettings() {
+        let id = Bundle.main.bundleIdentifier ?? ""
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension?id=\(id)") else { return }
+        NSWorkspace.shared.open(url)
     }
 
     func sendPriceAlert(
