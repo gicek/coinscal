@@ -7,6 +7,7 @@ struct WidgetSnapshot: Codable, Equatable, Sendable {
         /// In `WidgetSnapshot.currency`.
         var price: Double
         var change24hPercent: Double?
+        var fetchedAt: Date? = nil
     }
 
     var writtenAt: Date

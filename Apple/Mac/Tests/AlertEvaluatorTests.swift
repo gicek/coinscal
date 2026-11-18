@@ -11,15 +11,13 @@ import Testing
         threshold: Double,
         newPrice: Double = 100,
         changeFromRef: Double = 0,
-        referencePrice: Double? = nil,
-        rate: Double = 1
+        referencePrice: Double? = nil
     ) -> Bool {
         AlertEvaluator.shouldTriggerPriceAlert(
             newPrice: newPrice,
             changeFromRef: changeFromRef,
             watchlistCoin: coin(kind, threshold),
-            referencePrice: referencePrice,
-            usdToTargetRate: rate
+            referencePrice: referencePrice
         )
     }
 
@@ -33,12 +31,11 @@ import Testing
         #expect(!triggers(.notSet, threshold: 0, changeFromRef: 50))
     }
 
-    @Test func aboveComparesInDisplayCurrencyAndOnlyOnCrossing() {
-        // Threshold 100 USD at rate 7 → 700 in the display currency.
-        #expect(triggers(.above, threshold: 100, newPrice: 710, referencePrice: 690, rate: 7))
-        #expect(!triggers(.above, threshold: 100, newPrice: 710, referencePrice: 705, rate: 7), "already above: no repeat alert")
-        #expect(!triggers(.above, threshold: 100, newPrice: 710, referencePrice: nil, rate: 7), "no reference price: a crossing cannot be known")
-        #expect(!triggers(.above, threshold: 100, newPrice: 690, referencePrice: 600, rate: 7))
+    @Test func aboveComparesInUSDAndOnlyOnCrossing() {
+        #expect(triggers(.above, threshold: 100, newPrice: 101, referencePrice: 99))
+        #expect(!triggers(.above, threshold: 100, newPrice: 101, referencePrice: 100.5), "already above: no repeat alert")
+        #expect(!triggers(.above, threshold: 100, newPrice: 101, referencePrice: nil), "no reference price: a crossing cannot be known")
+        #expect(!triggers(.above, threshold: 100, newPrice: 99, referencePrice: 90))
     }
 
     @Test func belowOnlyOnCrossing() {
@@ -50,15 +47,15 @@ import Testing
 
     @Test func referencePriceFollowsPriceWhileOnFarSideOfAboveThreshold() {
         var c = Coin(id: "bitcoin", symbol: "BTC", name: "Bitcoin", rank: 1, logoAssetName: nil, logoURL: nil, referencePrice: 90)
-        AlertEvaluator.updateReferencePriceAfterNoTrigger(coin: &c, newPrice: 95, watchlistCoin: coin(.above, 100), usdToTargetRate: 1)
+        AlertEvaluator.updateReferencePriceAfterNoTrigger(coin: &c, newPrice: 95, watchlistCoin: coin(.above, 100))
         #expect(c.referencePrice == 95)
-        AlertEvaluator.updateReferencePriceAfterNoTrigger(coin: &c, newPrice: 120, watchlistCoin: coin(.above, 100), usdToTargetRate: 1)
+        AlertEvaluator.updateReferencePriceAfterNoTrigger(coin: &c, newPrice: 120, watchlistCoin: coin(.above, 100))
         #expect(c.referencePrice == 95, "stops following once past the threshold, so a later re-crossing still alerts")
     }
 
     @Test func changeKeepsFirstReferencePrice() {
         var c = Coin(id: "bitcoin", symbol: "BTC", name: "Bitcoin", rank: 1, logoAssetName: nil, logoURL: nil, referencePrice: 100)
-        AlertEvaluator.updateReferencePriceAfterNoTrigger(coin: &c, newPrice: 101, watchlistCoin: coin(.change, 2), usdToTargetRate: 1)
+        AlertEvaluator.updateReferencePriceAfterNoTrigger(coin: &c, newPrice: 101, watchlistCoin: coin(.change, 2))
         #expect(c.referencePrice == 100)
     }
 

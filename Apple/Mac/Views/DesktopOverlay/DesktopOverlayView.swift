@@ -25,7 +25,9 @@ struct DesktopOverlayView: View {
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: DesktopOverlayLayout.cornerRadius, style: .continuous)
         ZStack {
-            WidgetListView(content: model.content, now: Date(), large: true)
+            TimelineView(.periodic(from: .now, by: 60)) { context in
+                WidgetListView(content: model.content, now: context.date, large: true)
+            }
                 .environment(\.widgetTextBoost, DesktopOverlayLayout.textBoost(model.textSize))
                 .padding(DesktopOverlayLayout.contentPadding)
                 .modifier(WallpaperLegibility(active: DesktopOverlayLayout.textNeedsHalo(

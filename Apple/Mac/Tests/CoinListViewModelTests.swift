@@ -81,6 +81,33 @@ import Testing
         #expect(notifier.calls.isEmpty)
     }
 
+    @Test func absoluteAlertIgnoresExchangeRateChangesAndRebasesAfterRuleEdit() async {
+        settingsVM.settings.baseCurrency = .eur
+        settingsVM.settings.watchlistCoins = [.init(coinId: "bitcoin", alertKind: .above, notificationThreshold: 100)]
+        vm.startPolling()
+        prices.requests[1].respond(["BTC": 90.9], rate: 0.90)
+        await drainMainQueue()
+
+        vm.refresh()
+        prices.requests[2].respond(["BTC": 92.92], rate: 0.92)
+        await drainMainQueue()
+        #expect(notifier.calls.isEmpty, "the USD price stayed at 101")
+
+        settingsVM.settings.watchlistCoins[0].notificationThreshold = 99
+        vm.refresh()
+        prices.requests[3].respond(["BTC": 92.92], rate: 0.92)
+        await drainMainQueue()
+        #expect(notifier.calls.isEmpty, "editing the threshold is not a crossing")
+
+        vm.refresh()
+        prices.requests[4].respond(["BTC": 90.16], rate: 0.92)
+        await drainMainQueue()
+        vm.refresh()
+        prices.requests[5].respond(["BTC": 92.92], rate: 0.92)
+        await drainMainQueue()
+        #expect(notifier.calls.count == 1)
+    }
+
     /// Regression: a price already above the threshold at launch must not alert on every launch; only a new crossing alerts.
     @Test func aboveAlertFiresOnlyOnCrossingNotOnLaunch() async {
         var settings = AppSettings()

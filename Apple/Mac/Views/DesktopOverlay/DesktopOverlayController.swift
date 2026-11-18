@@ -19,6 +19,7 @@ final class DesktopOverlayController {
     private weak var settingsVM: SettingsViewModel?
     private var cancellables = Set<AnyCancellable>()
     private var settings = AppSettings()
+    private var coins: [Coin] = []
     /// nil until the first settings are applied (launch), so an already enabled overlay does not start adjusting.
     private var appliedSettings: AppSettings?
 
@@ -28,7 +29,10 @@ final class DesktopOverlayController {
 
         Publishers.CombineLatest(coinListVM.$coins, settingsVM.$settings)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] coins, settings in self?.apply(coins: coins, settings: settings) }
+            .sink { [weak self, weak coinListVM] coins, settings in
+                let matchingCurrency = coinListVM?.priceDataCurrency == settings.baseCurrency
+                self?.apply(coins: matchingCurrency ? coins : [], settings: settings)
+            }
             .store(in: &cancellables)
 
         // Displays added / removed / resized, and wake from sleep: put the window back on the main display.
@@ -71,6 +75,7 @@ final class DesktopOverlayController {
         let previous = self.settings
         let startsAdjusting = DesktopOverlayLayout.startsAdjusting(previous: appliedSettings, next: settings)
         self.settings = settings
+        self.coins = coins
         appliedSettings = settings
         guard settings.desktopOverlayEnabled else {
             // Turned off while adjusting: leave without saving the position.
@@ -78,25 +83,25 @@ final class DesktopOverlayController {
             window?.orderOut(nil)
             return
         }
-        model.content = DesktopOverlayLayout.content(coins: coins, settings: settings)
         model.backgroundOpacity = settings.desktopOverlayBackgroundOpacity
         model.textSize = settings.desktopOverlayTextSize
+        let anchor = model.isAdjusting ? window.map { DesktopOverlayLayout.topLeft(of: $0.frame) } : settings.desktopOverlayTopLeft
+        let frame = updateContentAndFrame(anchor: anchor)
 
         let isNew = window == nil
         let window = window ?? makeWindow()
         if !model.isAdjusting {
             window.level = Self.level
         }
-        let size = DesktopOverlayLayout.windowSize(for: model.content, textSize: model.textSize)
         if model.isAdjusting {
             // The watchlist changed while adjusting: keep the top-left corner where the panel is now; Done stores it.
-            if window.frame.size != size {
-                window.setFrame(DesktopOverlayLayout.resized(window.frame, to: size, screens: Self.screens), display: true)
+            if window.frame.size != frame.size {
+                window.setFrame(frame, display: true)
             }
-        } else if isNew || !window.isVisible || window.frame.size != size
+        } else if isNew || !window.isVisible || window.frame.size != frame.size
                     || previous.desktopOverlayTopLeft != settings.desktopOverlayTopLeft {
             // The saved corner is the top-left, so a taller or shorter panel keeps its top edge.
-            placeWindow()
+            window.setFrame(frame, display: true)
         }
         window.orderFrontRegardless()
         if startsAdjusting {
@@ -106,8 +111,21 @@ final class DesktopOverlayController {
 
     private func placeWindow() {
         guard let window, !model.isAdjusting else { return }
+        window.setFrame(updateContentAndFrame(anchor: settings.desktopOverlayTopLeft), display: true)
+    }
+
+    private func updateContentAndFrame(anchor: DesktopOverlayOrigin?) -> CGRect {
+        let content = DesktopOverlayLayout.content(coins: coins, settings: settings)
+        let fullSize = DesktopOverlayLayout.windowSize(for: content, textSize: model.textSize)
+        guard let screen = DesktopOverlayLayout.screen(for: anchor, size: fullSize, screens: Self.screens) else {
+            model.content = content
+            return CGRect(origin: .zero, size: fullSize)
+        }
+        let limit = DesktopOverlayLayout.rowsThatFit(height: screen.height, textSize: model.textSize, usesDefaultPosition: anchor == nil)
+        model.content = content.rows.count <= limit ? content : DesktopOverlayLayout.content(coins: coins, settings: settings, limit: limit)
         let size = DesktopOverlayLayout.windowSize(for: model.content, textSize: model.textSize)
-        window.setFrame(DesktopOverlayLayout.frame(saved: settings.desktopOverlayTopLeft, size: size, screens: Self.screens), display: true)
+        let origin = DesktopOverlayLayout.origin(saved: anchor, windowSize: size, visibleFrame: screen)
+        return CGRect(origin: origin, size: size)
     }
 
     /// Visible frames of all displays, main (menu bar) display first.

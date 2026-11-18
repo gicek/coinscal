@@ -94,12 +94,21 @@ import Testing
         let coins = (1...20).map { coin("c\($0)", updated: Double($0)) }
         let shown = DesktopOverlayLayout.content(coins: coins, settings: AppSettings())
         #expect(shown.rows.map(\.id) == (1...16).map { "c\($0)" })
-        #expect(shown.updatedAt == Date(timeIntervalSince1970: 16), "latest update among the shown coins")
+        #expect(shown.updatedAt == Date(timeIntervalSince1970: 1), "the oldest shown quote drives the warning")
         let withDead = DesktopOverlayLayout.content(coins: [coin("dead", price: nil, status: .delisted)], settings: AppSettings())
         #expect(withDead.rows.first?.hasMarket == false)
     }
 
     private let size = CGSize(width: 364, height: 200)
+
+    @Test func largeOverlayFitsTheVisibleDisplay() {
+        let height: CGFloat = 700
+        let rows = DesktopOverlayLayout.rowsThatFit(height: height, textSize: .large, usesDefaultPosition: true)
+        #expect(rows == 14)
+        let coins = (1...16).map { coin("c\($0)", updated: Double($0)) }
+        let content = DesktopOverlayLayout.content(coins: coins, settings: AppSettings(), limit: rows)
+        #expect(DesktopOverlayLayout.windowSize(for: content, textSize: .large).height + DesktopOverlayLayout.margin <= height)
+    }
 
     @Test func defaultPlacementIsTopRight() {
         let origin = DesktopOverlayLayout.origin(saved: nil, windowSize: size, visibleFrame: screen)

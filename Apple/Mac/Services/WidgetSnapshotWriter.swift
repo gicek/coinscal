@@ -59,8 +59,9 @@ final class WidgetSnapshotWriter {
     func bind(coinListVM: CoinListViewModel, settingsVM: SettingsViewModel) {
         cancellable = Publishers.CombineLatest(coinListVM.$coins, settingsVM.$settings)
             .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
-            .sink { [weak self] coins, settings in
-                self?.write(coins: coins, settings: settings)
+            .sink { [weak self, weak coinListVM] coins, settings in
+                let matchingCurrency = coinListVM?.priceDataCurrency == settings.baseCurrency
+                self?.write(coins: matchingCurrency ? coins : [], settings: settings)
             }
     }
 
@@ -124,7 +125,7 @@ final class WidgetSnapshotWriter {
         var quotes: [String: WidgetSnapshot.Quote] = [:]
         for coin in coins where coin.status == .active {
             guard let price = coin.currentPrice else { continue }
-            quotes[coin.id] = WidgetSnapshot.Quote(price: price, change24hPercent: coin.priceChange24hPercent)
+            quotes[coin.id] = WidgetSnapshot.Quote(price: price, change24hPercent: coin.priceChange24hPercent, fetchedAt: coin.lastUpdated)
         }
         return WidgetSnapshot(
             writtenAt: date,

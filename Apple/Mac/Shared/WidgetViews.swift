@@ -82,7 +82,7 @@ struct WidgetListView: View {
                     .padding(.bottom, 6)
                     ForEach(Array(content.rows.enumerated()), id: \.element.id) { index, row in
                         if index > 0 { Divider().opacity(0.5) }
-                        WidgetListRow(row: row, content: content)
+                        WidgetListRow(row: row, content: content, now: now)
                             .frame(height: Self.rowHeight(large: large, boost: boost))
                     }
                     Spacer(minLength: 0)
@@ -109,6 +109,7 @@ struct WidgetListView: View {
 private struct WidgetListRow: View {
     let row: WidgetRow
     let content: WidgetEntryContent
+    let now: Date
     @Environment(\.widgetTextBoost) private var boost
 
     var body: some View {
@@ -131,9 +132,17 @@ private struct WidgetListRow: View {
                     .lineLimit(1)
                     .textHalo()
             }
-            WidgetChangeText(row: row, content: content)
-                .font(.system(size: 11.5 + boost, weight: .semibold))
-                .frame(width: WidgetListView.changeColumnWidth(boost: boost), alignment: .trailing)
+            Group {
+                if row.isStale(at: now) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundStyle(.orange)
+                        .accessibilityLabel(Text(verbatim: WidgetText.string("coin.status.stale", content.language)))
+                } else {
+                    WidgetChangeText(row: row, content: content)
+                }
+            }
+            .font(.system(size: 11.5 + boost, weight: .semibold))
+            .frame(width: WidgetListView.changeColumnWidth(boost: boost), alignment: .trailing)
         }
     }
 }

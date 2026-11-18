@@ -23,34 +23,30 @@ enum WidgetDataLoader {
         let metas = ids.compactMap { catalog.metadata(for: $0) }
         let tradable = metas.filter { $0.status == .active }
 
-        var quotes: [String: WidgetSnapshot.Quote] = [:]
-        var updatedAt: Date?
-        if let fresh = WidgetContent.freshQuotes(
-            snapshot: snapshot, ids: ids, tradable: Set(tradable.map(\.id)), currency: currency, now: now
-        ) {
+        let cached = snapshot.flatMap { $0.currency == currency ? $0 : nil }
+        let tradableIDs = Set(tradable.map(\.id))
+        let quotes: [String: WidgetSnapshot.Quote]
+        if let fresh = WidgetContent.freshQuotes(snapshot: cached, ids: ids, tradable: tradableIDs, currency: currency, now: now) {
             quotes = fresh
-            updatedAt = snapshot?.writtenAt
-        } else if let fetched = await fetch(tradable, currency: currency, timeout: fetchTimeout) {
-            quotes = fetched
-            updatedAt = now
-        } else if let snapshot, snapshot.currency == currency {
-            // Offline: keep showing the last prices, marked as outdated by their time.
-            quotes = snapshot.quotes
-            updatedAt = snapshot.writtenAt
+        } else {
+            let previous = cached?.quotes.filter { tradableIDs.contains($0.key) } ?? [:]
+            let fetched = await fetch(tradable, currency: currency, timeout: fetchTimeout) ?? [:]
+            quotes = previous.merging(fetched) { _, current in current }
         }
+        let updatedAt = quotes.values.compactMap { $0.fetchedAt ?? cached?.writtenAt }.min()
 
         let rows = metas.map { meta in
             WidgetRow(
                 id: meta.id, symbol: meta.symbol, name: meta.name, logoAssetName: meta.logoAssetName,
                 hasMarket: meta.status == .active,
-                price: quotes[meta.id]?.price, change24hPercent: quotes[meta.id]?.change24hPercent
+                price: quotes[meta.id]?.price, change24hPercent: quotes[meta.id]?.change24hPercent, fetchedAt: quotes[meta.id]?.fetchedAt
             )
         }
         let defaults = AppSettings()
         return WidgetEntryContent(
             rows: WidgetContent.sorted(rows, by: sort),
             currency: currency,
-            updatedAt: quotes.isEmpty ? nil : updatedAt,
+            updatedAt: updatedAt,
             language: snapshot?.language ?? defaults.language,
             colorByChange: colorByChange,
             upColorHex: snapshot?.upColorHex ?? defaults.resolvedUpColorHex,
@@ -78,10 +74,11 @@ enum WidgetDataLoader {
         }
         cancellable?.cancel()
         guard let result else { return nil }
+        let fetchedAt = Date()
         var quotes: [String: WidgetSnapshot.Quote] = [:]
         for coin in coins {
             guard let price = result.prices[coin.symbol] else { continue }
-            quotes[coin.id] = WidgetSnapshot.Quote(price: price, change24hPercent: result.changes24h[coin.symbol])
+            quotes[coin.id] = WidgetSnapshot.Quote(price: price, change24hPercent: result.changes24h[coin.symbol], fetchedAt: fetchedAt)
         }
         return quotes.isEmpty ? nil : quotes
     }
@@ -107,7 +104,7 @@ enum WidgetDataLoader {
         let rows = ids.compactMap { catalog.metadata(for: $0) }.map { meta in
             WidgetRow(
                 id: meta.id, symbol: meta.symbol, name: meta.name, logoAssetName: meta.logoAssetName, hasMarket: true,
-                price: samples[meta.id]?.0, change24hPercent: samples[meta.id]?.1
+                price: samples[meta.id]?.0, change24hPercent: samples[meta.id]?.1, fetchedAt: Date()
             )
         }
         let defaults = AppSettings()

@@ -48,6 +48,13 @@ enum DesktopOverlayLayout {
         return CGSize(width: width, height: height)
     }
 
+    static func rowsThatFit(height: CGFloat, textSize: DesktopOverlayTextSize, usesDefaultPosition: Bool) -> Int {
+        let rowHeight = WidgetListView.rowHeight(large: true, boost: textBoost(textSize))
+        let padding = contentPadding * 2 + headerHeight(textSize) + (usesDefaultPosition ? margin : 0)
+        let count = Int((height - padding + dividerHeight) / (rowHeight + dividerHeight))
+        return min(rowLimit, max(1, count))
+    }
+
     /// Top-right corner of the visible frame (below the menu bar, beside the Dock).
     static func defaultOrigin(windowSize: CGSize, visibleFrame: CGRect) -> CGPoint {
         CGPoint(x: visibleFrame.maxX - windowSize.width - margin, y: visibleFrame.maxY - windowSize.height - margin)
@@ -77,13 +84,15 @@ enum DesktopOverlayLayout {
     /// The saved position goes to the display it overlaps most; if none (that display was unplugged), to the nearest
     /// one. The saved value itself is not changed, so the panel returns when the display comes back.
     static func frame(saved: DesktopOverlayOrigin?, size: CGSize, screens: [CGRect]) -> CGRect {
-        guard let main = screens.first else { return CGRect(origin: .zero, size: size) }
-        guard let saved else { return CGRect(origin: defaultOrigin(windowSize: size, visibleFrame: main), size: size) }
-        let wanted = CGRect(origin: CGPoint(x: saved.x, y: saved.y - size.height), size: size)
-        let screen = screens.max { overlap($0, wanted) < overlap($1, wanted) }.flatMap { overlap($0, wanted) > 0 ? $0 : nil }
-            ?? screens.min { distance($0, wanted) < distance($1, wanted) }
-            ?? main
+        guard let screen = screen(for: saved, size: size, screens: screens) else { return CGRect(origin: .zero, size: size) }
         return CGRect(origin: origin(saved: saved, windowSize: size, visibleFrame: screen), size: size)
+    }
+
+    static func screen(for saved: DesktopOverlayOrigin?, size: CGSize, screens: [CGRect]) -> CGRect? {
+        guard let saved else { return screens.first }
+        let wanted = CGRect(origin: CGPoint(x: saved.x, y: saved.y - size.height), size: size)
+        return screens.max { overlap($0, wanted) < overlap($1, wanted) }.flatMap { overlap($0, wanted) > 0 ? $0 : nil }
+            ?? screens.min { distance($0, wanted) < distance($1, wanted) }
     }
 
     private static func overlap(_ a: CGRect, _ b: CGRect) -> CGFloat {
@@ -103,18 +112,18 @@ enum DesktopOverlayLayout {
     }
 
     /// Watchlist order up to the row limit.
-    static func content(coins: [Coin], settings: AppSettings) -> WidgetEntryContent {
-        let shown = coins.prefix(rowLimit)
+    static func content(coins: [Coin], settings: AppSettings, limit: Int = rowLimit) -> WidgetEntryContent {
+        let shown = coins.prefix(limit)
         let rows = shown.map { coin in
             WidgetRow(
                 id: coin.id, symbol: coin.symbol, name: coin.name, logoAssetName: coin.logoAssetName,
-                hasMarket: coin.status == .active, price: coin.currentPrice, change24hPercent: coin.priceChange24hPercent
+                hasMarket: coin.status == .active, price: coin.currentPrice, change24hPercent: coin.priceChange24hPercent, fetchedAt: coin.lastUpdated
             )
         }
         return WidgetEntryContent(
             rows: rows,
             currency: settings.baseCurrency,
-            updatedAt: shown.compactMap(\.lastUpdated).max(),
+            updatedAt: shown.compactMap(\.lastUpdated).min(),
             language: settings.language,
             colorByChange: settings.priceColorEnabled,
             upColorHex: settings.resolvedUpColorHex,

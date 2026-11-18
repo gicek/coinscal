@@ -3,6 +3,7 @@ import SwiftUI
 /// One coin row in the popover; fixed height (Constants.Popover.rowHeight) so the popover height follows the row count.
 struct CoinRowView: View {
     let coin: Coin
+    let now: Date
     @EnvironmentObject var settingsVM: SettingsViewModel
 
     var body: some View {
@@ -53,6 +54,10 @@ struct CoinRowView: View {
         Group {
             if coin.status != .active {
                 Text(loc("coin.status.delisted"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else if let updatedAt = coin.lastUpdated, now.timeIntervalSince(updatedAt) >= WidgetContent.staleAfter {
+                Label(loc("coin.status.stale"), systemImage: "exclamationmark.triangle")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else if let change = coin.priceChange24hPercent {

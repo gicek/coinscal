@@ -6,6 +6,10 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 
 ### Fixed
 
+- Absolute price alerts preserve entered decimals and ignore exchange-rate-only changes.
+- Older quotes are marked per coin in the panel, widgets, and desktop ticker.
+- The desktop ticker limits its height to the available screen space.
+- Very small positive prices stay visible in the menu bar and panel.
 - Opening the menu bar panel no longer takes the active state from the frontmost app.
 - The menu bar panel has a thin outline like system popovers, instead of a doubled border.
 

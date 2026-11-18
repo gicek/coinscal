@@ -20,16 +20,26 @@ import Testing
         #expect(PriceFormatter.formatShort(1234.4) == "1,234")
     }
 
+    @Test func formatsMidpointsAndKeepsTinyPositivePricesVisible() {
+        #expect(PriceFormatter.formatShort(100.5) == "100")
+        #expect(PriceFormatter.formatShort(0.000012345) == "1.23e-5")
+        #expect(PriceFormatter.format(0.00000012345, currency: .usd) == "$1.23e-7")
+    }
+
     @Test func percentHasExplicitSign() {
         #expect(PriceFormatter.formatPercent(2.5) == "+2.50%")
         #expect(PriceFormatter.formatPercent(-1.25) == "-1.25%")
         #expect(PriceFormatter.formatPercent(0) == "+0.00%")
     }
 
-    @Test func alertThresholdUsesReferencePriceDecimalsWithoutGrouping() {
-        #expect(PriceFormatter.formatAlertPriceThreshold(referencePrice: 65_000, threshold: 66_300.4) == "66300")
-        #expect(PriceFormatter.formatAlertPriceThreshold(referencePrice: 0.5, threshold: 0.51) == "0.5100")
-        #expect(PriceFormatter.formatAlertPriceThreshold(referencePrice: nil, threshold: 12.5) == "12.50")
+    @Test func alertInputPreservesDecimalPrecisionAndParsesGrouping() {
+        #expect(PriceFormatter.formatAlertAmount(66_300.4) == "66300.4")
+        #expect(PriceFormatter.formatAlertAmount(0.51) == "0.51")
+        #expect(PriceFormatter.parseAlertAmount("1,000.25") == 1_000.25)
+        let tiny = 1.25868e-13
+        #expect(PriceFormatter.parseAlertAmount(PriceFormatter.formatAlertAmount(tiny)) == tiny)
+        #expect(PriceFormatter.parseAlertAmount("1,00.25") == nil)
+        #expect(PriceFormatter.parseAlertAmount("1e309") == nil)
     }
 
     @Test func usdConversionRoundTripsAndIgnoresInvalidRate() {

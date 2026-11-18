@@ -65,10 +65,11 @@ struct CoinPopoverView: View {
             emptyState
         } else {
             ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(coinListVM.coins) { coin in
-                        CoinRowView(coin: coin)
-                            .environmentObject(settingsVM)
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    LazyVStack(spacing: 0) {
+                        ForEach(coinListVM.coins) { coin in
+                            CoinRowView(coin: coin, now: context.date)
+                        }
                     }
                 }
             }

@@ -18,14 +18,14 @@ Out of scope: accounts and sync, a Coinscal server, trading, holdings and profit
 ## Menu Bar Item
 
 - "Show" is "Price" (default) or "Icon". With "Icon" the item always shows the monochrome logo.
-- With a price: `<symbol> <price>`, for example `BTC 65,000`, without a currency symbol. Decimals depend on magnitude, without trailing zeros: none from 100, up to two from 1 to 100, up to four below 1.
-- Without a price (starting up, every source failed, empty watchlist): the monochrome logo.
-- "Color by Price Change" colors the price by the coin's 24h change. "Show Background" puts it on a rounded background: the price color with white text, or, with coloring off, the menu bar text color with inverted text.
+- With a price: `<symbol> <price>`, for example `BTC 65,000`, without a currency symbol. Decimals depend on magnitude, without trailing zeros: none from 100, up to two from 1 to 100, up to four below 1. A positive price that would round to zero uses compact scientific notation.
+- Without a price (starting up or empty watchlist), the item shows the monochrome logo. If a refresh fails, it keeps the last available price.
+- "Color by Price Change" colors the price by the coin's 24h change. "Show Background" puts it on a rounded background: the price color with black or white text, whichever has more contrast, or, with coloring off, the menu bar text color with inverted text.
 - Left click toggles the panel. Right click opens the menu.
 
 ## Panel
 
-320pt wide: a header, the watchlist, and a footer with Settings, "Manage Watchlist", and Quit. The list is sized for 4 to 8 rows and scrolls beyond that, without a visible scroll bar. Each row shows the logo, name, symbol, price in the display currency, and 24h change. An empty watchlist shows an empty state with "Add Coins", which opens Settings → Watchlist.
+320pt wide: a header, the watchlist, and a footer with Settings, "Manage Watchlist", and Quit. The list is sized for 4 to 8 rows and scrolls beyond that, without a visible scroll bar. Each row shows the logo, name, symbol, price in the display currency, and 24h change. Cached prices older than 30 minutes show a warning in the change column. An empty watchlist shows an empty state with "Add Coins", which opens Settings → Watchlist.
 
 Opening the panel leaves the frontmost app active, as the system's menu bar extras do. The panel closes on a second click on the menu bar item, a click anywhere else, Esc, switching to another app, and when Settings opens. When a scheduled update check has found a new version, the header shows "Update Available"; clicking it opens the update window.
 
@@ -47,7 +47,7 @@ A window with three panes, General, Watchlist, and About, under a shared title b
 - **Watchlist**
   - "+" at the right of the title bar opens an add panel with a search field (focused) over the listed coins, matching symbol or name. With no input it lists every listed coin. Clicking a coin toggles it in the watchlist (added coins show a checkmark that turns into a remove sign on hover); the panel stays open. Return adds the first result not yet added. Esc, a click outside, "+" again, or switching panes closes it and clears the search.
   - "Recommended": BTC, ETH, BNB, SOL, ZEC, HYPE, BCH, LTC, UNI, AAVE; click to add or remove.
-  - The watchlist: drag handle to reorder, the alert condition and value, and delete. Coins without a market show "No market data".
+  - The watchlist: drag handle to reorder (also with arrow keys when focused or VoiceOver actions), the alert condition and value, and delete. Coins without a market show "No market data".
 - **About**: version, "Automatically Check for Updates" (on by default), "Automatically Install Updates" (off by default; available while automatic checks are on), and "Check for Updates", contact, data sources with the "Rates By Exchange Rate API" credit, and open source components.
 
 ## Widgets
@@ -58,7 +58,7 @@ A window with three panes, General, Watchlist, and About, under a shared title b
 | Watchlist | Medium (4 rows), Large (8 rows) | Logo, symbol and name, price, and 24h change per row; title and update time |
 
 - The 24h change uses color, ▲ / ▼, and a sign, so it stays readable when macOS shows desktop widgets in monochrome.
-- The update time turns orange with ⚠︎ when prices are older than 30 minutes. Before any price is available the widget says "Open Coinscal to get prices". Coins without a market show "No market data".
+- The update time shows the oldest displayed quote. It turns orange with ⚠︎ when a quote is older than 30 minutes. The Watchlist widget also marks the affected rows. Before any price is available the widget says "Open Coinscal to get prices". Coins without a market show "No market data".
 - Edit Widget:
   - Coin Price: Coin ("Follow Menu Bar Coin" by default, or any listed coin), Display Currency ("Follow App" by default), Color by Price Change (on).
   - Watchlist: Source ("Watchlist" by default, or "Choose Manually" with up to 4 or 8 coins), Sort By (watchlist order, or 24h change high to low or low to high), Display Currency, Color by Price Change.
@@ -70,7 +70,7 @@ A window with three panes, General, Watchlist, and About, under a shared title b
 
 A price list pinned to the desktop, between the wallpaper and the desktop icons, on every Space. Mouse clicks pass through it, and it doesn't appear in window switching. Unlike a widget it updates with the app every 10 seconds, and it disappears when the app quits.
 
-- One layout, the large widget's list: the first 16 watchlist coins, with a height that fits them; it grows downward from its top edge. "Large" text adds 2pt to all text.
+- One layout, the large widget's list: up to the first 16 watchlist coins, limited further by the available screen height. Stale quotes are marked in their rows. The list grows downward from its top edge. "Large" text adds 2pt to all text.
 - "Background Opacity" (0–100%, 100% by default) affects only the frosted background. Below 20%, text turns white with a faint shadow, like desktop icon labels, so it stays readable on any wallpaper; only ▲ / ▼ and ⚠︎ keep their colors.
 - By default it sits at the top right of the main display. Turning on "Show on Desktop", or "Adjust Position", brings it to the front with a dashed border and "Drag to move / Done"; it can be dragged to any display. "Done" (or Return) saves the position and restores click-through. If its display is disconnected, it moves to the nearest display until that one returns.
 
@@ -78,8 +78,8 @@ A price list pinned to the desktop, between the wallpaper and the desktop icons,
 
 - An alert fires only while "Price Alerts" is on and the coin's condition isn't "Off". New coins default to "Change 2%".
 - **Change**: fires when the price moves at least N% (0.5–200%) from the reference price, then the reference resets to the current price. The reference is the first price received or the price at the last alert, not the 24h open.
-- **Above / Below**: fires once when the price crosses the threshold; staying past it doesn't repeat. Thresholds are entered in the display currency and stored in USD. Switching a coin to Above or Below proposes the current price ±2%.
-- Without a reference (first price after launch, after changing the display currency) the app records one and doesn't fire, since it can't know whether a crossing happened. Changing the display currency resets every reference.
+- **Above / Below**: fires once when the price crosses the threshold; staying past it doesn't repeat. Thresholds are entered in the display currency and stored and evaluated in USD. The amount field waits for an exchange rate for the selected currency. Switching a coin to Above or Below proposes the current price ±2%.
+- Without a reference (first price after launch, after changing the display currency) the app records one and doesn't fire, since it can't know whether a crossing happened. Changing the display currency resets every reference. Editing a coin’s alert resets that coin’s reference.
 
 ## Updates
 

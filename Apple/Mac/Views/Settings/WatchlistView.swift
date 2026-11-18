@@ -29,6 +29,7 @@ struct WatchlistView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var vm: WatchlistViewModel
     @StateObject private var reorderSession = WatchlistReorderSession()
+    @FocusState private var focusedReorderID: String?
     /// Owned by `SettingsWindow`, which hosts the "+" toolbar button (see the note there).
     @Binding var showAddCoin: Bool
 
@@ -264,7 +265,10 @@ struct WatchlistView: View {
         meta: CoinMetadata,
         reorderContext: WatchlistRowReorderContext?
     ) -> some View {
+        let currency = settingsVM.settings.baseCurrency
         let currentCoin = coinListVM.coins.first { $0.id == watchlistCoin.coinId }
+        let displayedPrice = coinListVM.priceDataCurrency == currency ? currentCoin?.currentPrice : nil
+        let rate = coinListVM.usdExchangeRate(for: currency)
 
         return HStack {
             dragHandle(for: watchlistCoin, reorderContext: reorderContext)
@@ -274,7 +278,7 @@ struct WatchlistView: View {
                 Text(meta.symbol).font(.system(size: 13, weight: .medium))
                 if meta.status != .active {
                     coinStatusLine
-                } else if let price = currentCoin?.currentPrice {
+                } else if let price = displayedPrice {
                     Text(PriceFormatter.format(price, currency: settingsVM.settings.baseCurrency))
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -285,13 +289,13 @@ struct WatchlistView: View {
             WatchlistAlertControls(
                 kind: alertKindBinding(
                     for: watchlistCoin.coinId,
-                    currentPrice: currentCoin?.currentPrice,
-                    usdToTargetRate: coinListVM.lastUsdToTargetExchangeRate
+                    currentPrice: displayedPrice,
+                    usdToTargetRate: rate
                 ),
-                value: thresholdBinding(for: watchlistCoin.coinId, usdToTargetRate: coinListVM.lastUsdToTargetExchangeRate),
-                referencePrice: currentCoin?.currentPrice,
-                usdToTargetRate: coinListVM.lastUsdToTargetExchangeRate
+                value: thresholdBinding(for: watchlistCoin.coinId, currency: currency),
+                usdToTargetRate: rate
             )
+            .id(currency)
             .frame(width: WatchlistListLayout.alertColumnWidth, alignment: .center)
 
             // Remove this coin (same logic as the view model, which also fixes the menu bar coin).
@@ -322,13 +326,21 @@ struct WatchlistView: View {
         for watchlistCoin: WatchlistCoin,
         reorderContext: WatchlistRowReorderContext?
     ) -> some View {
+        let focused = reorderContext != nil && focusedReorderID == watchlistCoin.coinId
         let handle = Image(systemName: "line.3.horizontal")
             .font(.system(size: 11, weight: .medium))
             .foregroundStyle(
-                reorderSession.draggedID == watchlistCoin.coinId
+                focused || reorderSession.draggedID == watchlistCoin.coinId
                     ? Color.accentColor
                     : Color.primary.opacity(0.28)
             )
+            .frame(width: 16, height: 18)
+            .background {
+                if focused {
+                    RoundedRectangle(cornerRadius: 4)
+                        .strokeBorder(Color.accentColor, lineWidth: 1)
+                }
+            }
             .frame(width: WatchlistListLayout.dragHandleColumnWidth)
             .frame(maxHeight: .infinity)
             .accessibilityLabel(loc("watchlist.reorder"))
@@ -337,6 +349,24 @@ struct WatchlistView: View {
             handle
                 .contentShape(Rectangle())
                 .gesture(reorderGesture(for: watchlistCoin, context: reorderContext))
+                .focusable()
+                .focused($focusedReorderID, equals: watchlistCoin.coinId)
+                .focusEffectDisabled()
+                .onMoveCommand { direction in
+                    switch direction {
+                    case .up: moveCoin(in: reorderContext, by: -1)
+                    case .down: moveCoin(in: reorderContext, by: 1)
+                    default: break
+                    }
+                }
+                .accessibilityActions {
+                    if reorderContext.index > 0 {
+                        Button(loc("watchlist.moveUp")) { moveCoin(in: reorderContext, by: -1) }
+                    }
+                    if reorderContext.index + 1 < reorderContext.displayedIDs.count {
+                        Button(loc("watchlist.moveDown")) { moveCoin(in: reorderContext, by: 1) }
+                    }
+                }
                 .onHover { hovering in
                     if hovering {
                         NSCursor.openHand.push()
@@ -348,6 +378,15 @@ struct WatchlistView: View {
             // The handle in the floating row is display-only.
             handle
         }
+    }
+
+    private func moveCoin(in context: WatchlistRowReorderContext, by offset: Int) {
+        var ids = context.displayedIDs
+        let destination = context.index + offset
+        guard ids.indices.contains(destination) else { return }
+        reorderSession.cancel()
+        ids.swapAt(context.index, destination)
+        applyWatchlistOrder(ids)
     }
 
     private func reorderGesture(
@@ -395,64 +434,46 @@ struct WatchlistView: View {
         reloadCoinData()
     }
 
-    private func alertKindBinding(for coinId: String, currentPrice: Double?, usdToTargetRate: Double) -> Binding<CoinAlertKind> {
+    private func alertKindBinding(for coinId: String, currentPrice: Double?, usdToTargetRate: Double?) -> Binding<CoinAlertKind> {
         Binding(
             get: { settingsVM.settings.watchlistCoins.first(where: { $0.coinId == coinId })?.alertKind ?? .notSet },
             set: { newKind in
                 guard let i = settingsVM.settings.watchlistCoins.firstIndex(where: { $0.coinId == coinId }) else { return }
-                let oldKind = settingsVM.settings.watchlistCoins[i].alertKind
-                guard oldKind != newKind else { return }
-                settingsVM.settings.watchlistCoins[i].alertKind = newKind
-                let rate = usdToTargetRate > 0 ? usdToTargetRate : 1.0
+                var rule = settingsVM.settings.watchlistCoins[i]
+                guard rule.alertKind != newKind else { return }
+                rule.alertKind = newKind
                 switch newKind {
                 case .notSet:
-                    settingsVM.settings.watchlistCoins[i].notificationThreshold = 0
+                    rule.notificationThreshold = 0
                 case .change:
-                    settingsVM.settings.watchlistCoins[i].notificationThreshold = Constants.Defaults.defaultNotificationThreshold
-                case .above:
-                    if let p = currentPrice, p > 0 {
-                        let defaultUsd = PriceFormatter.alertUsdAmount(fromDisplay: p * 1.02, usdToTargetRate: rate)
-                        settingsVM.settings.watchlistCoins[i].notificationThreshold = AlertEvaluator.clampAlertThreshold(defaultUsd, kind: .above)
+                    rule.notificationThreshold = Constants.Defaults.defaultNotificationThreshold
+                case .above, .below:
+                    if let price = currentPrice, let rate = usdToTargetRate {
+                        let multiplier = newKind == .above ? 1.02 : 0.98
+                        let amountUSD = PriceFormatter.alertUsdAmount(fromDisplay: price * multiplier, usdToTargetRate: rate)
+                        rule.notificationThreshold = AlertEvaluator.clampAlertThreshold(amountUSD, kind: newKind)
                     } else {
-                        let v = settingsVM.settings.watchlistCoins[i].notificationThreshold
-                        settingsVM.settings.watchlistCoins[i].notificationThreshold = AlertEvaluator.clampAlertThreshold(v > 0 ? v : 1.0, kind: .above)
-                    }
-                case .below:
-                    if let p = currentPrice, p > 0 {
-                        let defaultUsd = PriceFormatter.alertUsdAmount(fromDisplay: p * 0.98, usdToTargetRate: rate)
-                        settingsVM.settings.watchlistCoins[i].notificationThreshold = AlertEvaluator.clampAlertThreshold(defaultUsd, kind: .below)
-                    } else {
-                        let v = settingsVM.settings.watchlistCoins[i].notificationThreshold
-                        settingsVM.settings.watchlistCoins[i].notificationThreshold = AlertEvaluator.clampAlertThreshold(v > 0 ? v : 1.0, kind: .below)
+                        rule.notificationThreshold = AlertEvaluator.clampAlertThreshold(rule.notificationThreshold, kind: newKind)
                     }
                 }
+                settingsVM.settings.watchlistCoins[i] = rule
             }
         )
     }
 
-    private func thresholdBinding(for coinId: String, usdToTargetRate: Double) -> Binding<Double> {
-        let rate = usdToTargetRate > 0 ? usdToTargetRate : 1.0
-        return Binding(
+    private func thresholdBinding(for coinId: String, currency: BaseCurrency) -> Binding<Double> {
+        Binding(
             get: {
-                guard let ac = settingsVM.settings.watchlistCoins.first(where: { $0.coinId == coinId }) else {
-                    return Constants.Defaults.defaultNotificationThreshold
-                }
-                switch ac.alertKind {
-                case .above, .below:
-                    return PriceFormatter.alertDisplayAmount(fromUsd: ac.notificationThreshold, usdToTargetRate: rate)
-                case .change, .notSet:
-                    return ac.notificationThreshold
-                }
+                settingsVM.settings.watchlistCoins.first(where: { $0.coinId == coinId })?.notificationThreshold
+                    ?? Constants.Defaults.defaultNotificationThreshold
             },
-            set: { newVal in
-                guard let i = settingsVM.settings.watchlistCoins.firstIndex(where: { $0.coinId == coinId }) else { return }
+            set: { value in
+                guard settingsVM.settings.baseCurrency == currency,
+                      let i = settingsVM.settings.watchlistCoins.firstIndex(where: { $0.coinId == coinId }) else { return }
                 let kind = settingsVM.settings.watchlistCoins[i].alertKind
-                switch kind {
-                case .above, .below:
-                    let usd = PriceFormatter.alertUsdAmount(fromDisplay: newVal, usdToTargetRate: rate)
-                    settingsVM.settings.watchlistCoins[i].notificationThreshold = AlertEvaluator.clampAlertThreshold(usd, kind: kind)
-                case .change, .notSet:
-                    settingsVM.settings.watchlistCoins[i].notificationThreshold = AlertEvaluator.clampAlertThreshold(newVal, kind: kind)
+                let threshold = AlertEvaluator.clampAlertThreshold(value, kind: kind)
+                if settingsVM.settings.watchlistCoins[i].notificationThreshold != threshold {
+                    settingsVM.settings.watchlistCoins[i].notificationThreshold = threshold
                 }
             }
         )
@@ -498,8 +519,7 @@ private extension View {
 private struct WatchlistAlertControls: View {
     @Binding var kind: CoinAlertKind
     @Binding var value: Double
-    var referencePrice: Double?
-    var usdToTargetRate: Double
+    var usdToTargetRate: Double?
 
     var body: some View {
         HStack(spacing: 6) {
@@ -515,7 +535,6 @@ private struct WatchlistAlertControls: View {
             WatchlistAlertNumberField(
                 kind: kind,
                 value: $value,
-                referencePrice: referencePrice,
                 usdToTargetRate: usdToTargetRate
             )
             .frame(minWidth: 72, maxWidth: .infinity)
@@ -523,30 +542,26 @@ private struct WatchlistAlertControls: View {
     }
 }
 
-/// Change shows % inside the box; Above/Below use the display price's decimals; Off is not editable.
+/// Change shows % inside the box. Absolute thresholds need a rate for the selected currency.
 private struct WatchlistAlertNumberField: View {
     let kind: CoinAlertKind
     @Binding var value: Double
-    var referencePrice: Double?
-    var usdToTargetRate: Double
+    var usdToTargetRate: Double?
 
     @State private var text: String = ""
     @State private var isEditing = false
     @State private var fieldProxy = AlertFieldProxy()
 
-    private var maxFractionDigits: Int {
-        switch kind {
-        case .change: return 6
-        case .above, .below: return 8
-        case .notSet: return 0
-        }
-    }
+    @State private var originalText: String?
+    @State private var editingRate: Double?
+    @State private var editingKind: CoinAlertKind?
 
-    private var filteredTextBinding: Binding<String> {
-        Binding(
-            get: { text },
-            set: { text = Self.sanitizeDecimalDigits($0, maxFractionDigits: maxFractionDigits, maxChars: 24) }
-        )
+    private var inputRate: Double? {
+        switch kind {
+        case .notSet: nil
+        case .change: 1
+        case .above, .below: usdToTargetRate
+        }
     }
 
     var body: some View {
@@ -564,25 +579,16 @@ private struct WatchlistAlertNumberField: View {
             // A click anywhere in the box bypasses SwiftUI focus and makes the AppKit field first responder directly.
             .contentShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
             .onTapGesture {
-                guard kind != .notSet else { return }
+                guard inputRate != nil else { return }
                 fieldProxy.beginEditing()
             }
             .onAppear { syncFromValue() }
             .onChange(of: value) {
                 if !isEditing { syncFromValue() }
             }
-            .onChange(of: kind) {
-                syncFromValue()
-            }
-            .onChange(of: referencePrice) {
-                if (kind == .above || kind == .below), !isEditing {
-                    syncFromValue()
-                }
-            }
+            .onChange(of: kind) { syncFromValue() }
             .onChange(of: usdToTargetRate) {
-                if (kind == .above || kind == .below), !isEditing {
-                    syncFromValue()
-                }
+                if !isEditing { syncFromValue() }
             }
     }
 
@@ -603,7 +609,16 @@ private struct WatchlistAlertNumberField: View {
                     .fixedSize()
             }
         case .above, .below:
-            alertValueTextField
+            if inputRate != nil {
+                alertValueTextField
+            } else {
+                Text(verbatim: "—")
+                    .font(.system(size: 12, design: .monospaced))
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .help(loc("watchlist.thresholdRateUnavailable"))
+                    .accessibilityLabel(loc("watchlist.thresholdRateUnavailable"))
+            }
         }
     }
 
@@ -611,70 +626,35 @@ private struct WatchlistAlertNumberField: View {
     /// while NSTextField focuses on a click anywhere in its frame.
     private var alertValueTextField: some View {
         AlertValueNSTextField(
-            text: filteredTextBinding,
+            text: $text,
             isEditing: $isEditing,
             proxy: fieldProxy,
+            onBegin: {
+                originalText = text
+                editingRate = inputRate
+                editingKind = kind
+            },
             onCommit: commit
         )
         .frame(maxWidth: .infinity)
     }
 
     private func syncFromValue() {
-        switch kind {
-        case .notSet:
-            text = ""
-        case .change:
-            text = Self.formatChangePercentInput(value)
-        case .above, .below:
-            text = PriceFormatter.formatAlertPriceThreshold(referencePrice: referencePrice, threshold: value)
-        }
+        text = inputRate.map { PriceFormatter.formatAlertAmount(value * $0) } ?? ""
     }
 
     private func commit() {
-        guard kind != .notSet else { return }
-        let normalized = text.replacingOccurrences(of: ",", with: ".").trimmingCharacters(in: .whitespaces)
-        if normalized.isEmpty {
+        defer {
+            originalText = nil
+            editingRate = nil
+            editingKind = nil
             syncFromValue()
-            return
         }
-        guard let v = Double(normalized) else {
-            syncFromValue()
-            return
+        guard let originalText, text != originalText, editingKind == kind, let editingRate,
+              let amount = PriceFormatter.parseAlertAmount(text) else { return }
+        if kind == .change || amount > 0 {
+            value = PriceFormatter.alertUsdAmount(fromDisplay: amount, usdToTargetRate: editingRate)
         }
-        if kind != .notSet {
-            value = AlertEvaluator.clampAlertThreshold(v, kind: kind)
-        }
-        syncFromValue()
-    }
-
-    private static func formatChangePercentInput(_ v: Double) -> String {
-        let f = NumberFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.numberStyle = .decimal
-        f.minimumFractionDigits = 0
-        f.maximumFractionDigits = 6
-        f.usesGroupingSeparator = false
-        return f.string(from: NSNumber(value: v)) ?? "\(v)"
-    }
-
-    private static func sanitizeDecimalDigits(_ raw: String, maxFractionDigits: Int, maxChars: Int) -> String {
-        let dotNorm = raw.replacingOccurrences(of: ",", with: ".")
-        var out = ""
-        var hasDot = false
-        var frac = 0
-        for ch in dotNorm {
-            if ("0"..."9").contains(ch) {
-                if hasDot {
-                    if frac >= maxFractionDigits { continue }
-                    frac += 1
-                }
-                out.append(ch)
-            } else if ch == "." && !hasDot {
-                hasDot = true
-                out.append(".")
-            }
-        }
-        return String(out.prefix(maxChars))
     }
 }
 
@@ -705,6 +685,7 @@ private struct AlertValueNSTextField: NSViewRepresentable {
     @Binding var text: String
     @Binding var isEditing: Bool
     let proxy: AlertFieldProxy
+    var onBegin: () -> Void
     var onCommit: () -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -755,16 +736,13 @@ private struct AlertValueNSTextField: NSViewRepresentable {
         }
 
         func controlTextDidBeginEditing(_ notification: Notification) {
+            parent.onBegin()
             parent.isEditing = true
         }
 
         func controlTextDidChange(_ notification: Notification) {
             guard let field = notification.object as? NSTextField else { return }
             parent.text = field.stringValue
-            // The binding setter filters digits; write the filtered value back when it differs from the input.
-            if parent.text != field.stringValue {
-                field.stringValue = parent.text
-            }
         }
 
         func controlTextDidEndEditing(_ notification: Notification) {

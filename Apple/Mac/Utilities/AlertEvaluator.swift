@@ -3,13 +3,12 @@ import Foundation
 enum AlertEvaluator {
 
     /// Whether a price alert should fire.
-    /// Above/Below fire once when the price crosses the threshold; without a reference price only the reference is set.
+    /// Above/Below receive USD prices and fire once when the price crosses the threshold; without a reference price only the reference is set.
     static func shouldTriggerPriceAlert(
         newPrice: Double,
         changeFromRef: Double,
         watchlistCoin: WatchlistCoin,
-        referencePrice: Double?,
-        usdToTargetRate: Double
+        referencePrice: Double?
     ) -> Bool {
         let tUsd = watchlistCoin.notificationThreshold
         switch watchlistCoin.alertKind {
@@ -18,14 +17,12 @@ enum AlertEvaluator {
         case .change:
             return abs(changeFromRef) >= tUsd
         case .above:
-            let tDisplay = PriceFormatter.alertDisplayAmount(fromUsd: tUsd, usdToTargetRate: usdToTargetRate)
             // Fire only when crossing from below to above; with no reference price (just launched or currency switched) a crossing cannot be known.
-            guard newPrice >= tDisplay, let ref = referencePrice else { return false }
-            return ref < tDisplay
+            guard newPrice >= tUsd, let ref = referencePrice else { return false }
+            return ref < tUsd
         case .below:
-            let tDisplay = PriceFormatter.alertDisplayAmount(fromUsd: tUsd, usdToTargetRate: usdToTargetRate)
-            guard newPrice <= tDisplay, let ref = referencePrice else { return false }
-            return ref > tDisplay
+            guard newPrice <= tUsd, let ref = referencePrice else { return false }
+            return ref > tUsd
         }
     }
 
@@ -33,8 +30,7 @@ enum AlertEvaluator {
     static func updateReferencePriceAfterNoTrigger(
         coin: inout Coin,
         newPrice: Double,
-        watchlistCoin: WatchlistCoin,
-        usdToTargetRate: Double
+        watchlistCoin: WatchlistCoin
     ) {
         let tUsd = watchlistCoin.notificationThreshold
         switch watchlistCoin.alertKind {
@@ -43,13 +39,11 @@ enum AlertEvaluator {
                 coin.referencePrice = newPrice
             }
         case .above:
-            let tDisplay = PriceFormatter.alertDisplayAmount(fromUsd: tUsd, usdToTargetRate: usdToTargetRate)
-            if newPrice < tDisplay || coin.referencePrice == nil {
+            if newPrice < tUsd || coin.referencePrice == nil {
                 coin.referencePrice = newPrice
             }
         case .below:
-            let tDisplay = PriceFormatter.alertDisplayAmount(fromUsd: tUsd, usdToTargetRate: usdToTargetRate)
-            if newPrice > tDisplay || coin.referencePrice == nil {
+            if newPrice > tUsd || coin.referencePrice == nil {
                 coin.referencePrice = newPrice
             }
         }

@@ -22,24 +22,28 @@ struct WidgetRow: Identifiable, Equatable, Sendable {
     let hasMarket: Bool
     var price: Double?
     var change24hPercent: Double?
+    var fetchedAt: Date? = nil
+
+    func isStale(at now: Date) -> Bool {
+        price != nil && (fetchedAt.map { now.timeIntervalSince($0) >= WidgetContent.staleAfter } ?? true)
+    }
 }
 
 /// Everything a widget view needs; built by the extension's timeline provider.
 struct WidgetEntryContent: Equatable, Sendable {
     var rows: [WidgetRow]
     var currency: BaseCurrency
-    /// When the prices were obtained; nil means no prices yet (app never ran and the widget could not fetch).
+    /// When the oldest displayed price was obtained. Legacy snapshots can only provide their write time.
     var updatedAt: Date?
     var language: AppLanguage
     var colorByChange: Bool
     var upColorHex: String
     var downColorHex: String
 
-    var hasPrices: Bool { updatedAt != nil && rows.contains { $0.price != nil } }
+    var hasPrices: Bool { rows.contains { $0.price != nil } }
 
     func isStale(at now: Date) -> Bool {
-        guard let updatedAt else { return false }
-        return now.timeIntervalSince(updatedAt) > WidgetContent.staleAfter
+        rows.contains { $0.isStale(at: now) } || updatedAt.map { now.timeIntervalSince($0) >= WidgetContent.staleAfter } == true
     }
 }
 
@@ -83,10 +87,14 @@ enum WidgetContent {
     static func freshQuotes(
         snapshot: WidgetSnapshot?, ids: [String], tradable: Set<String>, currency: BaseCurrency, now: Date
     ) -> [String: WidgetSnapshot.Quote]? {
-        guard let snapshot, snapshot.currency == currency,
-              now.timeIntervalSince(snapshot.writtenAt) < snapshotFreshFor,
-              ids.filter(tradable.contains).allSatisfy({ snapshot.quotes[$0] != nil }) else { return nil }
-        return snapshot.quotes
+        guard let snapshot, snapshot.currency == currency else { return nil }
+        let required = ids.filter(tradable.contains)
+        let quotes = snapshot.quotes.filter { required.contains($0.key) }
+        guard required.allSatisfy({ id in
+            guard let date = quotes[id]?.fetchedAt else { return false }
+            return now.timeIntervalSince(date) < snapshotFreshFor
+        }) else { return nil }
+        return quotes
     }
 
     /// Sorting by change keeps coins without a change at the end, in their original order.

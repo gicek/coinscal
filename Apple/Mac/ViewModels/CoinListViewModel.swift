@@ -5,8 +5,13 @@ import Combine
 final class CoinListViewModel: ObservableObject {
     @Published var coins: [Coin] = []
     @Published var isLoading = false
-    /// USD → `baseCurrency` rate used by the latest poll (Above/Below thresholds are stored in USD and converted for display and comparison).
-    @Published private(set) var lastUsdToTargetExchangeRate: Double = 1.0
+    @Published private var exchangeRate: Double?
+    private var alertRules: [String: WatchlistCoin] = [:]
+
+    func usdExchangeRate(for currency: BaseCurrency) -> Double? {
+        if currency == .usd { return 1 }
+        return currency == priceDataCurrency ? exchangeRate : nil
+    }
 
     private let catalog: CoinCatalog
     private let priceService: PriceServicing
@@ -17,7 +22,7 @@ final class CoinListViewModel: ObservableObject {
     private var fetchCancellable: AnyCancellable?
     private var pollTimer: AnyCancellable?
     /// Display currency of the prices currently shown; when it differs from the settings, old prices are not merged (no wrong-currency values).
-    private var priceDataCurrency: BaseCurrency?
+    private(set) var priceDataCurrency: BaseCurrency?
 
     init(
         settingsViewModel: SettingsViewModel,
@@ -67,7 +72,6 @@ final class CoinListViewModel: ObservableObject {
                 guard let self else { return }
                 // The display currency changed while this request was in flight: these prices are in the old currency, drop them.
                 guard currency == self.settingsViewModel.settings.baseCurrency else { return }
-                self.lastUsdToTargetExchangeRate = snapshot.usdToTargetRate
                 self.updateCoins(snapshot: snapshot, currency: currency)
             })
     }
@@ -80,55 +84,49 @@ final class CoinListViewModel: ObservableObject {
 
     private func updateCoins(snapshot: PriceSnapshot, currency: BaseCurrency) {
         let settings = settingsViewModel.settings
-        // Reference and new price must be in the same currency, otherwise the exchange rate shows up as a price change and fires a bogus Change alert.
-        if let last = priceDataCurrency, last != currency {
-            for i in coins.indices { coins[i].referencePrice = nil }
-        }
+        let sameCurrency = priceDataCurrency == currency
         priceDataCurrency = currency
+        if exchangeRate != snapshot.usdToTargetRate { exchangeRate = snapshot.usdToTargetRate }
 
-        for i in coins.indices {
-            let symbol = coins[i].symbol
-            guard let newPrice = snapshot.prices[symbol] else { continue }
+        let rules = settings.priceChangeNotificationEnabled
+            ? Dictionary(settings.watchlistCoins.map { ($0.coinId, $0) }, uniquingKeysWith: { first, _ in first })
+            : [:]
+        let updatedAt = Date()
+        var next = coins
+        for i in next.indices {
+            let id = next[i].id
+            if !sameCurrency {
+                next[i].currentPrice = nil
+                next[i].priceChange24hPercent = nil
+                next[i].lastUpdated = nil
+            }
+            if !sameCurrency || rules[id] != alertRules[id] {
+                next[i].referencePrice = nil
+            }
+            let symbol = next[i].symbol
+            guard let price = snapshot.prices[symbol] else { continue }
+            next[i].currentPrice = price
+            next[i].priceChange24hPercent = snapshot.changes24h[symbol]
+            next[i].lastUpdated = updatedAt
+            guard let rule = rules[id], let priceUSD = snapshot.pricesUSD[symbol] else { continue }
 
-            let oldRef = coins[i].referencePrice ?? newPrice
-            let changeFromRef = oldRef != 0 ? ((newPrice - oldRef) / oldRef) * 100 : 0
-
-            coins[i].currentPrice = newPrice
-            coins[i].priceChange24hPercent = snapshot.changes24h[symbol]
-            coins[i].lastUpdated = Date()
-
-            // Price alerts: Change uses the move from the reference price; Above/Below thresholds are USD, compared in the display currency.
-            if settings.priceChangeNotificationEnabled,
-               let watchlistCoin = settings.watchlistCoins.first(where: { $0.coinId == coins[i].id }) {
-                let triggered = AlertEvaluator.shouldTriggerPriceAlert(
-                    newPrice: newPrice,
-                    changeFromRef: changeFromRef,
-                    watchlistCoin: watchlistCoin,
-                    referencePrice: coins[i].referencePrice,
-                    usdToTargetRate: snapshot.usdToTargetRate
+            let alertPrice = rule.alertKind == .change ? price : priceUSD
+            let reference = next[i].referencePrice
+            let change = reference.map { (alertPrice - $0) / $0 * 100 } ?? 0
+            if AlertEvaluator.shouldTriggerPriceAlert(
+                newPrice: alertPrice, changeFromRef: change, watchlistCoin: rule, referencePrice: reference
+            ) {
+                notifier.sendPriceAlert(
+                    coin: next[i], alertKind: rule.alertKind, threshold: rule.notificationThreshold,
+                    changePercent: change, baseCurrency: currency, usdToTargetRate: snapshot.usdToTargetRate
                 )
-                if triggered {
-                    notifier.sendPriceAlert(
-                        coin: coins[i],
-                        alertKind: watchlistCoin.alertKind,
-                        threshold: watchlistCoin.notificationThreshold,
-                        changePercent: changeFromRef,
-                        baseCurrency: settings.baseCurrency,
-                        usdToTargetRate: snapshot.usdToTargetRate
-                    )
-                    coins[i].referencePrice = newPrice
-                } else {
-                    AlertEvaluator.updateReferencePriceAfterNoTrigger(
-                        coin: &coins[i],
-                        newPrice: newPrice,
-                        watchlistCoin: watchlistCoin,
-                        usdToTargetRate: snapshot.usdToTargetRate
-                    )
-                }
-            } else if coins[i].referencePrice == nil {
-                coins[i].referencePrice = newPrice
+                next[i].referencePrice = alertPrice
+            } else {
+                AlertEvaluator.updateReferencePriceAfterNoTrigger(coin: &next[i], newPrice: alertPrice, watchlistCoin: rule)
             }
         }
+        alertRules = rules
+        if coins != next { coins = next }
     }
 
     /// Whether a metadata reload keeps price, change and reference price (they must be dropped after a currency switch).

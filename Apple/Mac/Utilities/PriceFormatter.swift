@@ -11,6 +11,15 @@ enum PriceFormatter {
         return formatter
     }
 
+    private static func formattedPrice(_ price: Double, with formatter: NumberFormatter) -> String {
+        let formatted = formatter.string(from: NSNumber(value: price)) ?? String(price)
+        let roundsToZero = price > 0 && price <= pow(10, -Double(formatter.maximumFractionDigits)) / 2
+        guard roundsToZero else { return formatted }
+        let parts = String(format: "%.2e", price).split(separator: "e")
+        guard parts.count == 2, let exponent = Int(parts[1]) else { return formatted }
+        return "\(parts[0])e\(exponent)"
+    }
+
     /// Formats a price; with `includeCurrencySymbol` false only the grouped number is returned (where the currency is implied).
     static func format(_ price: Double, currency: BaseCurrency, includeCurrencySymbol: Bool = true) -> String {
         let formatter = makeFormatter()
@@ -19,7 +28,7 @@ enum PriceFormatter {
         formatter.groupingSeparator = ","
         formatter.groupingSize = 3
         formatter.usesGroupingSeparator = true
-        let formatted = formatter.string(from: NSNumber(value: price)) ?? "\(price)"
+        let formatted = formattedPrice(price, with: formatter)
         if includeCurrencySymbol {
             return "\(currency.symbol)\(formatted)"
         }
@@ -33,7 +42,7 @@ enum PriceFormatter {
         formatter.groupingSeparator = ","
         formatter.groupingSize = 3
         formatter.usesGroupingSeparator = true
-        return formatter.string(from: NSNumber(value: price)) ?? "\(price)"
+        return formattedPrice(price, with: formatter)
     }
 
     static func formatPercent(_ percent: Double) -> String {
@@ -52,18 +61,20 @@ enum PriceFormatter {
         return display / usdToTargetRate
     }
 
-    /// Above/Below threshold display: decimals follow the reference price (usually the current price), not the threshold itself.
-    static func formatAlertPriceThreshold(referencePrice: Double?, threshold: Double) -> String {
-        let ruleSource: Double
-        if let ref = referencePrice, ref > 0 {
-            ruleSource = ref
-        } else {
-            ruleSource = threshold
-        }
+    /// Preserve decimal places in the editable amount. Very small positive amounts use exponent notation.
+    static func formatAlertAmount(_ amount: Double) -> String {
         let formatter = makeFormatter()
-        formatter.minimumFractionDigits = ruleSource < 1 ? 4 : (ruleSource < 100 ? 2 : 0)
-        formatter.maximumFractionDigits = ruleSource < 1 ? 6 : (ruleSource < 100 ? 2 : 0)
+        formatter.maximumFractionDigits = 12
         formatter.usesGroupingSeparator = false
-        return formatter.string(from: NSNumber(value: threshold)) ?? "\(threshold)"
+        let text = formatter.string(from: NSNumber(value: amount)) ?? String(amount)
+        return amount > 0 && text == "0" ? String(amount) : text
+    }
+
+    static func parseAlertAmount(_ input: String) -> Double? {
+        let text = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard text.wholeMatch(of: /(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]*)?(?:[eE][+-]?[0-9]+)?|\.[0-9]+/) != nil,
+              let result = Double(text.replacingOccurrences(of: ",", with: "")),
+              result.isFinite else { return nil }
+        return result
     }
 }

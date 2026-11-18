@@ -10,11 +10,11 @@ import Testing
     private func snapshot(
         writtenAgo: TimeInterval = 60, currency: BaseCurrency = .usd, displayed: String = "ethereum",
         watchlist: [String] = ["bitcoin", "ethereum", "solana"],
-        quotes: [String: WidgetSnapshot.Quote] = ["bitcoin": .init(price: 80_000, change24hPercent: 2)]
+        quotes: [String: WidgetSnapshot.Quote]? = nil
     ) -> WidgetSnapshot {
         WidgetSnapshot(
             writtenAt: now.addingTimeInterval(-writtenAgo), language: .zhHans, currency: currency, colorByChange: true,
-            upColorHex: "#2CBD84", downColorHex: "#F6465D", displayedCoinId: displayed, watchlist: watchlist, quotes: quotes
+            upColorHex: "#2CBD84", downColorHex: "#F6465D", displayedCoinId: displayed, watchlist: watchlist, quotes: quotes ?? ["bitcoin": .init(price: 80_000, change24hPercent: 2, fetchedAt: now.addingTimeInterval(-writtenAgo))]
         )
     }
 
@@ -68,6 +68,13 @@ import Testing
         #expect(WidgetContent.freshQuotes(snapshot: snapshot(), ids: ["bitcoin", "ethereum"], tradable: ["bitcoin", "ethereum"], currency: .usd, now: now) == nil,
                 "a tradable coin is missing")
         #expect(WidgetContent.freshQuotes(snapshot: nil, ids: ["bitcoin"], tradable: tradable, currency: .usd, now: now) == nil)
+    }
+
+    @Test func writingASnapshotDoesNotRefreshOldQuotes() {
+        let coin = Coin(id: "bitcoin", symbol: "BTC", name: "Bitcoin", rank: nil, logoAssetName: nil, logoURL: nil,
+                        currentPrice: 100, lastUpdated: now.addingTimeInterval(-7200))
+        let snapshot = WidgetSnapshotWriter.makeSnapshot(coins: [coin], settings: AppSettings(), at: now)
+        #expect(WidgetContent.freshQuotes(snapshot: snapshot, ids: [coin.id], tradable: [coin.id], currency: .usd, now: now) == nil)
     }
 
     @Test func pricesOlderThan30MinutesAreStale() {

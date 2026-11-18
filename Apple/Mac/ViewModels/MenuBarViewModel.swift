@@ -45,6 +45,17 @@ final class MenuBarViewModel: ObservableObject {
         return coin
     }
 
+    /// Choose the higher-contrast foreground while keeping the selected background, including custom colors.
+    static func textColor(on background: NSColor) -> NSColor {
+        guard let rgb = background.usingColorSpace(.sRGB) else { return .white }
+        func linear(_ component: CGFloat) -> CGFloat {
+            component <= 0.04045 ? component / 12.92 : pow((component + 0.055) / 1.055, 2.4)
+        }
+        let luminance = 0.2126 * linear(rgb.redComponent)
+            + 0.7152 * linear(rgb.greenComponent) + 0.0722 * linear(rgb.blueComponent)
+        return luminance > 0.179 ? .black : .white
+    }
+
     private func updateStatusItem(coins: [Coin], settings: AppSettings, settingsVM: SettingsViewModel) {
         guard let displayedCoin = Self.priceCoin(coins: coins, settings: settings),
               let price = displayedCoin.currentPrice else {
@@ -73,8 +84,7 @@ final class MenuBarViewModel: ObservableObject {
             button.setAccessibilityLabel(nil)
             return
         case (true, true):
-            // Background = price color, text = white.
-            style = .init(textColor: .white, background: priceColor)
+            style = .init(textColor: Self.textColor(on: priceColor), background: priceColor)
         case (true, false):
             // Text = price color, no background.
             style = .init(textColor: priceColor, background: nil)
