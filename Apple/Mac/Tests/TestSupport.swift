@@ -192,6 +192,8 @@ private final class FirstValueSubscription {
 final class FakeUpdaterBackend: UpdaterBackend {
     var canCheckForUpdates = true
     var automaticallyChecksForUpdates = true
+    var automaticallyDownloadsUpdates = false
+    var allowsAutomaticUpdates: Bool { automaticallyChecksForUpdates }
     private(set) var checkCount = 0
 
     func checkForUpdates() {

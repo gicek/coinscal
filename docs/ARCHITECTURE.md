@@ -120,9 +120,10 @@ CoinscalWidget (extension) → WidgetDataLoader → App Group snapshot, or its o
 
 - `UpdateController` holds the update state shown in the UI and talks to an `UpdaterBackend`: `SparkleUpdaterBackend` wraps `SPUStandardUpdaterController`; tests use `FakeUpdaterBackend`, and the unit-test host attaches none.
 - The feed follows the in-app language: the updater delegate (`feedURLString(for:)`) turns `SUFeedURL` into `appcast.<code>.xml` (`UpdateFeed`, read before every check), a feed whose only release notes link is in that language. Sparkle would otherwise choose among localized links by the system language. `appcast.xml` keeps all three for older builds.
-- Info.plist: `SUFeedURL` `https://dl.coinscal.app/appcast.xml`, `SUPublicEDKey`, `SUEnableAutomaticChecks`, `SUScheduledCheckInterval` 86400, `SUEnableInstallerLauncherService`. Automatic installation is off and no system profile is sent.
+- Info.plist: `SUFeedURL` `https://dl.coinscal.app/appcast.xml`, `SUPublicEDKey`, `SUEnableAutomaticChecks` (`COINSCAL_AUTOMATIC_UPDATE_CHECKS`: on for Release, off for Debug, whose bundle ID can't install release updates), `SUScheduledCheckInterval` 86400, `SUEnableInstallerLauncherService`. Sparkle checks when 24 hours have passed since the last check, at launch or on a timer while running, and right away on a first launch. No system profile is sent.
+- Automatic installs (`automaticallyDownloadsUpdates`) are off by default; the About pane and Sparkle's update window toggle them. Sparkle allows them only while automatic checks are on (`allowsAutomaticUpdates`).
 - Sparkle verifies each archive's EdDSA signature and requires the same Team ID. The sandbox allows Sparkle's installer through the mach-lookup exceptions `$(PRODUCT_BUNDLE_IDENTIFIER)-spks` / `-spki`; the downloader service stays off because the app has `network.client`.
-- Gentle reminders: a scheduled check shows Sparkle's window only when Coinscal is frontmost; otherwise `updateAvailable` drives the panel header until Sparkle reports that the user saw it or the session ended.
+- Gentle reminders: a scheduled check shows Sparkle's window only when Coinscal is frontmost; otherwise `updateAvailable` drives the panel header until Sparkle reports that the user saw it or the session ended. The found build is stored (`pendingUpdateBuild`), so the reminder returns after a relaunch while the running build is older.
 - Publishing and signing: [Releasing](RELEASING.md).
 
 ## Localization

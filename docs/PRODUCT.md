@@ -48,7 +48,7 @@ A window with three panes, General, Watchlist, and About, under a shared title b
   - "+" at the right of the title bar opens an add panel with a search field (focused) over the listed coins, matching symbol or name. With no input it lists every listed coin. Clicking a coin toggles it in the watchlist (added coins show a checkmark that turns into a remove sign on hover); the panel stays open. Return adds the first result not yet added. Esc, a click outside, "+" again, or switching panes closes it and clears the search.
   - "Recommended": BTC, ETH, BNB, SOL, ZEC, HYPE, BCH, LTC, UNI, AAVE; click to add or remove.
   - The watchlist: drag handle to reorder, the alert condition and value, and delete. Coins without a market show "No market data".
-- **About**: version, "Automatically Check for Updates" (on by default) and "Check for Updates", contact, data sources with the "Rates By Exchange Rate API" credit, and open source components.
+- **About**: version, "Automatically Check for Updates" (on by default), "Automatically Install Updates" (off by default; available while automatic checks are on), and "Check for Updates", contact, data sources with the "Rates By Exchange Rate API" credit, and open source components.
 
 ## Widgets
 
@@ -83,9 +83,9 @@ A price list pinned to the desktop, between the wallpaper and the desktop icons,
 
 ## Updates
 
-- Coinscal checks for updates once a day. A scheduled check opens no window unless Coinscal is in front; it shows "Update Available" in the panel header instead.
+- Coinscal checks for updates once a day. A scheduled check opens no window unless Coinscal is in front; it shows "Update Available" in the panel header instead, also after a relaunch, until the user opens the update window or the update is installed.
 - "Check for Updates" opens the update window at once, with release notes and "Install Update", or a note that Coinscal is up to date. A failed scheduled check stays silent; a manual one shows the error.
-- Nothing installs without the user's consent. Installing replaces the app and relaunches it, keeping settings, watchlist, widgets, and the login item.
+- Nothing installs without the user's consent: either "Install Update" in the update window, or "Automatically Install Updates" turned on (in Settings or the update window), which installs found updates when Coinscal quits. Installing replaces the app and relaunches it, keeping settings, watchlist, widgets, and the login item.
 - Release notes follow the in-app language. The update window itself comes from Sparkle and follows the system language.
 
 ## Coin Availability

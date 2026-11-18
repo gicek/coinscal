@@ -4,6 +4,18 @@ Notable changes to the Coinscal app, newest first. Versions follow `MARKETING_VE
 
 ## Unreleased
 
+### Added
+
+- "Automatically Install Updates" in Settings → About, off by default.
+
+### Changed
+
+- The "Update Available" reminder stays after a relaunch until you open the update window or install the update.
+
+### Development
+
+- Debug builds check for updates only on request.
+
 ## 1.1.0 — 2026-11-18
 
 ### Fixed

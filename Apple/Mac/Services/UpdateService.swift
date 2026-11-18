@@ -8,6 +8,10 @@ protocol UpdaterBackend: AnyObject {
     /// False while a check or an update session is already running.
     var canCheckForUpdates: Bool { get }
     var automaticallyChecksForUpdates: Bool { get set }
+    /// Download and install found updates without asking (Sparkle's "automatically install" option).
+    var automaticallyDownloadsUpdates: Bool { get set }
+    /// False while automatic checks are off: automatic installs depend on them.
+    var allowsAutomaticUpdates: Bool { get }
     func checkForUpdates()
 }
 
@@ -15,19 +19,40 @@ protocol UpdaterBackend: AnyObject {
 /// `attach`), every action is disabled.
 @MainActor
 final class UpdateController: ObservableObject {
+    /// Build number of an update a scheduled check found and the user hasn't looked at yet.
+    static let pendingBuildKey = "pendingUpdateBuild"
+
     /// A scheduled check found an update but didn't show a window (Coinscal has no Dock icon, so it shouldn't
     /// steal focus); the popover shows "Update Available" until the user looks at it or the session ends.
+    /// The found build is remembered, so the reminder survives a relaunch while this build is older.
     @Published private(set) var updateAvailable = false
     /// False in the unit-test host, where no updater runs.
     @Published private(set) var isAvailable = false
     @Published private(set) var canCheckForUpdates = false
     @Published private(set) var automaticallyChecksForUpdates = false
+    @Published private(set) var automaticallyInstallsUpdates = false
+    @Published private(set) var canAutomaticallyInstallUpdates = false
 
     private var backend: UpdaterBackend?
+    private let storage: SettingsDataStorage
+    private let currentBuild: String
+
+    init(
+        storage: SettingsDataStorage = UserDefaults.standard,
+        currentBuild: String = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "0"
+    ) {
+        self.storage = storage
+        self.currentBuild = currentBuild
+    }
 
     func attach(_ backend: UpdaterBackend) {
         self.backend = backend
         isAvailable = true
+        if let pending = pendingBuild, Self.isNewer(pending, than: currentBuild) {
+            updateAvailable = true
+        } else {
+            pendingBuild = nil
+        }
         refresh()
     }
 
@@ -45,17 +70,37 @@ final class UpdateController: ObservableObject {
         refresh()
     }
 
-    func scheduledUpdateFound() {
+    func setAutomaticallyInstallsUpdates(_ enabled: Bool) {
+        guard let backend, backend.allowsAutomaticUpdates else { return }
+        backend.automaticallyDownloadsUpdates = enabled
+        refresh()
+    }
+
+    func scheduledUpdateFound(build: String) {
+        pendingBuild = build
         updateAvailable = true
     }
 
     func updateReminderHandled() {
+        pendingBuild = nil
         updateAvailable = false
     }
 
     func refresh() {
         canCheckForUpdates = backend?.canCheckForUpdates ?? false
         automaticallyChecksForUpdates = backend?.automaticallyChecksForUpdates ?? false
+        canAutomaticallyInstallUpdates = backend?.allowsAutomaticUpdates ?? false
+        automaticallyInstallsUpdates = canAutomaticallyInstallUpdates && (backend?.automaticallyDownloadsUpdates ?? false)
+    }
+
+    private var pendingBuild: String? {
+        get { storage.data(forKey: Self.pendingBuildKey).flatMap { String(data: $0, encoding: .utf8) } }
+        set { storage.set(newValue.map { Data($0.utf8) }, forKey: Self.pendingBuildKey) }
+    }
+
+    /// Build numbers compare numerically ("10" is newer than "9").
+    static func isNewer(_ build: String, than current: String) -> Bool {
+        build.compare(current, options: .numeric) == .orderedDescending
     }
 }
 
@@ -99,6 +144,13 @@ final class SparkleUpdaterBackend: NSObject, UpdaterBackend, SPUUpdaterDelegate,
         set { updaterController.updater.automaticallyChecksForUpdates = newValue }
     }
 
+    var automaticallyDownloadsUpdates: Bool {
+        get { updaterController.updater.automaticallyDownloadsUpdates }
+        set { updaterController.updater.automaticallyDownloadsUpdates = newValue }
+    }
+
+    var allowsAutomaticUpdates: Bool { updaterController.updater.allowsAutomaticUpdates }
+
     func checkForUpdates() {
         updaterController.checkForUpdates(nil)
     }
@@ -123,7 +175,7 @@ final class SparkleUpdaterBackend: NSObject, UpdaterBackend, SPUUpdaterDelegate,
 
     func standardUserDriverWillHandleShowingUpdate(_ handleShowingUpdate: Bool, forUpdate update: SUAppcastItem, state: SPUUserUpdateState) {
         if !handleShowingUpdate && !state.userInitiated {
-            controller?.scheduledUpdateFound()
+            controller?.scheduledUpdateFound(build: update.versionString)
         }
     }
 

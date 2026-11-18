@@ -36,10 +36,13 @@ settings:
       COINSCAL_APP_ID: com.gicek.coinscal.debug
       COINSCAL_DISPLAY_NAME: Coinscal Debug
       COINSCAL_URL_SCHEME: coinscal-debug
+      # Debug builds can't install release updates (different bundle ID); check only on request.
+      COINSCAL_AUTOMATIC_UPDATE_CHECKS: NO
     Release:
       COINSCAL_APP_ID: com.gicek.coinscal
       COINSCAL_DISPLAY_NAME: Coinscal
       COINSCAL_URL_SCHEME: coinscal
+      COINSCAL_AUTOMATIC_UPDATE_CHECKS: YES
       # Strip on build as well; Debug keeps symbols for lldb.
       DEPLOYMENT_POSTPROCESSING: YES
 

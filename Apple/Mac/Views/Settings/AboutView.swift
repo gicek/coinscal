@@ -42,6 +42,12 @@ struct AboutView: View {
                     ))
                     .disabled(!updateController.isAvailable)
 
+                    Toggle(loc("about.updates.autoInstall"), isOn: Binding(
+                        get: { updateController.automaticallyInstallsUpdates },
+                        set: { updateController.setAutomaticallyInstallsUpdates($0) }
+                    ))
+                    .disabled(!updateController.canAutomaticallyInstallUpdates)
+
                     Button(loc("menu.checkForUpdates")) {
                         updateController.checkForUpdates()
                     }

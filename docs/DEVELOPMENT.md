@@ -39,7 +39,7 @@ Copy `local.mk.example` to `local.mk` (ignored by Git) for machine-specific sett
 
 ## Debug Builds
 
-Debug builds are a separate app, "Coinscal Debug", with their own bundle IDs, App Group, settings, and URL scheme ([Architecture](ARCHITECTURE.md#build-configurations)). They run next to an installed Coinscal, and the widget gallery lists both. The first launch uses default settings. Two debug builds still exclude each other.
+Debug builds are a separate app, "Coinscal Debug", with their own bundle IDs, App Group, settings, and URL scheme ([Architecture](ARCHITECTURE.md#build-configurations)). They run next to an installed Coinscal, and the widget gallery lists both. The first launch uses default settings. Debug builds check for updates only on request, since they can't install a release build. Two debug builds still exclude each other.
 
 `make test-mac` unregisters its test host app from Launch Services afterwards, so the system offers only the widget of `Build/macOS/Debug`.
 

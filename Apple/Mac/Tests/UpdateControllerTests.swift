@@ -5,7 +5,7 @@ import Testing
 @MainActor
 struct UpdateControllerTests {
     @Test func withoutBackendEverythingIsDisabled() {
-        let controller = UpdateController()
+        let controller = UpdateController(storage: InMemoryDataStorage())
         #expect(!controller.isAvailable)
         #expect(!controller.canCheckForUpdates)
         controller.checkForUpdates()
@@ -14,7 +14,7 @@ struct UpdateControllerTests {
     }
 
     @Test func attachReadsBackendState() {
-        let controller = UpdateController()
+        let controller = UpdateController(storage: InMemoryDataStorage())
         let backend = FakeUpdaterBackend()
         backend.automaticallyChecksForUpdates = false
         controller.attach(backend)
@@ -24,7 +24,7 @@ struct UpdateControllerTests {
     }
 
     @Test func checkForwardsOnlyWhenBackendCanCheck() {
-        let controller = UpdateController()
+        let controller = UpdateController(storage: InMemoryDataStorage())
         let backend = FakeUpdaterBackend()
         controller.attach(backend)
         controller.checkForUpdates()
@@ -38,7 +38,7 @@ struct UpdateControllerTests {
     }
 
     @Test func automaticChecksPreferenceGoesToBackend() {
-        let controller = UpdateController()
+        let controller = UpdateController(storage: InMemoryDataStorage())
         let backend = FakeUpdaterBackend()
         controller.attach(backend)
         controller.setAutomaticallyChecksForUpdates(false)
@@ -47,13 +47,52 @@ struct UpdateControllerTests {
     }
 
     @Test func reminderShowsUntilHandled() {
-        let controller = UpdateController()
+        let controller = UpdateController(storage: InMemoryDataStorage(), currentBuild: "3")
         controller.attach(FakeUpdaterBackend())
         #expect(!controller.updateAvailable)
-        controller.scheduledUpdateFound()
+        controller.scheduledUpdateFound(build: "4")
         #expect(controller.updateAvailable)
         controller.updateReminderHandled()
         #expect(!controller.updateAvailable)
+    }
+
+    @Test func reminderSurvivesRelaunchUntilInstalledOrHandled() {
+        let storage = InMemoryDataStorage()
+        let first = UpdateController(storage: storage, currentBuild: "3")
+        first.attach(FakeUpdaterBackend())
+        first.scheduledUpdateFound(build: "10")
+
+        let relaunched = UpdateController(storage: storage, currentBuild: "3")
+        relaunched.attach(FakeUpdaterBackend())
+        #expect(relaunched.updateAvailable, "build 10 is newer than 3 (numeric comparison)")
+
+        let updated = UpdateController(storage: storage, currentBuild: "10")
+        updated.attach(FakeUpdaterBackend())
+        #expect(!updated.updateAvailable, "the found build is installed")
+        let afterUpdate = UpdateController(storage: storage, currentBuild: "3")
+        afterUpdate.attach(FakeUpdaterBackend())
+        #expect(!afterUpdate.updateAvailable, "the stale reminder was cleared")
+
+        relaunched.scheduledUpdateFound(build: "11")
+        relaunched.updateReminderHandled()
+        let handled = UpdateController(storage: storage, currentBuild: "3")
+        handled.attach(FakeUpdaterBackend())
+        #expect(!handled.updateAvailable)
+    }
+
+    @Test func automaticInstallsNeedAutomaticChecks() {
+        let controller = UpdateController(storage: InMemoryDataStorage())
+        let backend = FakeUpdaterBackend()
+        controller.attach(backend)
+        controller.setAutomaticallyInstallsUpdates(true)
+        #expect(backend.automaticallyDownloadsUpdates)
+        #expect(controller.automaticallyInstallsUpdates)
+
+        controller.setAutomaticallyChecksForUpdates(false)
+        #expect(!controller.canAutomaticallyInstallUpdates)
+        #expect(!controller.automaticallyInstallsUpdates, "shown off while automatic checks are off")
+        controller.setAutomaticallyInstallsUpdates(false)
+        #expect(backend.automaticallyDownloadsUpdates, "ignored while not allowed")
     }
 
     @Test func feedFollowsTheAppLanguage() {

@@ -8,7 +8,7 @@ Last run Nov 18, 2026.
 
 | Check | Result |
 |---|---|
-| `make test-mac` | Localization guards (45 files), catalog and release notes validation, 118 unit tests in 15 suites: pass |
+| `make test-mac` | Localization guards (45 files), catalog and release notes validation, 120 unit tests in 15 suites: pass |
 | `make test-site` | Localization guards (7 files), 8 offline checks: pass |
 | `make mac-check-sources` (Oct 16, 2026) | All 4 price and 3 exchange rate sources respond; all 450 catalog symbols priced; failover with Binance unreachable takes one round |
 | CI | Repository hygiene, localization guards, release notes, website checks |
@@ -50,6 +50,7 @@ macOS 27.2.1 with a debug build, unless noted.
 **Updates and release**
 - An update from 1.0.1 to 1.1.0 end to end: release notes in the system language (1.0.1 reads `appcast.xml`), relaunch, settings and widgets intact.
 - From 1.1.0 on, release notes appear in the in-app language, including after switching languages (first testable with the next release).
+- "Automatically Install Updates" is grayed out while automatic checks are off and installs a found update when Coinscal quits; the "Update Available" reminder returns after a relaunch.
 - A scheduled check shows "Update Available" without opening a window; a tampered archive is rejected; offline checks stay silent.
 - First launch from the DMG on another Mac is not blocked by Gatekeeper.
 
