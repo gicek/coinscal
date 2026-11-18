@@ -2,6 +2,14 @@
 
 Features added, changed, fixed, and removed, newest first. Third-level headings start with Added / Changed / Fixed / Removed; fixes describe the symptom, root cause, fix, and tests.
 
+## 2026-11-18
+
+### Fixed: Unit tests didn't build with the macOS 27.2 SDK
+- Symptom: `make test-mac` failed to compile `TestSupport.swift` ("conformance of 'P' to protocol 'Publisher' may be isolated and cannot be passed to @concurrent context").
+- Root cause: `firstValue(_:)` iterated `publisher.values`, which the newer Swift 6 compiler rejects for possibly isolated conformances.
+- Fix: `firstValue(_:)` subscribes with `first().sink` and a checked continuation on the main actor; behavior is unchanged.
+- Tests: the full unit test suite builds and passes again.
+
 ## 2026-10-16
 
 ### Added: Coinscal 1.0.1

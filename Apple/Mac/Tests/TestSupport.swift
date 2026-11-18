@@ -157,10 +157,34 @@ func drainMainQueue() async {
 /// First value of a publisher; runs on the caller's main actor so the publisher never crosses isolation.
 @MainActor
 func firstValue<P: Publisher>(_ publisher: P) async throws -> P.Output where P.Output: Sendable {
-    for try await value in publisher.values {
-        return value
+    // A sink rather than `publisher.values`: iterating that async sequence passes the publisher's conformance
+    // into a concurrent context, which Swift 6 rejects for isolated conformances.
+    let subscription = FirstValueSubscription()
+    defer { subscription.cancellable?.cancel() }
+    return try await withCheckedThrowingContinuation { continuation in
+        subscription.cancellable = publisher.first().sink(
+            receiveCompletion: { completion in
+                guard !subscription.resumed else { return }
+                subscription.resumed = true
+                if case .failure(let error) = completion {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(throwing: CancellationError())
+                }
+            },
+            receiveValue: { value in
+                guard !subscription.resumed else { return }
+                subscription.resumed = true
+                continuation.resume(returning: value)
+            }
+        )
     }
-    throw CancellationError()
+}
+
+@MainActor
+private final class FirstValueSubscription {
+    var cancellable: AnyCancellable?
+    var resumed = false
 }
 
 /// Updater double: records checks and holds the automatic-check preference in memory.
