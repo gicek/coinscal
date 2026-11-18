@@ -58,5 +58,5 @@ The appcast item carries `sparkle:version` (the build number), `sparkle:shortVer
 
 ## Keys and Secrets
 
-- The EdDSA private key lives in the login Keychain (account `com.gicek.coinscal`) and in an offline backup; `update-keys.sh` refuses to write the backup inside the repository. Only the public key (`SUPublicEDKey`) is committed. Losing the key strands installed copies on their version. To restore it on another Mac: `Build/Sparkle/2.10.0/dist/bin/generate_keys --account com.gicek.coinscal -f <backup>`.
+- The EdDSA private key lives in the login Keychain (account `ed25519`, "Private key for signing Sparkle updates") and in an offline backup; `update-keys.sh` refuses to write the backup inside the repository. Only the public key (`SUPublicEDKey`) is committed. Losing the key strands installed copies on their version. To restore it on another Mac: `Build/Sparkle/2.10.0/dist/bin/generate_keys --account ed25519 -f <backup>`.
 - Cloudflare credentials stay in Wrangler's user configuration or `CLOUDFLARE_API_TOKEN`; Apple credentials stay in `local.mk` or the keychain. None of them go into the repository.

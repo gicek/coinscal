@@ -6,7 +6,7 @@ appcast's -> sign the zip for Sparkle -> render release notes and appcast.xml ->
 finally appcast.xml to R2 -> create the GitHub Release. Nothing is uploaded until every check has passed.
 
 Usage: scripts/release/publish.py --version 1.1 --build 2 --min-system 14.0 --dist Build/macOS/Dist \
-    --notes docs/release-notes/1.1 --work Build/macOS/Publish --sparkle-bin <dir> --key-account com.gicek.coinscal \
+    --notes docs/release-notes/1.1 --work Build/macOS/Publish --sparkle-bin <dir> --key-account ed25519 \
     --bucket coinscal-dl --base-url https://dl.coinscal.app --wrangler "npx --yes wrangler@<version>" \
     [--node-bin <dir>] [--dry-run]
 """

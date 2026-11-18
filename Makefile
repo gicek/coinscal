@@ -51,11 +51,11 @@ MIN_MACOS := $(shell sed -nE 's/^ *macOS: *"?([^"]+)"?.*/\1/p' Apple/project.yml
 BUILD_TARGETS += mac
 TEST_TARGETS += test-mac
 # Sparkle (in-app updates, docs/RELEASING.md): command-line tools from the pinned release; the signing key lives in the
-# login Keychain under this account
+# login Keychain under this account (Sparkle's default, shown in Keychain Access as "Private key for signing Sparkle updates")
 SPARKLE_VERSION := 2.10.0
 SPARKLE_SHA256 := c2bf58aa8387266ac179357b1415d6f2635f044da8be41042af32425dae6da0c
 SPARKLE_DIR := $(BUILD_ROOT)/Sparkle/$(SPARKLE_VERSION)
-SPARKLE_KEY_ACCOUNT := com.gicek.coinscal
+SPARKLE_KEY_ACCOUNT := ed25519
 # Update files (docs/RELEASING.md): R2 bucket served only through this download domain
 DOWNLOAD_BUCKET := coinscal-dl
 DOWNLOAD_URL := https://dl.coinscal.app
